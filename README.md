@@ -1,1 +1,3 @@
-# zeebe-workflow-monitor-softies
+# Team Softikset – Zeebe Workflow Monitor
+
+TUNI University Software Project - Elisa
