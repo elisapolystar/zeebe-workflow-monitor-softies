@@ -1,0 +1,62 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"os/signal"
+
+	"github.com/Shopify/sarama"
+)
+
+func main() {
+
+	// Define the Kafka broker address and topic we want to subscribe to
+	brokers := []string{"kafka:9092"}
+	topic := "zeebe"
+
+	// Configure the Kafka consumer
+	config := sarama.NewConfig()
+	config.Consumer.Return.Errors = true
+
+	// Create a Kafka consumer
+	consumer, err := sarama.NewConsumer(brokers, config)
+	if err != nil {
+		fmt.Printf("Error creating Kafka consumer: %v\n", err)
+		return
+	}
+
+	defer func() {
+		if err := consumer.Close(); err != nil {
+			fmt.Printf("Error closing Kafka consumer: %v\n", err)
+		}
+	}()
+
+	// Subscribe to the Kafka topic
+	partitionConsumer, err := consumer.ConsumePartition(topic, 0, sarama.OffsetOldest)
+	if err != nil {
+		fmt.Printf("Error subscribing to topic: %v\n", err)
+		return
+	}
+	defer func() {
+		if err := partitionConsumer.Close(); err != nil {
+			fmt.Printf("Error closing partition consumer: %v\n", err)
+		}
+	}()
+
+	// Set up a signal channel to handle termination
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt)
+
+	// Consume messages from the Kafka topic
+	for {
+		select {
+		case msg := <-partitionConsumer.Messages():
+			fmt.Printf("Received message: %s\n", string(msg.Value))
+		case err := <-partitionConsumer.Errors():
+			fmt.Printf("Error consuming message: %v\n", err)
+		case <-signals:
+			fmt.Println("Received termination signal. Closing consumer.")
+			return
+		}
+	}
+}
