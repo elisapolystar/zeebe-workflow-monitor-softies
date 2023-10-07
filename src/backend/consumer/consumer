@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 
@@ -71,13 +73,18 @@ func main() {
 		fmt.Printf("Subscribed to topic: %s\n", topic)
 	}
 
+	// Create a channel to send messages to the frontend
+	messageChannel := make(chan string)
+
 	// Consume messages from the Kafka topics
 	for {
 		select {
 		case topic := <-partitionConsumer:
 			select {
 			case msg := <-partitionConsumers[topic].Messages():
+				message := string(msg.Value)
 				fmt.Printf("Received message from topic %s: %s\n", topic, string(msg.Value))
+				messageChannel <- message
 			case err := <-partitionConsumers[topic].Errors():
 				fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
 			case <-signals:
@@ -86,4 +93,27 @@ func main() {
 			}
 		}
 	}
+
+	// Handle HTTP requests from the frontend
+	http.HandleFunc("/messages", func(w http.ResponseWriter, r *http.Request) {
+		// Set the response content type to JSON
+		w.Header().Set("Content-Type", "application/json")
+
+		// Read messages from channel and send them to frontend
+		message := <-messageChannel
+
+		// Create a JSON response
+		reponse := map[string]string{"message": message}
+
+		// Serialize the reponse to Json
+		jsonBytes, err := json.Marshal(response)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Write JSON to the frontend
+		w.WriteHeader(http.StatusOK)
+		w.Write(jsonBytes)
+	})
 }
