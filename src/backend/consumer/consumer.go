@@ -8,6 +8,7 @@ import (
 	"os/signal"
 
 	"github.com/IBM/sarama"
+	"github.com/gorilla/websocket"
 )
 
 func main() {
@@ -116,4 +117,24 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 		w.Write(jsonBytes)
 	})
+
+	// Establish a WebSocket connection to the frontend
+	// (Server URL will be updated once it's known)
+	serverURL := "URL"
+	test_message := "Hello from the backend"
+	conn, _, err := websocket.DefaultDialer.Dial(serverURL, nil)
+	if err != nil {
+		log.Fatal("Error connecting to WebSocket:", err)
+	}
+	defer conn.Close()
+
+	// Send test message to the frontend
+	err := conn.WriteMessage(websocket.TextMessage, []byte(message))
+	if err != nil {
+		log.Println("Error sending message:", err)
+		return
+	}
+	else {
+		fmt.Println("Sent message:", message)
+	}	
 }
