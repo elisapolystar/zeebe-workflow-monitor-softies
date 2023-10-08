@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 )
 
 func main() {
@@ -79,7 +79,7 @@ func main() {
 	// Consume messages from the Kafka topics
 	for {
 		select {
-		case topic := <-partitionConsumer:
+		case topic := <-partitionConsumers:
 			select {
 			case msg := <-partitionConsumers[topic].Messages():
 				message := string(msg.Value)
@@ -103,7 +103,7 @@ func main() {
 		message := <-messageChannel
 
 		// Create a JSON response
-		reponse := map[string]string{"message": message}
+		response := map[string]string{"message": message}
 
 		// Serialize the reponse to Json
 		jsonBytes, err := json.Marshal(response)
