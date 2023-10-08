@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile
       context: src/backend/consumer/
     container_name: backend
+    depends_on:
+      - kafka
     networks:
       - testenv
 
@@ -14,6 +16,8 @@ services:
       dockerfile: Dockerfile
       context: src/frontend/
     container_name: frontend
+    depends_on:
+      - backend
     networks:
       - testenv
 
