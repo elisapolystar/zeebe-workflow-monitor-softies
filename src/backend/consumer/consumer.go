@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"os"
 	"os/signal"
 
@@ -14,7 +12,7 @@ import (
 func main() {
 
 	// Define the Kafka broker address and topic we want to subscribe to
-	brokers := []string{"kafka:9092"}
+	brokers := []string{"localhost:9092"}
 	topics := []string{"zeebe",
 		"zeebe-deployment",
 		"zeebe-deploy-distribution",
@@ -75,43 +73,43 @@ func main() {
 	}
 
 	// Create a channel to send messages to the frontend
-	messageChannel := make(chan string)
+	//messageChannel := make(chan string)
 
 	// Consume messages from the Kafka topics
 	for {
 		select {
-		case topic := <-partitionConsumers:
-			select {
-			case msg := <-partitionConsumers[topic].Messages():
-				message := string(msg.Value)
-				fmt.Printf("Received message from topic %s: %s\n", topic, string(msg.Value))
-				messageChannel <- message
-			case err := <-partitionConsumers[topic].Errors():
-				fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
-			case <-signals:
-				fmt.Println("Received termination signal. Closing consumer.")
-				return
+		case <-signals:
+			fmt.Println("Received termination signal. Closing consumer.")
+			return
+		default:
+			for topic, partitionConsumer := range partitionConsumers {
+				select {
+				case msg := <-partitionConsumer.Messages():
+					fmt.Printf("Received message from topic %s: %s\n", topic, string(msg.Value))
+				case err := <-partitionConsumer.Errors():
+					fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
+				}
 			}
 		}
 	}
 
-	// Handle HTTP requests from the frontend
-	http.HandleFunc("/messages", func(w http.ResponseWriter, r *http.Request) {
-		// Set the response content type to JSON
-		w.Header().Set("Content-Type", "application/json")
+	// // Handle HTTP requests from the frontend
+	// http.HandleFunc("/messages", func(w http.ResponseWriter, r *http.Request) {
+	// 	// Set the response content type to JSON
+	// 	w.Header().Set("Content-Type", "application/json")
 
-		// Read messages from channel and send them to frontend
-		message := <-messageChannel
+	// 	// Read messages from channel and send them to frontend
+	// 	message := <-messageChannel
 
-		// Create a JSON response
-		response := map[string]string{"message": message}
+	// 	// Create a JSON response
+	// 	response := map[string]string{"message": message}
 
-		// Serialize the reponse to Json
-		jsonBytes, err := json.Marshal(response)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	// 	// Serialize the reponse to Json
+	// 	jsonBytes, err := json.Marshal(response)
+	// 	if err != nil {
+	// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 		return
+	// 	}
 
 		// Write JSON to the frontend
 		w.WriteHeader(http.StatusOK)
@@ -137,4 +135,8 @@ func main() {
 	else {
 		fmt.Println("Sent message:", message)
 	}	
+	// 	// Write JSON to the frontend
+	// 	w.WriteHeader(http.StatusOK)
+	// 	w.Write(jsonBytes)
+	// })
 }
