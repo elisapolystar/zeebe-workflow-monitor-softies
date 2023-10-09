@@ -93,29 +93,6 @@ func main() {
 		}
 	}
 
-	// // Handle HTTP requests from the frontend
-	// http.HandleFunc("/messages", func(w http.ResponseWriter, r *http.Request) {
-	// 	// Set the response content type to JSON
-	// 	w.Header().Set("Content-Type", "application/json")
-
-	// 	// Read messages from channel and send them to frontend
-	// 	message := <-messageChannel
-
-	// 	// Create a JSON response
-	// 	response := map[string]string{"message": message}
-
-	// 	// Serialize the reponse to Json
-	// 	jsonBytes, err := json.Marshal(response)
-	// 	if err != nil {
-	// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 		return
-	// 	}
-
-		// Write JSON to the frontend
-		w.WriteHeader(http.StatusOK)
-		w.Write(jsonBytes)
-	})
-
 	// Establish a WebSocket connection to the frontend
 	// (Server URL will be updated once it's known)
 	serverURL := "URL"
