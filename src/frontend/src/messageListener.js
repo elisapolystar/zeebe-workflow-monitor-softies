@@ -7,7 +7,7 @@ const MessageListener = () => {
 
     useEffect(() => {
         // Update the URL once known
-        const socket = io('http://server:8000');
+        const socket = io('http://localhost:8000');
 
         // Define event handlers for messages received from the server.
         socket.on('message', (message) => {
