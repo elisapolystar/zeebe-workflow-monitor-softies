@@ -6,10 +6,28 @@ import (
 	"os/signal"
 
 	"github.com/IBM/sarama"
-	"github.com/gorilla/websocket"
 )
 
-func main() {
+func Consume() {
+
+	// // Establish a WebSocket connection to the frontend
+	// // (Server URL will be updated once it's known)
+	// serverURL := "URL"
+	// test_message := "Hello from the backend"
+	// conn, _, err := websocket.DefaultDialer.Dial(serverURL, nil)
+	// if err != nil {
+	// 	log.Fatal("Error connecting to WebSocket:", err)
+	// }
+	// defer conn.Close()
+
+	// // Send test message to the frontend
+	// err := conn.WriteMessage(websocket.TextMessage, []byte(test_message))
+	// if err != nil {
+	// 	log.Println("Error sending message:", err)
+	// 	return
+	// } else {
+	// 	fmt.Println("Sent message:", test_message)
+	// }
 
 	// Define the Kafka broker address and topic we want to subscribe to
 	brokers := []string{"localhost:9092"}
@@ -72,44 +90,35 @@ func main() {
 		fmt.Printf("Subscribed to topic: %s\n", topic)
 	}
 
-	// Create a channel to send messages to the frontend
-	//messageChannel := make(chan string)
-
 	// Consume messages from the Kafka topics
 	for {
-		select {
-		case <-signals:
-			fmt.Println("Received termination signal. Closing consumer.")
-			return
-		default:
-			for topic, partitionConsumer := range partitionConsumers {
-				select {
-				case msg := <-partitionConsumer.Messages():
-					fmt.Printf("Received message from topic %s: %s\n", topic, string(msg.Value))
-				case err := <-partitionConsumer.Errors():
-					fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
-				}
+		for topic, partitionConsumer := range partitionConsumers {
+			select {
+			case msg := <-partitionConsumer.Messages():
+				fmt.Printf("Received message from topic %s: %s\n", topic, string(msg.Value))
+			case err := <-partitionConsumer.Errors():
+				fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
+			default:
+				continue
 			}
 		}
 	}
 
-	// Establish a WebSocket connection to the frontend
-	// (Server URL will be updated once it's known)
-	serverURL := "URL"
-	test_message := "Hello from the backend"
-	conn, _, err := websocket.DefaultDialer.Dial(serverURL, nil)
-	if err != nil {
-		log.Fatal("Error connecting to WebSocket:", err)
-	}
-	defer conn.Close()
+	// for {
+	// 	select {
+	// 	case <-signals:
+	// 		fmt.Println("Received termination signal. Closing consumer.")
+	// 		return
+	// 	default:
+	// 		for topic, partitionConsumer := range partitionConsumers {
+	// 			select {
+	// 			case msg := <-partitionConsumer.Messages():
+	// 				fmt.Printf("Received message from topic %s: %s\n", topic, string(msg.Value))
+	// 			case err := <-partitionConsumer.Errors():
+	// 				fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
+	// 			}
+	// 		}
+	// 	}
+	// }
 
-	// Send test message to the frontend
-	err := conn.WriteMessage(websocket.TextMessage, []byte(message))
-	if err != nil {
-		log.Println("Error sending message:", err)
-		return
-	}
-	else {
-		fmt.Println("Sent message:", message)
-	}	
 }
