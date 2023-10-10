@@ -2,7 +2,10 @@ module consumer
 
 go 1.21.2
 
-require github.com/IBM/sarama v1.41.2
+require (
+	github.com/IBM/sarama v1.41.2
+	github.com/gorilla/websocket v1.5.0
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
