@@ -11,7 +11,6 @@ func rootHandler(response http.ResponseWriter, request *http.Request) {
 
 func main() {
 
-	Consume()
 	fmt.Println("Backend started!")
 	go Consume()
 	fmt.Println("goroutine in action")
