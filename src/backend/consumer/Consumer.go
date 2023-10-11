@@ -1,20 +1,124 @@
 package main
 
 import (
-    "fmt"
-    "net/http"
+	"fmt"
+	"os"
+	"os/signal"
+
+	"github.com/IBM/sarama"
 )
 
-func rootHandler(response http.ResponseWriter, request *http.Request) {
-    fmt.Fprintf(response, "Hello there!")
-}
+func Consume() {
 
-func main() {
+	// // Establish a WebSocket connection to the frontend
+	// // (Server URL will be updated once it's known)
+	// serverURL := "URL"
+	// test_message := "Hello from the backend"
+	// conn, _, err := websocket.DefaultDialer.Dial(serverURL, nil)
+	// if err != nil {
+	// 	log.Fatal("Error connecting to WebSocket:", err)
+	// }
+	// defer conn.Close()
 
-	fmt.Println("Backend started!")
-	
-	//Call function that handles requests arriving at root
-	http.HandleFunc("/", rootHandler)
-	//Start server and listen port 8000
-	http.ListenAndServe(":8000", nil)
+	// // Send test message to the frontend
+	// err := conn.WriteMessage(websocket.TextMessage, []byte(test_message))
+	// if err != nil {
+	// 	log.Println("Error sending message:", err)
+	// 	return
+	// } else {
+	// 	fmt.Println("Sent message:", test_message)
+	// }
+
+	// Define the Kafka broker address and topic we want to subscribe to
+	brokers := []string{"localhost:9092"}
+	topics := []string{"zeebe",
+		"zeebe-deployment",
+		"zeebe-deploy-distribution",
+		"zeebe-error",
+		"zeebe-incident",
+		"zeebe-job-batch",
+		"zeebe-job",
+		"zeebe-message",
+		"zeebe-message-subscription",
+		"zeebe-message-subscription-start-event",
+		"zeebe-process",
+		"zeebe-process-event",
+		"zeebe-process-instance",
+		"zeebe-process-instance-result",
+		"zeebe-process-message-subscription",
+		"zeebe-timer",
+		"zeebe-variable"}
+
+	// Configure the Kafka consumer
+	config := sarama.NewConfig()
+	config.Consumer.Return.Errors = true
+
+	// Create a Kafka consumer
+	consumer, err := sarama.NewConsumer(brokers, config)
+	if err != nil {
+		fmt.Printf("Error creating Kafka consumer: %v\n", err)
+		return
+	}
+
+	defer func() {
+		if err := consumer.Close(); err != nil {
+			fmt.Printf("Error closing Kafka consumer: %v\n", err)
+		}
+	}()
+
+	// Set up a signal channel to handle termination
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt)
+
+	// Create a map to store partition consumers for each topic
+	partitionConsumers := make(map[string]sarama.PartitionConsumer)
+
+	// Subscribe to each topic
+	for _, topic := range topics {
+		partitionConsumer, err := consumer.ConsumePartition(topic, 0, sarama.OffsetOldest)
+		if err != nil {
+			fmt.Printf("Error subscribing to topic %s: %v\n", topic, err)
+			return
+		}
+		defer func(topic string) {
+			if err := partitionConsumers[topic].Close(); err != nil {
+				fmt.Printf("Error closing partition consumer for topic %s: %v\n", topic, err)
+			}
+		}(topic)
+
+		partitionConsumers[topic] = partitionConsumer
+		fmt.Printf("Subscribed to topic: %s\n", topic)
+	}
+
+	// Consume messages from the Kafka topics
+	for {
+		for topic, partitionConsumer := range partitionConsumers {
+			select {
+			case msg := <-partitionConsumer.Messages():
+				fmt.Printf("Received message from topic %s: %s\n", topic, string(msg.Value))
+			case err := <-partitionConsumer.Errors():
+				fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
+			default:
+				continue
+			}
+		}
+	}
+
+	// for {
+	// 	select {
+	// 	case <-signals:
+	// 		fmt.Println("Received termination signal. Closing consumer.")
+	// 		return
+	// 	default:
+	// 		for topic, partitionConsumer := range partitionConsumers {
+	// 			select {
+	// 			case msg := <-partitionConsumer.Messages():
+	// 				fmt.Printf("Received message from topic %s: %s\n", topic, string(msg.Value))
+	// 			case err := <-partitionConsumer.Errors():
+	// 				fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
+	// 			}
+	// 		}
+	// 	}
+	// }
+
 }
