@@ -6,14 +6,26 @@ const MessageListener = () => {
     const [messages, setMessages] = useState([]);
 
     useEffect(() => {
-        // Update the URL once known
-        const socket = io("ws://localhost:8001/ws");
+        let socket = new WebSocket("ws://localhost:8001/ws")
+        console.log("Attempting Websocket Connection")
 
-        // Define event handlers for messages received from the server.
-        socket.on('message', (message) => {
-            // Handle incoming messages here and update your component state.
-            setMessages((prevMessages) => [...prevMessages, message]);
-        });
+        socket.onopen = () => {
+            console.log("Successfully Connected");
+            socket.send("Hi from the client!")
+        }
+
+        socket.onclose = (event) => {
+            console.log("Socket closed connection: ", event)
+
+        }
+
+        socket.onerror = (error) => {
+            console.log("SOcket Error: ", error)
+        }
+
+        socket.addEventListener('message', (event) => {
+                setMessages((prevMessages) => [...prevMessages, event.data]);
+        })
 
         // Clean up the WebSocket connection when the component unmounts.
         return () => {
