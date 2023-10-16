@@ -97,7 +97,7 @@ services:
       - testenv
 
   postgres:
-    image: bitnami/postgresql:11.21.0
+    image: bitnami/postgresql:15.4.0
     restart: always
     environment:
       - POSTGRES_DB=postgres
