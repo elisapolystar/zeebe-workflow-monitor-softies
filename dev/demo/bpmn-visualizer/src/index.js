@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import MessageListener from './messageListener';
+import RenderBPMN from './renderBPMN';
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <MessageListener />
+    <RenderBPMN />
   </React.StrictMode>
 );
