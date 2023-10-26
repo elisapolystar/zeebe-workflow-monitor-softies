@@ -1,10 +1,16 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from "react-dom/client";
 import MessageListener from './messageListener';
+import NavBar from './components/NavBar';
+import Header from './components/Header'
 
-ReactDOM.render(
+const root = createRoot(document.getElementById('root'));
+root.render(
   <React.StrictMode>
-    <MessageListener />
+    <div>
+      <Header />
+      <NavBar />
+      <MessageListener />
+    </div>
   </React.StrictMode>,
-  document.getElementById('root')
 );

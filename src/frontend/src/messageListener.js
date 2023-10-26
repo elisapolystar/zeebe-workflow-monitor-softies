@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
-import MessageDisplayer from './messageDisplayer'; 
+import MessageDisplayer from './messageDisplayer';
 
 const MessageListener = () => {
     const [messages, setMessages] = useState([]);
@@ -29,7 +29,7 @@ const MessageListener = () => {
 
         // Clean up the WebSocket connection when the component unmounts.
         return () => {
-            socket.disconnect();
+            socket.close();
         };
     }, []);
 
