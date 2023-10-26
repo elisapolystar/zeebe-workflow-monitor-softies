@@ -5,6 +5,7 @@ go 1.21.2
 require (
 	github.com/IBM/sarama v1.41.2
 	github.com/gorilla/websocket v1.5.0
+	github.com/lib/pq v1.6.0
 )
 
 require (

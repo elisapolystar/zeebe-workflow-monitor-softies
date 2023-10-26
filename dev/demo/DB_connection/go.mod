@@ -3,5 +3,5 @@ module db
 go 1.21.2
 
 require (
-    "github.com/lib/pq"
+    github.com/lib/pq
 )

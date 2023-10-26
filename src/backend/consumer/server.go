@@ -50,14 +50,20 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func testDatabase() {
+	go TestDatabase()
+}
+
 func main() {
 
 	fmt.Println("Backend started!")
 
 	messageChannel = make(chan string)
 	go Consume(messageChannel)
+	go TestDatabase()
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/ws", wsEndpoint)
+	http.HandleFunc("/test", testDatabase)
 
 	//Start server and listen port 8000
 	http.ListenAndServe(":8001", nil)
