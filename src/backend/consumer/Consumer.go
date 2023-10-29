@@ -8,7 +8,7 @@ import (
 	"github.com/IBM/sarama"
 )
 
-func Consume(messageChannel chan<- string) {
+func Consume(messageChannel chan<- topicMessagePair) {
 
 	// Define the Kafka broker address and topic we want to subscribe to
 	brokers := []string{"localhost:9092"}
@@ -76,25 +76,9 @@ func Consume(messageChannel chan<- string) {
 		for topic, partitionConsumer := range partitionConsumers {
 			select {
 			case msg := <-partitionConsumer.Messages():
-				fmt.Println()
-				fmt.Printf("Received message from topic %s: %s\n", topic, string(msg.Value))
-				if topic == "zeebe-process" {
-					process, err := parseJson(msg.Value)
-					if err != nil {
-						fmt.Println("Error parsing the json: ", err)
-					}
-					fmt.Println()
-					fmt.Println("----------------------------")
-					fmt.Println()
-					fmt.Println("Process key of the process item: ", process.Key)
-					fmt.Println("bpmnProcessId: ", process.Value.BpmnProcessId)
-					fmt.Println("Version: ", process.Value.Version)
-					fmt.Println()
-					fmt.Println("----------------------------")
-				} else {
-					continue
-				}
-				messageChannel <- string(msg.Value)
+
+				messageChannel <- topicMessagePair{topic, msg.Value}
+
 			case err := <-partitionConsumer.Errors():
 				fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
 			default:
