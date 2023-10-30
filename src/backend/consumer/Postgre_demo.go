@@ -10,7 +10,7 @@ import (
 
 const (
 	host = "postgres"
-	port = "5432"
+	port = 5432
 	user = "postgres"
 	password = "password"
 	dbname = "test"
@@ -42,7 +42,8 @@ func TestDatabase() {
 
 	//Create a database named "kafka"
 	fmt.Println("creating new database")
-	_, err = db.Exec("create database " + new_db)
+	createDB := "CREATE DATABASE " + new_db
+	_, err = db.Exec(createDB)
 	if err != nil {
 		fmt.Println("Database creation failed")
 		panic(err)
