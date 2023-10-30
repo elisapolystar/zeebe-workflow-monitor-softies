@@ -50,7 +50,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func testDatabase() {
+func testDatabase(response http.ResponseWriter, request *http.Request) {
 	go TestDatabase()
 }
 
