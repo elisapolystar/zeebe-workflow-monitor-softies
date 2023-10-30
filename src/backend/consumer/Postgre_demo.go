@@ -15,13 +15,15 @@ const (
 	password = "password"
 	dbname = "postgres"
 	new_db = "kafka"
+	/*
 	create_table = "CREATE TABLE franz ( id integer, nimi varchar(255), sivumaara integer, vuosi integer);"
 	insertion_1 = "INSERT INTO franz (id, nimi, sivumaara, vuosi) VALUES (1, 'Anna Karenina', 864, 1878),
 	(2, 'Madame Bovary', 322, 1856), (3, 'War and Peace', 1225, 1869), (4, 'The Great Gatsby', 218, 1925),
 	(5, 'Lolita', 371, 1959), (6, 'Middlemarch', 501, 1872), (7, 'The Adventures of Huckleberry Finn', 362, 1884),
 	(8, 'The Stories of Antony Chekhov', 269, 1885), (9, 'In Search of Lost Time', 4215, 1913), (10, 'Hamlet', 500, 1600);"
-	display_1 = "FROM franz SELECT *;"
-	deletion = "DELETE FROM 'franz' WHERE sivumaara > 500;"
+	display_1 = "SELECT * FROM franz;"
+	deletion = "DELETE FROM franz WHERE sivumaara > 500;"
+	*/
 )
 
 
@@ -38,7 +40,7 @@ func TestDatabase() {
 	defer db.Close()
 	fmt.Println("Connected to the database!")
 
-	// Create a database named "kafka"
+	/* Create a database named "kafka"
 	_, err = db.Exec("create database " + new_db)
 	if err != nil {
 		fmt.Println("Database creation failed")
@@ -73,7 +75,7 @@ func TestDatabase() {
 		fmt.Println(id, nimi, sivumaara, vuosi)
 	}
 	// delete every book containing more than 500 pages from the table
-	_, err = db.Exec(deletion);
+	_, err = db.Exec(deletion)
 	if err != nil {
 		fmt.Println("Failed to delete rows")
 		panic(err)
@@ -94,6 +96,13 @@ func TestDatabase() {
 		fmt.Println(id, nimi, sivumaara, vuosi)
 	}
 
+	_, err = db.Exec("DROP DATABASE kafka")
+	if err != nil {
+		ftm.Print("Failed to drop the database")
+		panic(err)
+	}
+	ftm.Print("Database Dropped")
+	*/
 }
 
 
