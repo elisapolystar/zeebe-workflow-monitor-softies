@@ -63,6 +63,20 @@ func writer(conn *websocket.Conn) {
 			fmt.Println()
 			fmt.Println("++++++++++++++++++++++++++++++++++++++++++++++++++")
 			fmt.Println()
+
+			jsonString, err2 := structToJson(&process)
+			if err2 != nil {
+				fmt.Println("Error turning struct to json: ", err2)
+			}
+
+			fmt.Println()
+			fmt.Println("JSON STRING - JSON STRING - JSON STRING - JSON STRING - JSON STRING -")
+			fmt.Println()
+			fmt.Print(jsonString)
+			fmt.Println()
+			fmt.Println("JSON STRING - JSON STRING - JSON STRING - JSON STRING - JSON STRING -")
+			fmt.Println()
+
 		}
 
 		// Make a struct of a process instance JSON
@@ -85,6 +99,19 @@ func writer(conn *websocket.Conn) {
 			fmt.Println("Parent element instance key: ", processInstanceItem.Value.ParentElementInstanceKey)
 			fmt.Println()
 			fmt.Println("//////////////////////////////////////////////////")
+			fmt.Println()
+
+			jsonString, err2 := structToJson(&processInstanceItem)
+			if err2 != nil {
+				fmt.Println("Error turning struct to json: ", err2)
+			}
+
+			fmt.Println()
+			fmt.Println("JSON STRING - JSON STRING - JSON STRING - JSON STRING - JSON STRING -")
+			fmt.Println()
+			fmt.Print(jsonString)
+			fmt.Println()
+			fmt.Println("JSON STRING - JSON STRING - JSON STRING - JSON STRING - JSON STRING -")
 			fmt.Println()
 
 		}
@@ -154,6 +181,26 @@ func writer(conn *websocket.Conn) {
 			fmt.Println("INCIDENT - INCIDENT - INCIDENT - INCIDENT - INCIDENT - ")
 			fmt.Println()
 
+		}
+
+		// Make a struct of a message JSON
+		if tmPair.Topic == "zeebe-message" {
+
+			messageItem, err := parseMessageJson(tmPair.Message)
+			if err != nil {
+				fmt.Println("Error parsing the message JSON: ", err)
+			}
+
+			fmt.Println()
+			fmt.Println("MESSAGE - MESSAGE - MESSAGE - MESSAGE - MESSAGE - MESSAGE")
+			fmt.Println()
+			fmt.Println("Key of message: ", messageItem.Key)
+			fmt.Println("Correlation key: ", messageItem.Value.CorrelationKey)
+			fmt.Println("Name: ", messageItem.Value.Name)
+			fmt.Println()
+			fmt.Println()
+			fmt.Println("MESSAGE - MESSAGE - MESSAGE - MESSAGE - MESSAGE - MESSAGE")
+			fmt.Println()
 		}
 	}
 }

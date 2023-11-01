@@ -69,3 +69,29 @@ func parseIncidentJson(msg []byte) (*Incident, error) {
 
 	return &incidentItem, nil
 }
+
+// Turn JSON data into a struct of type Message
+func parseMessageJson(msg []byte) (*Message, error) {
+
+	var messageItem Message
+	err := json.Unmarshal(msg, &messageItem)
+	if err != nil {
+		fmt.Println("Error Unmarshalling message JSON")
+		fmt.Println(err.Error())
+	}
+
+	return &messageItem, nil
+}
+
+// Turn a process struct into JSON data
+func structToJson(data interface{}) (string, error) {
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		fmt.Println(err.Error())
+	}
+
+	jsonString := string(jsonData)
+	return jsonString, err
+}

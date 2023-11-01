@@ -70,3 +70,15 @@ type IncidentValue struct {
 	ErrorType            string `json:"errorType"`
 	ErrorMessage         string `json:"errorMessage"`
 }
+
+type Message struct {
+	Key       int64        `json:"key"`
+	Value     MessageValue `json:"value"`
+	Timestamp int64        `json:"timestamp"`
+}
+
+type MessageValue struct {
+	Name           string `json:"name"`
+	CorrelationKey string `json:"correlationKey"`
+	MessageId      string `json:"messageId"`
+}
