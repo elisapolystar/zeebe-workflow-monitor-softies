@@ -1,7 +1,7 @@
 import React from 'react';
-import './Instances.css'; 
+import './Instances.css';
 
-const Instances = () => {
+const Instances: React.FC = () => {
   return (
     <div className="instance-container">
       <div className="instance-item">

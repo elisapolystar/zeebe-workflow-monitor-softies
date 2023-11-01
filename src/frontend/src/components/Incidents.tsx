@@ -1,7 +1,7 @@
 import React from 'react';
-import './Incidents.css'; 
+import './Incidents.css';
 
-const Incidents = () => {
+const Incidents: React.FC = () => {
   return (
     <div className="incident-container">
       <div className="incident-item">

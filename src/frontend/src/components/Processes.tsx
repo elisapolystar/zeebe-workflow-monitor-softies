@@ -1,11 +1,7 @@
 import React from 'react';
-import './Processes.css'; 
-/*   
-https://blog.logrocket.com/creating-react-sortable-table/     
-https://mui.com/material-ui/react-accordion/
+import './Processes.css';
 
-*/
-const Processes = () => {
+const Processes: React.FC = () => {
   return (
     <div className="process-container">
       <div className="process-item">
