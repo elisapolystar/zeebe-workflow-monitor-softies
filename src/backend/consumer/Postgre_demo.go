@@ -48,7 +48,14 @@ func TestDatabase() {
 		fmt.Println("Database creation failed")
 		panic(err)
 	}
-
+	// connect to the new database
+	new_db_conn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", 
+	host, port, user, password, new_db)
+	db_2, err2 := sql.Open("postgres", new_db_conn)
+	if err2 != nil {
+		fmt.Println("connecting to the new database failed")
+		panic(err)
+	}
 	// Create a table into Kafka named "franz"
 	fmt.Println("creating table")
 	_, err = db.Exec(create_table)
@@ -105,7 +112,7 @@ func TestDatabase() {
 		fmt.Println(id, nimi, sivumaara, vuosi)
 	}
 	fmt.Println("dropping database...")
-	_, err = db.Exec("DROP DATABASE test")
+	_, err = db_2.Exec("DROP DATABASE kafka")
 	if err != nil {
 		fmt.Println("Failed to drop the database")
 		panic(err)
