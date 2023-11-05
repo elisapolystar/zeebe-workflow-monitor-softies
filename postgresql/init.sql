@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS process(
 
 CREATE TABLE IF NOT EXISTS process_instance(
     Key BIGINT PRIMARY KEY,
-    PartitionID NOT NULL,
+    PartitionID BIGINT NOT NULL,
     ProcessDefinitionKey BIGINT NOT NULL,
     BpmnProcessId VARCHAR(50) NOT NULL,
     Version INT NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS process_instance(
 );
 
 CREATE TABLE IF NOT EXISTS variable(
-    PartitionID NOT NULL,
+    PartitionID BIGINT NOT NULL,
     Position BIGINT NOT NULL,
     Name VARCHAR(50) NOT NULL,
     Value VARCHAR(50) NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS variable(
 
 CREATE TABLE IF NOT EXISTS job(
     key BIGINT PRIMARY KEY,
-    timestamp BIGINT NOT NULL,
+    Timestamp BIGINT NOT NULL,
     ProcessInstanceKey REFERENCES process_instance (key) NOT NULL,
     ElementInstanceKey BIGINT NOT NULL,
     JobType VARCHAR(50),
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS job(
 );
 
 CREATE TABLE IF NOT EXISTS incident(
-    key BIGINT PRIMARY KEY,
+    Key BIGINT PRIMARY KEY,
     BpmnProcessId VARCHAR(50) NOT NULL,
     ProcessInstanceKey REFERENCES process_instance (key) NOT NULL,
     ElementInstanceKey BIGINT NOT NULL,
@@ -49,9 +49,9 @@ CREATE TABLE IF NOT EXISTS incident(
 );
 
 CREATE TABLE IF NOT EXISTS message(
-    key BIGINT PRIMARY KEY,
+    Key BIGINT PRIMARY KEY,
     Name VARCHAR(50) NOT NULL,
     CorrelationKey VARCHAR(50) NOT NULL,
     MessageId VARCHAR(50) NOT NULL,
-    timestamp BIGINT NOT NULL
+    Timestamp BIGINT NOT NULL
 );

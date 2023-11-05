@@ -30,7 +30,7 @@ func SaveData(entity interface{}) {
 			fmt.Println("saving process")
 			//prepare the sql %d = number %s = text/string
 			//insertProcess = fmt.Sprintf("INSERT INTO process (Key, BpmnProcessId, Version, Resource, timestamp) VALUES (%d, '%s', %d, '%s', %d);";
-			insertProcess := fmt.Sprintf("INSERT INTO process (Key, BpmnProcessId, Version, Resource, timestamp) VALUES ($1, $2, $3, $4, $5)")
+			insertProcess := fmt.Sprintf("INSERT INTO process (Key, BpmnProcessId, Version, Resource, Timestamp) VALUES ($1, $2, $3, $4, $5)")
 			//execute the insertion command with entity as parameters
 			_, err = db.Exec(insertProcess, entity.Key, entity.Value.BpmnProcessId, entity.Value.Version, entity.Value.Resource, entity.Timestamp)
 			if err != nil {
