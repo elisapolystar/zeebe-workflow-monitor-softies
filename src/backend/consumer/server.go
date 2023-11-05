@@ -50,8 +50,9 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func testDatabase(response http.ResponseWriter, request *http.Request) {
-	go TestDatabase()
+//saves only process as test
+func storeConsumerData(process Process) {
+	SaveData(process)
 }
 
 func main() {
