@@ -8,10 +8,10 @@ import (
 	"github.com/IBM/sarama"
 )
 
-func Consume(messageChannel chan<- string) {
+func Consume(messageChannel chan<- topicMessagePair) {
 
 	// Define the Kafka broker address and topic we want to subscribe to
-	brokers := []string{"kafka:9093"}
+	brokers := []string{"localhost:9092"}
 	topics := []string{"zeebe",
 		"zeebe-deployment",
 		"zeebe-deploy-distribution",
@@ -76,8 +76,9 @@ func Consume(messageChannel chan<- string) {
 		for topic, partitionConsumer := range partitionConsumers {
 			select {
 			case msg := <-partitionConsumer.Messages():
-				fmt.Printf("Received message from topic %s: %s\n", topic, string(msg.Value))
-				messageChannel <- string(msg.Value)
+
+				messageChannel <- topicMessagePair{topic, msg.Value}
+
 			case err := <-partitionConsumer.Errors():
 				fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
 			default:
