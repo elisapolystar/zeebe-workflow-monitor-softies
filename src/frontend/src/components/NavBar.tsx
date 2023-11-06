@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import './NavBar.css';
 import Processes from './Processes.tsx';
@@ -6,21 +6,10 @@ import Instances from './Instances.tsx';
 import Incidents from './Incidents.tsx';
 
 
-
-
-
-
-
-
-
-
 /*
 
-
-
-
-
-
+{
+process
 [
 
 {
@@ -40,55 +29,60 @@ Time: 22/22/2222
 }
 "timestamp":1698688538626,
 ]
-
-
-
-
+}
 */
+interface NavBarProps {
+  socket: WebSocket | null;
+}
 
 
+const NavBar: React.FC<NavBarProps> = ({socket}) => {
+  const [processes, setProcesses] = useState([]); // State for processes
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const NavBar: React.FC = () => {
   const navigate = (path: string) => {
     window.history.pushState({}, '', path);
     ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(path));
+    return getComponentForPath(path) ;
   };
 
   const getComponentForPath = (path: string) => {
     switch (path) {
       case '/processes':
-        return <Processes />;
+        fetchProcesses(socket, undefined);
+        return <Processes /*processes={processes}*/ />;
       case '/instances':
         return <Instances />;
       case '/incidents':
         return <Incidents />;
       default:
         return <div>Not Found</div>;
+    }
+  };
+
+  const fetchProcesses = (socket, id) => {
+    console.log("fetchProocesses");
+    if (socket) {
+      let messageObject;
+      
+      if(id === undefined){
+        messageObject = `{
+          process: "", 
+        }`;
+      }else{
+        messageObject = `{
+          process: "${id}", 
+        }`;
+      }
+
+      // Send a WebSocket message to request processes from the backend
+      socket.send(messageObject);
+      console.log("Process request sent from frontend");
+
+      // Handle the response from the backend
+      socket.addEventListener('message', (event) => {
+        const data = JSON.parse(event.data);
+        setProcesses(data);
+      });
     }
   };
 
