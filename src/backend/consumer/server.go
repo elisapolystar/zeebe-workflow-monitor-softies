@@ -62,6 +62,8 @@ func listenTmChannel() {
 				fmt.Println("Error parsing the json: ", err)
 			}
 
+			SaveData(*process)
+
 			// Talenna_tietokantaan(process)
 
 			fmt.Println()
@@ -240,7 +242,6 @@ func listenTmChannel() {
 func main() {
 
 	fmt.Println("Backend started!")
-
 	messageChannel = make(chan topicMessagePair)
 	go Consume(messageChannel)
 	go listenTmChannel()

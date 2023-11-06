@@ -113,7 +113,6 @@ services:
       - '5432:5432'
     volumes:
       - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - postgres:/var/lib/postgres/data
     networks:
       - testenv
 

@@ -1,7 +1,9 @@
-CREATE DATABASE IF NOT EXISTS workflow;
-USE workflow;
+CREATE USER test PASSWORD 'password';
+CREATE DATABASE workflow OWNER test;
+GRANT CONNECT ON DATABASE workflow TO test;
+\c workflow;
 
-CREATE TABLE IF NOT EXISTS process(
+CREATE TABLE IF NOT EXISTS process (
     Key BIGINT PRIMARY KEY,
     BpmnProcessId VARCHAR(50) NOT NULL,
     Version INT NOT NULL,
@@ -9,7 +11,7 @@ CREATE TABLE IF NOT EXISTS process(
     Timestamp BIGINT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS process_instance(
+CREATE TABLE IF NOT EXISTS process_instance (
     Key BIGINT PRIMARY KEY,
     PartitionID BIGINT NOT NULL,
     ProcessDefinitionKey BIGINT NOT NULL,
@@ -19,7 +21,7 @@ CREATE TABLE IF NOT EXISTS process_instance(
     ParentElementInstanceKey BIGINT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS variable(
+CREATE TABLE IF NOT EXISTS variable (
     PartitionID BIGINT NOT NULL,
     Position BIGINT NOT NULL,
     Name VARCHAR(50) NOT NULL,
@@ -28,7 +30,7 @@ CREATE TABLE IF NOT EXISTS variable(
     ScopeKey BIGINT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS job(
+CREATE TABLE IF NOT EXISTS job (
     key BIGINT PRIMARY KEY,
     Timestamp BIGINT NOT NULL,
     ProcessInstanceKey REFERENCES process_instance (key) NOT NULL,
@@ -38,7 +40,7 @@ CREATE TABLE IF NOT EXISTS job(
     Retries INT
 );
 
-CREATE TABLE IF NOT EXISTS incident(
+CREATE TABLE IF NOT EXISTS incident (
     Key BIGINT PRIMARY KEY,
     BpmnProcessId VARCHAR(50) NOT NULL,
     ProcessInstanceKey REFERENCES process_instance (key) NOT NULL,
@@ -48,7 +50,7 @@ CREATE TABLE IF NOT EXISTS incident(
     ErrorMessage TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS message(
+CREATE TABLE IF NOT EXISTS message (
     Key BIGINT PRIMARY KEY,
     Name VARCHAR(50) NOT NULL,
     CorrelationKey VARCHAR(50) NOT NULL,
