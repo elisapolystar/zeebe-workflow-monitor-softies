@@ -29,7 +29,7 @@ const MessageListener = () => {
 
         // Clean up the WebSocket connection when the component unmounts.
         return () => {
-            socket.disconnect();
+            socket.close();
         };
     }, []);
 
