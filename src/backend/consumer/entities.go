@@ -82,3 +82,18 @@ type MessageValue struct {
 	CorrelationKey string `json:"correlationKey"`
 	MessageId      string `json:"messageId"`
 }
+
+type Timer struct {
+	Key       int64      `json:"key"`
+	Timestamp int64      `json:"timestamp"`
+	Value     TimerValue `json:"value"`
+}
+
+type TimerValue struct {
+	ProcessDefinitionKey int64  `json:"processDefinitionKey"`
+	ProcessInstanceKey   int64  `json:"processInstanceKey"`
+	ElementInstanceKey   int64  `json:"elementInstanceKey"`
+	TargetElementId      string `json:"targetElementId"`
+	Duedate              int64  `json:"dueDate"`
+	Repetitions          int64  `json:"repetitions"`
+}
