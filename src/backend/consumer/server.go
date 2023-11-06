@@ -25,22 +25,6 @@ func rootHandler(response http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(response, "Hello there!")
 }
 
-func writer(conn *websocket.Conn) {
-
-	/*for {
-		tmPair, ok := <-messageChannel
-		if !ok {
-			fmt.Println("Channel is closed.")
-			break
-		}
-
-		err := conn.WriteMessage(websocket.TextMessage, tmPair.Message)
-		if err != nil {
-			return
-		}
-	}*/
-}
-
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	ws, err := upgrader.Upgrade(w, r, nil)
@@ -49,7 +33,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println("Client Succesfully Connected...")
-	writer(ws)
+	fmt.Println(ws)
 }
 
 // Listen for the messages from the consumer and parse the messages into structs
