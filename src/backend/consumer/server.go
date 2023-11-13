@@ -63,6 +63,8 @@ func listenTmChannel() {
 			}
 
 			SaveData(*process)
+			processes := RetrieveProcesses()
+			fmt.Println(string(processes))
 
 			// Talenna_tietokantaan(process)
 
