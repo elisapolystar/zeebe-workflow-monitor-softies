@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"database/sql"
+	"encoding/json"
 	_ "github.com/lib/pq"
 )
 
@@ -14,8 +15,15 @@ const (
 	password = "password"
 	DBname = "workflow"
 	
-	ProcessesQuery = "SELECT * FROM process;"
+	ProcessesQuery = "SELECT Key, BpmnProcessId, Version, Timestamp FROM process;"
 )
+
+type SimpleProcess struct {
+	Key				int64	`json:"key"`
+	BpmnProcessId 	string 	`json:"bpmnProcessId"`
+	Version       	int64  	`json:"version"`
+	Timestamp 		int64	`json:"timestamp"`
+}
 
 func SaveData(entity interface{}) {
 	//connect to database
@@ -47,7 +55,7 @@ func SaveData(entity interface{}) {
 	}
 }
 
-func RetrieveProcesses() *sql.Rows {
+func RetrieveProcesses() []byte {
 	fmt.Println("retrieving processes from the database")
 	//connect to database
 	db, err := connectToDatabase()
@@ -57,7 +65,23 @@ func RetrieveProcesses() *sql.Rows {
 	fmt.Println("processes retrieved succesfully")
 	rows, err := db.Query(ProcessesQuery)
 	defer rows.Close()
-	return rows
+
+	//array for the processes
+	var processes []SimpleProcess
+
+	for rows.Next(){
+		var p SimpleProcess
+		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Timestamp)
+		if err != nil {
+			fmt.Println("Failed to scan rows")
+		}
+		processes = append(processes, p)
+	}
+	jsonData, err := json.Marshal(processes)
+	if err != nil {
+		fmt.Println("Failed to transform to json")
+	}
+	return jsonData
 }
 
 func connectToDatabase() (*sql.DB, error){
