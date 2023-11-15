@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
 import MessageDisplayer from './messageDisplayer';
 
-const MessageListener: React.FC = () => {
-  const [messages, setMessages] = useState<string[]>([]); // Specify the type for the messages array
+interface MessageListenerProps {
+  onSocketOpen: (socket: WebSocket) => void;
+}
+
+const MessageListener: React.FC<MessageListenerProps> = ({ onSocketOpen }) => {
+  const [messages, setMessages] = useState<string[]>([]);
 
   useEffect(() => {
     let socket = new WebSocket("ws://localhost:8001/ws");
@@ -11,6 +14,7 @@ const MessageListener: React.FC = () => {
 
     socket.onopen = () => {
       console.log("Successfully Connected");
+      onSocketOpen(socket);
       socket.send("Hi from the client!");
     }
 
@@ -30,7 +34,7 @@ const MessageListener: React.FC = () => {
     return () => {
       socket.close();
     };
-  }, []);
+  }, [onSocketOpen]);
 
   return (
     <div>

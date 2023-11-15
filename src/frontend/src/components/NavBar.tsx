@@ -4,6 +4,7 @@ import './NavBar.css';
 import Processes from './Processes.tsx';
 import Instances from './Instances.tsx';
 import Incidents from './Incidents.tsx';
+import { root } from '../index';
 
 
 /*
@@ -37,7 +38,8 @@ interface NavBarProps {
 
 
 const NavBar: React.FC<NavBarProps> = ({socket}) => {
-  const [processes, setProcesses] = useState([]); // State for processes
+  const [processes, setProcesses] = useState([]);
+  const [instances, setInstances] = useState([]); 
 
   const navigate = (path: string) => {
     window.history.pushState({}, '', path);
@@ -51,20 +53,23 @@ const NavBar: React.FC<NavBarProps> = ({socket}) => {
         fetchProcesses(socket, undefined);
         return <Processes /*processes={processes}*/ />;
       case '/instances':
+        fetchInstances(socket, undefined);
         return <Instances />;
       case '/incidents':
         return <Incidents />;
       default:
-        return <div>Not Found</div>;
+        fetchProcesses(socket, undefined);
+        return <Processes /*processes={processes}*/ />;
     }
   };
 
   const fetchProcesses = (socket, id) => {
     console.log("fetchProocesses");
+
     if (socket) {
       let messageObject;
       
-      if(id === undefined){
+      if(!id){
         messageObject = `{
           process: "", 
         }`;
@@ -76,15 +81,33 @@ const NavBar: React.FC<NavBarProps> = ({socket}) => {
 
       // Send a WebSocket message to request processes from the backend
       socket.send(messageObject);
-      console.log("Process request sent from frontend");
-
-      // Handle the response from the backend
-      socket.addEventListener('message', (event) => {
-        const data = JSON.parse(event.data);
-        setProcesses(data);
-      });
+      console.log(`Process request ${messageObject} sent from frontend`);
     }
   };
+
+  const fetchInstances = (socket, id) => {
+    if(socket) {
+      let messageObject = `{
+        instance: "${id}"
+      }`;
+      socket.send(messageObject);
+    }
+  }
+
+  const responseListener = (socket) => {
+
+    // Handle the response from the backend
+    socket.addEventListener('message', (event) => {
+      console.log(event);
+      const data = JSON.parse(event.data);
+      console.log(event.data);
+      if(data.process){
+        setProcesses(data);
+      }else if(data.instance){
+        setInstances(data);
+      }
+    });
+  }
 
   return (
     <div>
