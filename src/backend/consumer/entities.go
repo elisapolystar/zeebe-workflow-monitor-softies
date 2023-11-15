@@ -97,3 +97,13 @@ type TimerValue struct {
 	Duedate              int64  `json:"dueDate"`
 	Repetitions          int64  `json:"repetitions"`
 }
+
+// Message from frontend
+type FrontCommunication struct {
+	Process string `json:"process"`
+}
+
+type WebsocketMessage struct {
+	Type string `json:"type"`
+	Data string `json:"data"`
+}

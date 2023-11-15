@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -25,6 +26,66 @@ func rootHandler(response http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(response, "Hello there!")
 }
 
+func reader(conn *websocket.Conn) {
+
+	for {
+		messageType, p, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Error reading message from websocket: ", err)
+			return
+		}
+
+		//maybe use conn.ReadJSON()
+		frontMessage, err3 := parseCommunicationItem(p)
+		if err3 != nil {
+			log.Println("Error parsing the message from frontend(!): ", err3)
+		}
+
+		fmt.Println()
+		fmt.Println("Front message process value: ", frontMessage.Process)
+		fmt.Println()
+		fmt.Println("The message from front: ", string(p))
+		fmt.Println()
+
+		if frontMessage.Process == "" {
+
+			allProcesses := RetrieveProcesses()
+			fmt.Println(string(allProcesses))
+
+			processesData := WebsocketMessage{
+				Type: "process",
+				Data: string(allProcesses),
+			}
+
+			processesDataJson, err := json.Marshal(processesData)
+			if err != nil {
+				fmt.Println("Error JSON Unmarshalling in the websocket comm section")
+				fmt.Println(err.Error())
+			}
+
+			err2 := conn.WriteMessage(messageType, processesDataJson)
+			if err2 != nil {
+				fmt.Println("Error sending message to frontend: ", err2)
+				return
+			}
+
+		} else {
+			//processItem = hae_prosessi(frontMessage.Process)
+			//conn.WriteMessage(processItem)
+			fmt.Println("Kurwa")
+		}
+
+		/*fmt.Println()
+		fmt.Println("Echo trying:D")
+		fmt.Println()
+		err2 := conn.WriteMessage(messageType, p)
+		if err2 != nil {
+			log.Println("Error sending message to frontend: ", err2)
+			return
+		}*/
+	}
+}
+
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	ws, err := upgrader.Upgrade(w, r, nil)
@@ -33,7 +94,8 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println("Client Succesfully Connected...")
-	fmt.Println(ws)
+
+	reader(ws)
 }
 
 // Listen for the messages from the consumer and parse the messages into structs

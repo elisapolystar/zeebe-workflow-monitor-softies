@@ -108,3 +108,16 @@ func structToJson(data interface{}) (string, error) {
 	jsonString := string(jsonData)
 	return jsonString, err
 }
+
+// Turn a message from the frontend into a struct
+func parseCommunicationItem(msg []byte) (*FrontCommunication, error) {
+
+	var communicationItem FrontCommunication
+	err := json.Unmarshal(msg, &communicationItem)
+	if err != nil {
+		fmt.Println("Le` error in the front json parsings :-(")
+		fmt.Println(err.Error())
+	}
+
+	return &communicationItem, nil
+}
