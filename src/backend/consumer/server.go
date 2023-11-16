@@ -34,6 +34,7 @@ func reader(conn *websocket.Conn) {
 			log.Println("Error reading message from websocket: ", err)
 			return
 		}
+		log.Println(string(p))
 
 		//maybe use conn.ReadJSON()
 		frontMessage, err3 := parseCommunicationItem(p)
@@ -49,7 +50,14 @@ func reader(conn *websocket.Conn) {
 
 		if frontMessage.Process == "" {
 
+			fmt.Println()
+			fmt.Println("FRONTEND IS WANTING ALL PROCESSES FRONTEND IS WANTING ALL PROCESSES FRONTEND IS WANTING ALL PROCESSES FRONTEND IS WANTING ALL PROCESSES ")
+			fmt.Println()
 			allProcesses := RetrieveProcesses()
+			if len(string(allProcesses)) == 0 {
+				fmt.Println("No processes to return from database")
+				continue
+			}
 			fmt.Println(string(allProcesses))
 
 			processesData := WebsocketMessage{
@@ -87,12 +95,10 @@ func reader(conn *websocket.Conn) {
 }
 
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
-
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 	}
-
 	log.Println("Client Succesfully Connected...")
 
 	reader(ws)
@@ -303,16 +309,19 @@ func listenTmChannel() {
 	}
 }
 
+func setupRoutes() {
+	http.HandleFunc("/", rootHandler)
+	http.HandleFunc("/ws", wsEndpoint)
+}
+
 func main() {
 
 	fmt.Println("Backend started!")
 	messageChannel = make(chan topicMessagePair)
 	go Consume(messageChannel)
 	go listenTmChannel()
-	http.HandleFunc("/", rootHandler)
-	http.HandleFunc("/ws", wsEndpoint)
-
+	fmt.Println("We are here")
+	setupRoutes()
 	//Start server and listen port 8000
 	http.ListenAndServe(":8001", nil)
-
 }
