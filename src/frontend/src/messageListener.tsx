@@ -7,7 +7,7 @@ interface MessageListenerProps {
 
 const MessageListener: React.FC<MessageListenerProps> = ({ onSocketOpen }) => {
   const [messages, setMessages] = useState<string[]>([]);
-
+  
   useEffect(() => {
     let socket = new WebSocket("ws://localhost:8001/ws");
     console.log("Attempting WebSocket Connection");
