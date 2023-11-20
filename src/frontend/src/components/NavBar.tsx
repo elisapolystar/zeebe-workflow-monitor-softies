@@ -5,74 +5,6 @@ import Processes from './Processes.tsx';
 import Instances from './Instances.tsx';
 import Incidents from './Incidents.tsx';
 
-
-
-
-
-
-
-
-
-
-/*
-
-
-
-
-
-
-[
-
-{
-Process-definition-key: 1111111111
-BPMN-process-id: order1
-instances: 1
-Version: 1/1
-Time: 11/11/1111
-}
-
-{
-Process-definition-key: 222222222222
-BPMN-process-id: order2
-instances: 2
-Version: 2/2
-Time: 22/22/2222
-}
-"timestamp":1698688538626,
-]
-
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const NavBar: React.FC = () => {
   const navigate = (path: string) => {
     window.history.pushState({}, '', path);
@@ -88,7 +20,7 @@ const NavBar: React.FC = () => {
       case '/incidents':
         return <Incidents />;
       default:
-        return <div>Not Found</div>;
+        return <Processes />;
     }
   };
 

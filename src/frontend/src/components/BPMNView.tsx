@@ -1,6 +1,5 @@
 import { BpmnVisualization } from 'bpmn-visualization';
 import React, { useEffect, useRef } from 'react';
-import Data from './test.json'
 
 // const BPMNView: React.FC = () => {
 //     const containerRef = useRef<HTMLDivElement>(null);

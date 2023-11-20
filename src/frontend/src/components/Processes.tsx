@@ -4,10 +4,6 @@ import './Processes.css';
 import data from "./test.json";
 import BPMNView from './BPMNView.tsx';
 
-/*   
-https://blog.logrocket.com/creating-react-sortable-table/     
-https://mui.com/material-ui/react-accordion/*/
-
 
 const Processes: React.FC = () => {
   const navigate = (path: string) => {
@@ -19,9 +15,6 @@ const Processes: React.FC = () => {
     switch (path) {
       case '/BPMNView':
         return <BPMNView />;
-
-      default:
-        return <div>Not Found</div>;
     }
   };
 
