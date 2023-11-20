@@ -16,12 +16,21 @@ const (
 	DBname = "workflow"
 	
 	ProcessesQuery = "SELECT Key, BpmnProcessId, Version, Timestamp FROM process;"
+	ProcessByIDQuery = "SELECT * FROM process WHERE key = %s"
 )
 
 type SimpleProcess struct {
 	Key				int64	`json:"key"`
 	BpmnProcessId 	string 	`json:"bpmnProcessId"`
 	Version       	int64  	`json:"version"`
+	Timestamp 		int64	`json:"timestamp"`
+}
+
+type FullProcess struct {
+	Key				int64	`json:"key"`
+	BpmnProcessId 	string 	`json:"bpmnProcessId"`
+	Version       	int64  	`json:"version"`
+	Resource 		string 	`json:"resource"`
 	Timestamp 		int64	`json:"timestamp"`
 }
 
@@ -82,6 +91,34 @@ func RetrieveProcesses() []byte {
 		fmt.Println("Failed to transform to json")
 	}
 	return jsonData
+}
+
+func RetrieveProcessByID(key string) []byte {
+	fmt.Println("Retrieving the Process...")
+	// Connect to the DB
+	db, err := connectToDatabase()
+    if err != nil {
+        fmt.Println("Error opening database connection:", err)
+    }
+	// Perform the query
+	db_query := fmt.Sprintf(ProcessByIDQuery, key)
+	rows, err := db.Query(db_query)
+	defer rows.Close()
+	fmt.Println("Process retrieved successfully!")
+	fmt.Println("Converting data to JSON...")
+	// Convert data to a JSON format
+	var p FullProcess
+	for rows.Next(){
+		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Resource, &p.Timestamp)
+		if err != nil {
+			fmt.Println("Failed to scan row")
+		}		
+	}
+	json, err := json.Marshal(p)
+	if err != nil {
+		fmt.Println("Failed to convert data to JSON")
+	}
+	return json	
 }
 
 func connectToDatabase() (*sql.DB, error){
