@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BpmnVisualization } from 'bpmn-visualization';
 import diagram from './money-loan.bpmn';
 import tippy from 'tippy.js';
-import React, { useEffect, useRef } from 'react';
+
 
 // const BPMNView: React.FC = () => {
 //     const containerRef = useRef<HTMLDivElement>(null);
