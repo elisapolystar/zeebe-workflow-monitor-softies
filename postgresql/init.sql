@@ -26,14 +26,14 @@ CREATE TABLE IF NOT EXISTS variable (
     Position BIGINT NOT NULL,
     Name VARCHAR(50) NOT NULL,
     Value VARCHAR(50) NOT NULL,
-    ProcessInstanceKey REFERENCES process_instance (key),
+    ProcessInstanceKey REFERENCES process_instance (ProcessInstanceKey),
     ScopeKey BIGINT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS job (
     Key BIGINT PRIMARY KEY,
     Timestamp BIGINT NOT NULL,
-    ProcessInstanceKey REFERENCES process_instance (key) NOT NULL,
+    ProcessInstanceKey REFERENCES process_instance (ProcessInstanceKey),
     ElementInstanceKey BIGINT NOT NULL,
     JobType VARCHAR(50),
     Worker VARCHAR(50),
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS job (
 CREATE TABLE IF NOT EXISTS incident (
     Key BIGINT PRIMARY KEY,
     BpmnProcessId VARCHAR(50) NOT NULL,
-    ProcessInstanceKey REFERENCES process_instance (key) NOT NULL,
+    ProcessInstanceKey REFERENCES process_instance (ProcessInstanceKey),
     ElementInstanceKey BIGINT NOT NULL,
     JobKey BIGINT NOT NULL;
     ErrorType VARCHAR(50) NOT NULL,
