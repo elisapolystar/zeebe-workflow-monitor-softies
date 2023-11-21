@@ -3,6 +3,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"database/sql"
 	"encoding/json"
 	_ "github.com/lib/pq"
@@ -93,7 +94,7 @@ func RetrieveProcesses() []byte {
 	return jsonData
 }
 
-func RetrieveProcessByID(key string) []byte {
+func RetrieveProcessByID(key int64) []byte {
 	fmt.Println("Retrieving the Process...")
 	// Connect to the DB
 	db, err := connectToDatabase()
@@ -101,7 +102,9 @@ func RetrieveProcessByID(key string) []byte {
         fmt.Println("Error opening database connection:", err)
     }
 	// Perform the query
-	db_query := fmt.Sprintf(ProcessByIDQuery, key)
+	var strkey string
+	strkey = strconv.FormatInt(key, 10)
+	db_query := fmt.Sprintf(ProcessByIDQuery, strkey)
 	rows, err := db.Query(db_query)
 	defer rows.Close()
 	fmt.Println("Process retrieved successfully!")
