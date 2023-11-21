@@ -34,33 +34,72 @@ func reader(conn *websocket.Conn) {
 			log.Println("Error reading message from websocket: ", err)
 			return
 		}
-		log.Println(string(p))
 
-		//maybe use conn.ReadJSON()
-		frontMessage, err3 := parseCommunicationItem(p)
-		if err3 != nil {
-			log.Println("Error parsing the message from frontend(!): ", err3)
-		}
-
-		fmt.Println()
-		fmt.Println("Front message process value: ", frontMessage.Process)
 		fmt.Println()
 		fmt.Println("The message from front: ", string(p))
 		fmt.Println()
+		
+		var messageData map[string]interface{}
+		if err := json.Unmarshal([]byte(p), &messageData); err != nil {
+			log.Println("Error unmarshalling frontend message JSON: " err)
+			return
+		}
 
-		if frontMessage.Process == "" {
+		if processValue, ok := data["process"]; ok {
+			fmt.Println("Process: ", processValue)
+
+			processMessage, err3 := parseCommunicationItem(p)
+			if err3 != nil {
+				log.Println("Error parsing the message from frontend(!): ", err3)
+			}
+			if processValue == "" {
+
+				fmt.Println()
+				fmt.Println("FRONTEND IS WANTING ALL PROCESSES ")
+				fmt.Println()
+
+				allProcesses := RetrieveProcesses()
+				fmt.Println("(J)The processes retrieved: ", string(allProcesses))
+
+				processesData := WebsocketMessage {
+					Type: "process",
+					Data: string(allProcesses),
+				}
+
+				processesDataJson, err := json.Marshal(processesData)
+				if err != nil {
+					fmt.Println("Error JSON Unmarshalling in the websocket comm section")
+					fmt.Println(err.Error())
+				}
+
+				err2 := conn.WriteMessage(messageType, processesDataJson)
+				if err2 != nil {
+					fmt.Println("Error sending message to frontend: ", err2)
+					return
+				}
+			} else {
+				fmt.Println("Kurwo")
+			}
+
+		} else if variableValue, ok := data["variable:-P"]; ok {
+			fmt.Println("Variable: ", variableValue)
+		} else {
+			log.Println("hmm maybe some other json")
+		}
+
+		/*if frontMessage.Process == "" {
 
 			fmt.Println()
 			fmt.Println("FRONTEND IS WANTING ALL PROCESSES FRONTEND IS WANTING ALL PROCESSES FRONTEND IS WANTING ALL PROCESSES FRONTEND IS WANTING ALL PROCESSES ")
 			fmt.Println()
 			allProcesses := RetrieveProcesses()
-			if len(string(allProcesses)) == 0 {
+			if len(string(string(allProcesses))) == 0 {
 				fmt.Println("No processes to return from database")
 				continue
 			}
 			fmt.Println(string(allProcesses))
 
-			processesData := WebsocketMessage{
+			processesData := WebsocketMessage {
 				Type: "process",
 				Data: string(allProcesses),
 			}
@@ -81,7 +120,7 @@ func reader(conn *websocket.Conn) {
 			//processItem = hae_prosessi(frontMessage.Process)
 			//conn.WriteMessage(processItem)
 			fmt.Println("Kurwa")
-		}
+		}*/
 
 		/*fmt.Println()
 		fmt.Println("Echo trying:D")

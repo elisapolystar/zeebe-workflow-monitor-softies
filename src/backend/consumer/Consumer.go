@@ -11,7 +11,7 @@ import (
 func Consume(messageChannel chan<- topicMessagePair) {
 
 	// Define the Kafka broker address and topic we want to subscribe to
-	brokers := []string{"kafka:9093"}
+	brokers := []string{"localhost:9092"}
 	topics := []string{"zeebe",
 		"zeebe-deployment",
 		"zeebe-deploy-distribution",

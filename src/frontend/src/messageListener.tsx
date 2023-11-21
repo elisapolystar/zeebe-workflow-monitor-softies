@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import MessageDisplayer from './messageDisplayer';
-
+/*
 interface MessageListenerProps {
   onSocketOpen: (socket: WebSocket) => void;
 }
-
-const MessageListener: React.FC<MessageListenerProps> = ({ onSocketOpen }) => {
+*/
+const MessageListener: React.FC/*<MessageListenerProps>*/ = (/*{ onSocketOpen }*/) => {
   const [messages, setMessages] = useState<string[]>([]);
   
   useEffect(() => {
@@ -14,7 +14,7 @@ const MessageListener: React.FC<MessageListenerProps> = ({ onSocketOpen }) => {
 
     socket.onopen = () => {
       console.log("Successfully Connected");
-      onSocketOpen(socket);
+      //onSocketOpen(socket);
       socket.send("Hi from the client!");
     }
 
@@ -34,7 +34,7 @@ const MessageListener: React.FC<MessageListenerProps> = ({ onSocketOpen }) => {
     return () => {
       socket.close();
     };
-  }, [onSocketOpen]);
+  }, [/*onSocketOpen*/]);
 
   return (
     <div>
