@@ -34,7 +34,6 @@ type FullProcess struct {
 	Resource 		string 	`json:"resource"`
 	Timestamp 		int64	`json:"timestamp"`
 }
-
 func SaveData(entity interface{}) {
 	//connect to database
 	db, err := connectToDatabase()
@@ -122,6 +121,7 @@ func RetrieveProcessByID(key int64) []byte {
 		fmt.Println("Failed to convert data to JSON")
 	}
 	return json	
+  
 }
 
 func connectToDatabase() (*sql.DB, error){
