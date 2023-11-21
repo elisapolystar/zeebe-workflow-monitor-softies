@@ -63,7 +63,7 @@ func listenTmChannel() {
 			}
 
 			SaveData(*process)
-			processes := RetrieveProcesses()
+			processes := RetrieveProcessByID(process.Key)
 			fmt.Println(string(processes))
 
 			// Talenna_tietokantaan(process)
@@ -239,6 +239,11 @@ func listenTmChannel() {
 		}
 
 	}
+}
+
+func TestProcessByID() {
+	//Create a a random test process
+
 }
 
 func main() {
