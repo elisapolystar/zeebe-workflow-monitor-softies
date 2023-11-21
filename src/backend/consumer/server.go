@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/websocket"
 )
@@ -29,59 +30,100 @@ func rootHandler(response http.ResponseWriter, request *http.Request) {
 func reader(conn *websocket.Conn) {
 
 	for {
+		// Read messages sent by frontend
 		messageType, p, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Error reading message from websocket: ", err)
 			return
 		}
 
+		// Print the message received for debuging reasons
 		fmt.Println()
 		fmt.Println("The message from front: ", string(p))
 		fmt.Println()
-		
+
+		// Turn the json from frontend into a map so we can check wich fields it contains
 		var messageData map[string]interface{}
 		if err := json.Unmarshal([]byte(p), &messageData); err != nil {
-			log.Println("Error unmarshalling frontend message JSON: " err)
+			log.Println("Error unmarshalling frontend message JSON: ", err)
 			return
 		}
 
-		if processValue, ok := data["process"]; ok {
+		// If the json from fron contains field process we do stuff for process request
+		if processValue, ok := messageData["process"]; ok {
 			fmt.Println("Process: ", processValue)
 
+			// Parse the json into struct so we can access the value of the "process" -field
 			processMessage, err3 := parseCommunicationItem(p)
 			if err3 != nil {
 				log.Println("Error parsing the message from frontend(!): ", err3)
 			}
-			if processValue == "" {
+			fmt.Println("The value of the process field in the json front sent: ", processMessage.Process)
+
+			// If the value of the "process"-field is empty then we want to return all the processes to the frontend
+			if processMessage.Process == "" {
 
 				fmt.Println()
 				fmt.Println("FRONTEND IS WANTING ALL PROCESSES ")
 				fmt.Println()
 
+				// Retrieve the processes from the database
 				allProcesses := RetrieveProcesses()
 				fmt.Println("(J)The processes retrieved: ", string(allProcesses))
 
-				processesData := WebsocketMessage {
+				// Transfrom the retrieved processes to the correct json format that can be sent to the front
+				processesData := WebsocketMessage{
 					Type: "process",
 					Data: string(allProcesses),
 				}
-
 				processesDataJson, err := json.Marshal(processesData)
 				if err != nil {
-					fmt.Println("Error JSON Unmarshalling in the websocket comm section")
+					fmt.Println("Error JSON marshalling in the websocket comm section")
 					fmt.Println(err.Error())
 				}
 
+				// Send all processes to the frontend in the correct format
 				err2 := conn.WriteMessage(messageType, processesDataJson)
 				if err2 != nil {
 					fmt.Println("Error sending message to frontend: ", err2)
 					return
 				}
+
+				// Then if the value of the "process"-field is not empty then we want to retrieve only one process from the database
+			} else if processMessage.Process != "" {
+
+				fmt.Println()
+				fmt.Println("FRONTEND IS WANTING ONLY ONE PROCESS ")
+				fmt.Println()
+
+				key, err := strconv.ParseInt(processMessage.Process, 10, 64)
+				if err != nil {
+					log.Println("Error turning string to int: ", err)
+				}
+
+				process := RetrieveProcessByID(key)
+				fmt.Println("(J) The retrieved process: ", string(process))
+
+				processData := WebsocketMessage{
+					Type: "process",
+					Data: string(process),
+				}
+				processDataJson, err2 := json.Marshal(processData)
+				if err2 != nil {
+					log.Println("Error marshalling websocketmessage struct: ", err2)
+				}
+
+				err3 := conn.WriteMessage(messageType, processDataJson)
+				if err3 != nil {
+					log.Println("Error sending single process message to frontend: ", err2)
+					return
+				}
+
 			} else {
-				fmt.Println("Kurwo")
+				fmt.Println("Wtf?")
 			}
 
-		} else if variableValue, ok := data["variable:-P"]; ok {
+		} else if variableValue, ok := messageData["variable:-P"]; ok {
 			fmt.Println("Variable: ", variableValue)
 		} else {
 			log.Println("hmm maybe some other json")
@@ -120,15 +162,6 @@ func reader(conn *websocket.Conn) {
 			//processItem = hae_prosessi(frontMessage.Process)
 			//conn.WriteMessage(processItem)
 			fmt.Println("Kurwa")
-		}*/
-
-		/*fmt.Println()
-		fmt.Println("Echo trying:D")
-		fmt.Println()
-		err2 := conn.WriteMessage(messageType, p)
-		if err2 != nil {
-			log.Println("Error sending message to frontend: ", err2)
-			return
 		}*/
 	}
 }
@@ -171,7 +204,7 @@ func listenTmChannel() {
 
 			SaveData(*process)
 			processes := RetrieveProcessByID(process.Key)
-			fmt.Println(string(processes))
+			fmt.Println("The process we just saved: ", string(processes))
 
 			// Talenna_tietokantaan(process)
 
