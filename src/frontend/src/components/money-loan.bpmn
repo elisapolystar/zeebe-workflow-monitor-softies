@@ -46,9 +46,6 @@
       <bpmn:timerEventDefinition id="TimerEventDefinition_1k2y3cd">
         <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT120S</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
-      <bpmn:timerEventDefinition id="TimerEventDefinition_1k2y3cb">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT120D</bpmn:timeDuration>
-      </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
     <bpmn:sequenceFlow id="Flow_03ei1b4" sourceRef="StartEvent_1" targetRef="Gateway_0wveo0b" />
     <bpmn:sequenceFlow id="Flow_0kwk6ch" sourceRef="Gateway_0wveo0b" targetRef="send-acceptance-letter" />
