@@ -10,15 +10,12 @@ interface NavBarProps {
 }
 
 const NavBar: React.FC<NavBarProps> = ({ socket }) => {
-  const [processes, setProcesses] = useState([]);
-  const [instances, setInstances] = useState([]);
+  const [processes, setProcesses] = useState<any[]>([]);
+  const [instances, setInstances] = useState<any[]>([]);
 
   const fetchProcesses = (id: string | undefined) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
-      const messageObject = !id
-        ? '{ "process": "" }'
-        : `{ "process": "${id}" }`;
-
+      const messageObject = !id ? '{ "process": "" }' : `{ "process": "${id}" }`;
       socket.send(messageObject);
       console.log(`Process request ${messageObject} sent from frontend`);
     }
@@ -32,48 +29,43 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
     }
   };
 
-  useEffect(() => {
-    const responseListener = (event: MessageEvent) => {
-      const data = JSON.parse(event.data);
-      if (data.process) {
-        setProcesses(data.process);
-      } else if (data.instance) {
-        setInstances(data.instance);
-      }
-    };
-
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.addEventListener('message', responseListener);
-    }
-
-    return () => {
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.removeEventListener('message', responseListener);
-      }
-    };
-  }, [socket]);
-
   const navigate = (path: string) => {
     window.history.pushState({}, '', path);
     ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(path));
-    return getComponentForPath(path);
+
   };
 
   const getComponentForPath = (path: string) => {
     switch (path) {
       case '/processes':
         fetchProcesses(undefined);
-        return <Processes />;
+        return <Processes socket={socket}/*processes={processes}*/ />;
       case '/instances':
         fetchInstances(undefined);
-        return <Instances />;
+        return <Instances /*instances={instances}*/ />;
       case '/incidents':
         return <Incidents />;
       default:
         fetchProcesses(undefined);
-        return <Processes />;
+        return <Processes socket={socket}/*processes={processes}*/ />;
     }
   };
+
+  useEffect(() => {
+
+    // Add WebSocket message event listener here if needed
+    if (socket) {
+      socket.addEventListener('message', (event) => {
+        const message = event.data;
+        console.log(message);
+        if(message.type === 'process'){
+          setProcesses(message.data);
+          console.log(message.data);
+          console.log(processes);
+        }
+      });
+    }
+  }, []);
 
   return (
     <div>
@@ -92,3 +84,5 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
 };
 
 export default NavBar;
+
+
