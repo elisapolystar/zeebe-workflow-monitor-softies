@@ -1,0 +1,3 @@
+**/node_modules
+src/backend/consumer/consumer_test.go
+src/backend/consumer/DatabaseHandler_test.go
