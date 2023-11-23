@@ -10,8 +10,6 @@ interface NavBarProps {
 }
 
 const NavBar: React.FC<NavBarProps> = ({ socket }) => {
-  const [processes, setProcesses] = useState<any[]>([]);
-  const [instances, setInstances] = useState<any[]>([]);
 
   const fetchProcesses = (id: string | undefined) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
@@ -32,14 +30,14 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
   const navigate = (path: string) => {
     window.history.pushState({}, '', path);
     ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(path));
-
   };
 
   const getComponentForPath = (path: string) => {
     switch (path) {
       case '/processes':
         fetchProcesses(undefined);
-        return <Processes socket={socket}/*processes={processes}*/ />;
+        //return <Processes socket={socket}/*processes={processes}*/ />;
+        return;
       case '/instances':
         fetchInstances(undefined);
         return <Instances /*instances={instances}*/ />;
@@ -47,26 +45,25 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
         return <Incidents />;
       default:
         fetchProcesses(undefined);
-        return <Processes socket={socket}/*processes={processes}*/ />;
+        //return <Processes socket={socket}/*processes={processes}*/ />;
+        return;
     }
   };
 
   useEffect(() => {
-
-    // Add WebSocket message event listener here if needed
-    if (socket) {
+    if (socket && socket.readyState === WebSocket.OPEN) {
       socket.addEventListener('message', (event) => {
-        const message = event.data;
-        console.log(message);
+        console.log('Recieved a message from backend!');
+
+        const message = JSON.parse(event.data);
+
         if(message.type === 'process'){
-          setProcesses(message.data);
-          console.log(message.data);
-          console.log(processes);
+          console.log(`Process recieved: ${message.data}`)
+          return <Processes socket={socket} processes={message.data} />
         }
       });
     }
-  }, []);
-
+  }, [socket]);
   return (
     <div>
       <nav>

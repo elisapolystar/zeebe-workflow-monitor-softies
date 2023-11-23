@@ -91,9 +91,6 @@ const BPMNView: React.FC<BpmnProps> = () => {
       function addTimerPopup(bpmnElements) {
         bpmnElements.forEach(bpmnElement => {
             console.log(bpmnElement);
-            const htmlElement = bpmnElement.htmlElement;
-            const isEdge = !bpmnElement.bpmnSemantic.isShape;
-            const offset = isEdge ? [0, -40] : undefined; 
         });
     }
 
