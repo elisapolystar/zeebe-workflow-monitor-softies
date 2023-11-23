@@ -47,7 +47,8 @@ CREATE TABLE IF NOT EXISTS incident (
     ElementInstanceKey BIGINT NOT NULL,
     JobKey BIGINT NOT NULL;
     ErrorType VARCHAR(50) NOT NULL,
-    ErrorMessage TEXT NOT NULL
+    ErrorMessage TEXT NOT NULL,
+    Timestamp BIGINT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS message (
