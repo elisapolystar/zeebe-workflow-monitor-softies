@@ -4,7 +4,7 @@ on:
     branches: [main]
 
 jobs:
-  staticcheck:
+  go-staticcheck:
     name: "Golang static testing"
     runs-on: ubuntu-latest
     steps:
@@ -19,3 +19,17 @@ jobs:
           version: "2023.1.6"
           install-go: false
           working-directory: ./src/backend/consumer
+  ts-staticcheck:
+    name: "Typescript static testing"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+      - run: npm install
+        working-directory: src/frontend/
+      - run: npm run lint
+        working-directory: src/frontend/
