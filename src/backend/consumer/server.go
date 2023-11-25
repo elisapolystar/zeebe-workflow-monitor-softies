@@ -113,6 +113,7 @@ func reader(conn *websocket.Conn) {
 					log.Println("Error marshalling websocketmessage struct: ", err2)
 				}
 
+				fmt.Println("The JSON we are sending to front: ", processDataJson)
 				err3 := conn.WriteMessage(messageType, processDataJson)
 				if err3 != nil {
 					log.Println("Error sending single process message to frontend: ", err2)
@@ -330,6 +331,8 @@ func listenTmChannel() {
 			fmt.Println()
 			fmt.Println("Key of the incident item: ", incidentItem.Key)
 			fmt.Println("Process Id: ", incidentItem.Value.BpmnProcessId)
+			fmt.Println()
+			fmt.Println("Timestamp: ", incidentItem.Timestamp)
 			fmt.Println()
 			fmt.Println("Error type: ", incidentItem.Value.ErrorType)
 			fmt.Println("Error message: ", incidentItem.Value.ErrorMessage)

@@ -57,8 +57,9 @@ type JobValue struct {
 }
 
 type Incident struct {
-	Key   int64         `json:"key"`
-	Value IncidentValue `json:"value"`
+	Key       int64         `json:"key"`
+	Timestamp int64         `json:"timestamp"`
+	Value     IncidentValue `json:"value"`
 }
 
 type IncidentValue struct {
