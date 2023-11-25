@@ -113,6 +113,7 @@ func reader(conn *websocket.Conn) {
 					log.Println("Error marshalling websocketmessage struct: ", err2)
 				}
 
+				fmt.Println("The JSON we are sending to front: ", processDataJson)
 				err3 := conn.WriteMessage(messageType, processDataJson)
 				if err3 != nil {
 					log.Println("Error sending single process message to frontend: ", err2)
@@ -120,49 +121,15 @@ func reader(conn *websocket.Conn) {
 				}
 
 			} else {
-				fmt.Println("Wtf?")
+				fmt.Println("For some reason process message value is not empty and does not contain anything?")
 			}
 
+			// Not ready yet.
 		} else if variableValue, ok := messageData["variable:-P"]; ok {
 			fmt.Println("Variable: ", variableValue)
 		} else {
 			log.Println("hmm maybe some other json")
 		}
-
-		/*if frontMessage.Process == "" {
-
-			fmt.Println()
-			fmt.Println("FRONTEND IS WANTING ALL PROCESSES FRONTEND IS WANTING ALL PROCESSES FRONTEND IS WANTING ALL PROCESSES FRONTEND IS WANTING ALL PROCESSES ")
-			fmt.Println()
-			allProcesses := RetrieveProcesses()
-			if len(string(string(allProcesses))) == 0 {
-				fmt.Println("No processes to return from database")
-				continue
-			}
-			fmt.Println(string(allProcesses))
-
-			processesData := WebsocketMessage {
-				Type: "process",
-				Data: string(allProcesses),
-			}
-
-			processesDataJson, err := json.Marshal(processesData)
-			if err != nil {
-				fmt.Println("Error JSON Unmarshalling in the websocket comm section")
-				fmt.Println(err.Error())
-			}
-
-			err2 := conn.WriteMessage(messageType, processesDataJson)
-			if err2 != nil {
-				fmt.Println("Error sending message to frontend: ", err2)
-				return
-			}
-
-		} else {
-			//processItem = hae_prosessi(frontMessage.Process)
-			//conn.WriteMessage(processItem)
-			fmt.Println("Kurwa")
-		}*/
 	}
 }
 
@@ -331,6 +298,8 @@ func listenTmChannel() {
 			fmt.Println("Key of the incident item: ", incidentItem.Key)
 			fmt.Println("Process Id: ", incidentItem.Value.BpmnProcessId)
 			fmt.Println()
+			fmt.Println("Timestamp: ", incidentItem.Timestamp)
+			fmt.Println()
 			fmt.Println("Error type: ", incidentItem.Value.ErrorType)
 			fmt.Println("Error message: ", incidentItem.Value.ErrorMessage)
 			fmt.Println()
@@ -377,7 +346,6 @@ func listenTmChannel() {
 			fmt.Println("TIMER TIMER TIMER TIMER TIMER TIMER TIMER TIMER ")
 
 		}
-
 	}
 }
 
