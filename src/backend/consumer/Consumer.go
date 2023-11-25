@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/IBM/sarama"
 )
@@ -73,17 +74,26 @@ func Consume(messageChannel chan<- topicMessagePair) {
 
 	// Consume messages from the Kafka topics
 	for {
-		for topic, partitionConsumer := range partitionConsumers {
-			select {
-			case msg := <-partitionConsumer.Messages():
+		select {
+		case <-signals:
+			fmt.Println("Received termination signal. Closing consumer.")
+			return
+		default:
+			for topic, partitionConsumer := range partitionConsumers {
+				select {
+				case msg := <-partitionConsumer.Messages():
 
-				messageChannel <- topicMessagePair{topic, msg.Value}
+					messageChannel <- topicMessagePair{topic, msg.Value}
 
-			case err := <-partitionConsumer.Errors():
-				fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
-			default:
-				continue
+				case err := <-partitionConsumer.Errors():
+					fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
+				default:
+					continue
+				}
 			}
 		}
+
+		// Pause for 0.1 seconds to save cpu usage
+		time.Sleep(100 * time.Millisecond)
 	}
 }
