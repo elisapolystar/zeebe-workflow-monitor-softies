@@ -1,0 +1,34 @@
+/* Style the navigation bar container */
+nav {
+    background-color: white; /* Background color */
+    color: #333; /* Text color */
+    padding-left: 90px;
+    padding-bottom: 50px;
+    font-family: 'Arial', sans-serif;
+    font-size: 20px;
+  }
+  
+  /* Style the list inside the navigation bar */
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  /* Style the list items (links) */
+  li {
+    display: inline; 
+    margin-right: 10%; 
+  }
+  
+  /* Style the links */
+  a {
+    text-decoration: none; 
+    color: white; 
+  }
+  
+  /* Change link color on hover */
+  a:hover {
+    color: #66d9ff;
+  }
+  

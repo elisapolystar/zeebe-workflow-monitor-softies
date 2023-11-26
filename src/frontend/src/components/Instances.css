@@ -1,0 +1,17 @@
+/* Style the container for the horizontal layout */
+.instance-container {
+    display: inline; 
+    align-items: center; 
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Style each item within the container */
+  .instance-item {
+    background-color: white; 
+    color: #333;
+    padding: 10px; 
+    padding-left: 45px;
+    margin-bottom: 2%;
+    font-size: 18px;
+  }
+  
