@@ -4,24 +4,18 @@ import NavBar from './components/NavBar.tsx';
 const App: React.FC = () => {
 
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [messages, setMessages] = useState<string[]>([]);
-  let connection = false;
 
   useEffect(() => {
     const newSocket = new WebSocket("ws://localhost:8001/ws");
 
-    if(!connection){
     newSocket.onopen = () => {
       console.log("Successfully Connected");
-      
-      //newSocket.send('{ "process": "" }');
+      //newSocket.send('Hi from the client!');
       setSocket(newSocket);
-      connection = true;
     };
 
     newSocket.onclose = (event) => {
       console.log("Socket closed connection: ", event);
-      connection = false;
     };
 
     newSocket.onerror = (error) => {
@@ -29,14 +23,13 @@ const App: React.FC = () => {
     };
 
     newSocket.addEventListener('message', (event) => {
-      const message = event.data;
-      //setMessages(message);
+      //const message = event.data;
+      //console.log(message);
     });
 
     return () => {
       newSocket.close();
     };
-  };
   }, []);
 
 

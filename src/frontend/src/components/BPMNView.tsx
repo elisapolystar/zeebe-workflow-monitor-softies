@@ -4,7 +4,7 @@ import diagram from './money-loan.bpmn';
 import tippy from 'tippy.js';
 
 interface BpmnProps {
-    id: String | null;
+    process: String | null;
   }
 // const BPMNView: React.FC = () => {
 //     const containerRef = useRef<HTMLDivElement>(null);
@@ -91,9 +91,6 @@ const BPMNView: React.FC<BpmnProps> = () => {
       function addTimerPopup(bpmnElements) {
         bpmnElements.forEach(bpmnElement => {
             console.log(bpmnElement);
-            const htmlElement = bpmnElement.htmlElement;
-            const isEdge = !bpmnElement.bpmnSemantic.isShape;
-            const offset = isEdge ? [0, -40] : undefined; 
         });
     }
 

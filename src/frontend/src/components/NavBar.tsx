@@ -10,8 +10,7 @@ interface NavBarProps {
 }
 
 const NavBar: React.FC<NavBarProps> = ({ socket }) => {
-  const [processes, setProcesses] = useState<any[]>([]);
-  const [instances, setInstances] = useState<any[]>([]);
+  const [processesData, setProcesses] = useState<string | null>(null);
 
   const fetchProcesses = (id: string | undefined) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
@@ -32,40 +31,38 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
   const navigate = (path: string) => {
     window.history.pushState({}, '', path);
     ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(path));
-
   };
 
   const getComponentForPath = (path: string) => {
     switch (path) {
       case '/processes':
         fetchProcesses(undefined);
-        return <Processes socket={socket}/*processes={processes}*/ />;
+        return processesData ? <Processes socket={socket} processes={processesData} /> : <div>Loading...</div>;
       case '/instances':
         fetchInstances(undefined);
         return <Instances /*instances={instances}*/ />;
       case '/incidents':
         return <Incidents />;
       default:
-        fetchProcesses(undefined);
-        return <Processes socket={socket}/*processes={processes}*/ />;
+        if(!processesData) fetchProcesses(undefined);
+        return processesData ? <Processes socket={socket} processes={processesData} /> : <div>Loading...</div>;
     }
   };
 
   useEffect(() => {
-
-    // Add WebSocket message event listener here if needed
-    if (socket) {
+    if (socket && socket.readyState === WebSocket.OPEN) {
       socket.addEventListener('message', (event) => {
-        const message = event.data;
-        console.log(message);
+        console.log('Recieved a message from backend!');
+
+        const message = JSON.parse(event.data);
+        console.log(`Process ${message}`)
         if(message.type === 'process'){
+          console.log(`Process recieved: ${message.data}`)
           setProcesses(message.data);
-          console.log(message.data);
-          console.log(processes);
         }
       });
     }
-  }, []);
+  }, [socket]);
 
   return (
     <div>
