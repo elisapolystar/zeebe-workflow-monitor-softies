@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/websocket"
 )
@@ -25,15 +27,120 @@ func rootHandler(response http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(response, "Hello there!")
 }
 
-func wsEndpoint(w http.ResponseWriter, r *http.Request) {
+func reader(conn *websocket.Conn) {
 
+	for {
+		// Read messages sent by frontend
+		messageType, p, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Error reading message from websocket: ", err)
+			return
+		}
+
+		// Print the message received for debuging reasons
+		fmt.Println()
+		fmt.Println("The message from front: ", string(p))
+		fmt.Println()
+
+		// Turn the json from frontend into a map so we can check wich fields it contains
+		var messageData map[string]interface{}
+		if err := json.Unmarshal([]byte(p), &messageData); err != nil {
+			log.Println("Error unmarshalling frontend message JSON: ", err)
+			return
+		}
+
+		// If the json from fron contains field process we do stuff for process request
+		if processValue, ok := messageData["process"]; ok {
+			fmt.Println("Process: ", processValue)
+
+			// Parse the json into struct so we can access the value of the "process" -field
+			processMessage, err3 := parseCommunicationItem(p)
+			if err3 != nil {
+				log.Println("Error parsing the message from frontend(!): ", err3)
+			}
+			fmt.Println("The value of the process field in the json front sent: ", processMessage.Process)
+
+			// If the value of the "process"-field is empty then we want to return all the processes to the frontend
+			if processMessage.Process == "" {
+
+				fmt.Println()
+				fmt.Println("FRONTEND IS WANTING ALL PROCESSES ")
+				fmt.Println()
+
+				// Retrieve the processes from the database
+				allProcesses := RetrieveProcesses()
+				fmt.Println("(J)The processes retrieved: ", string(allProcesses))
+
+				// Transfrom the retrieved processes to the correct json format that can be sent to the front
+				processesData := WebsocketMessage{
+					Type: "all-processes",
+					Data: string(allProcesses),
+				}
+				processesDataJson, err := json.Marshal(processesData)
+				if err != nil {
+					fmt.Println("Error JSON marshalling in the websocket comm section")
+					fmt.Println(err.Error())
+				}
+
+				// Send all processes to the frontend in the correct format
+				err2 := conn.WriteMessage(messageType, processesDataJson)
+				if err2 != nil {
+					fmt.Println("Error sending message to frontend: ", err2)
+					return
+				}
+
+				// Then if the value of the "process"-field is not empty then we want to retrieve only one process from the database
+			} else if processMessage.Process != "" {
+
+				fmt.Println()
+				fmt.Println("FRONTEND IS WANTING ONLY ONE PROCESS ")
+				fmt.Println()
+
+				key, err := strconv.ParseInt(processMessage.Process, 10, 64)
+				if err != nil {
+					log.Println("Error turning string to int: ", err)
+				}
+
+				process := RetrieveProcessByID(key)
+				fmt.Println("(J) The retrieved process: ", string(process))
+
+				processData := WebsocketMessage{
+					Type: "process",
+					Data: string(process),
+				}
+				processDataJson, err2 := json.Marshal(processData)
+				if err2 != nil {
+					log.Println("Error marshalling websocketmessage struct: ", err2)
+				}
+
+				fmt.Println("The JSON we are sending to front: ", processDataJson)
+				err3 := conn.WriteMessage(messageType, processDataJson)
+				if err3 != nil {
+					log.Println("Error sending single process message to frontend: ", err2)
+					return
+				}
+
+			} else {
+				fmt.Println("For some reason process message value is not empty and does not contain anything?")
+			}
+
+			// Not ready yet.
+		} else if variableValue, ok := messageData["variable:-P"]; ok {
+			fmt.Println("Variable: ", variableValue)
+		} else {
+			log.Println("hmm maybe some other json")
+		}
+	}
+}
+
+func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 	}
-
 	log.Println("Client Succesfully Connected...")
-	fmt.Println(ws)
+
+	reader(ws)
 }
 
 // Listen for the messages from the consumer and parse the messages into structs
@@ -64,7 +171,7 @@ func listenTmChannel() {
 
 			SaveData(*process)
 			processes := RetrieveProcessByID(process.Key)
-			fmt.Println(string(processes))
+			fmt.Println("The process we just saved: ", string(processes))
 
 			// Talenna_tietokantaan(process)
 
@@ -191,6 +298,8 @@ func listenTmChannel() {
 			fmt.Println("Key of the incident item: ", incidentItem.Key)
 			fmt.Println("Process Id: ", incidentItem.Value.BpmnProcessId)
 			fmt.Println()
+			fmt.Println("Timestamp: ", incidentItem.Timestamp)
+			fmt.Println()
 			fmt.Println("Error type: ", incidentItem.Value.ErrorType)
 			fmt.Println("Error message: ", incidentItem.Value.ErrorMessage)
 			fmt.Println()
@@ -237,13 +346,12 @@ func listenTmChannel() {
 			fmt.Println("TIMER TIMER TIMER TIMER TIMER TIMER TIMER TIMER ")
 
 		}
-
 	}
 }
 
-func TestProcessByID() {
-	//Create a a random test process
-
+func setupRoutes() {
+	http.HandleFunc("/", rootHandler)
+	http.HandleFunc("/ws", wsEndpoint)
 }
 
 func main() {
@@ -252,10 +360,8 @@ func main() {
 	messageChannel = make(chan topicMessagePair)
 	go Consume(messageChannel)
 	go listenTmChannel()
-	http.HandleFunc("/", rootHandler)
-	http.HandleFunc("/ws", wsEndpoint)
-
+	fmt.Println("We are here")
+	setupRoutes()
 	//Start server and listen port 8000
 	http.ListenAndServe(":8001", nil)
-
 }
