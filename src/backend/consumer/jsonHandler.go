@@ -96,6 +96,20 @@ func parseTimerJson(msg []byte) (*Timer, error) {
 	return &timerItem, nil
 }
 
+func parseZeebeJson(msg []byte) (*Zeebe, error) {
+
+	var zeebeItem Zeebe
+	err := json.Unmarshal(msg, &zeebeItem)
+	if err != nil {
+		fmt.Println("Error Unmarshalling Zeebe item JSON")
+		fmt.Println(err.Error())
+	}
+
+	zeebeItem.Active = true
+
+	return &zeebeItem, nil
+}
+
 // Turn a process struct into JSON data
 func structToJson(data interface{}) (string, error) {
 
