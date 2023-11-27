@@ -15,7 +15,7 @@ const (
 	user = "postgres"
 	password = "password"
 	DBname = "workflow"
-	
+
 	ProcessesQuery = "SELECT Key, BpmnProcessId, Version, Timestamp FROM process;"
 	ProcessByIDQuery = "SELECT * FROM process WHERE key = %s"
 )
@@ -58,6 +58,9 @@ func SaveData(entity interface{}) {
 	//save an instance entity
 	case ProcessInstance:
 		fmt.Println("saving instance")
+		//TODO add statement
+	case Zeebe:
+		fmt.Println("Zeebe entity supported later")
 		//TODO add statement
 	default:
         fmt.Println("Unsupported entity")
@@ -114,19 +117,19 @@ func RetrieveProcessByID(key int64) []byte {
 		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Resource, &p.Timestamp)
 		if err != nil {
 			fmt.Println("Failed to scan row")
-		}		
+		}
 	}
 	json, err := json.Marshal(p)
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
-	return json	
-  
+	return json
+
 }
 
 func connectToDatabase() (*sql.DB, error){
 	//pass variables to the connection string
-	DBConnection := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", 
+	DBConnection := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 	host, port, user, password, DBname)
 
 	// Open a database connection, and check that it works

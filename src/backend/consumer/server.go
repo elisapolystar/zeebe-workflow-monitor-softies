@@ -161,6 +161,31 @@ func listenTmChannel() {
 		fmt.Println("------------------------------------------------------------")
 		fmt.Println()
 
+		if tmPair.Topic == "zeebe" {
+
+			zeebeItem, err := parseZeebeJson(tmPair.Message)
+			if err != nil {
+				fmt.Println("Error parsing the process instance json: ", err)
+			}
+
+			SaveData(*zeebeItem)
+
+			// Structi muutetaan fronttiin lähetettäväksi JSONiksi
+			jsonString, err2 := structToJson(&zeebeItem)
+			if err2 != nil {
+				fmt.Println("Error turning struct to json: ", err2)
+			}
+
+			fmt.Println()
+			fmt.Println("JSON STRING - JSON STRING - JSON STRING - JSON STRING - JSON STRING -")
+			fmt.Println()
+			fmt.Print(jsonString)
+			fmt.Println()
+			fmt.Println("JSON STRING - JSON STRING - JSON STRING - JSON STRING - JSON STRING -")
+			fmt.Println()
+
+		}
+
 		// Make a struct of a process JSON
 		if tmPair.Topic == "zeebe-process" {
 
@@ -364,4 +389,5 @@ func main() {
 	setupRoutes()
 	//Start server and listen port 8000
 	http.ListenAndServe(":8001", nil)
+
 }
