@@ -110,8 +110,8 @@ type WebsocketMessage struct {
 }
 
 type Zeebe struct {
-	Key					int64									`json:"key"`
-	PartitionId	int64									`json:"partitionId"`
-	Value				ProcessInstanceValue	`json:"value"`
-	Active			bool									`json:"active"`
+	Key         int64                `json:"key"`
+	PartitionId int64                `json:"partitionId"`
+	Value       ProcessInstanceValue `json:"value"`
+	Active      bool                 `json:"active"`
 }
