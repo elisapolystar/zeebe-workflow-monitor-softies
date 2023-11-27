@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import './Processes.css'; 
 import data from "./test.json";
@@ -10,9 +10,12 @@ https://mui.com/material-ui/react-accordion/*/
 
 interface ProcessProps {
   socket: WebSocket | null;
+  processes: String | null;
 }
 
 const Processes: React.FC<ProcessProps> = ({socket}) => {
+  const [bpmnData, setBpmnData] = useState<string | null>(null);
+
   const navigate = (path: string) => {
     const view = path.split('/');
     console.log(view);
@@ -32,12 +35,24 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
     switch (path) {
       case '/BPMNView':
         fetchBpmn(id);
-        return <BPMNView id={id}/>;
+        return bpmnData ? <BPMNView process={bpmnData} /> : <div>Loading...</div>;
 
       default:
         return <div>Not Found</div>;
     }
   };
+
+  useEffect(() => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.addEventListener('message', (event) => {
+        const message = JSON.parse(event.data);
+
+        if(message.type === 'all-processes' ){
+          setBpmnData(message.data);
+        }
+      });
+    }
+  }, [socket]);
 
   return (
     <div className="process-container">

@@ -10,6 +10,7 @@ interface NavBarProps {
 }
 
 const NavBar: React.FC<NavBarProps> = ({ socket }) => {
+  const [processesData, setProcesses] = useState<string | null>(null);
 
   const fetchProcesses = (id: string | undefined) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
@@ -36,17 +37,15 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
     switch (path) {
       case '/processes':
         fetchProcesses(undefined);
-        //return <Processes socket={socket}/*processes={processes}*/ />;
-        return;
+        return processesData ? <Processes socket={socket} processes={processesData} /> : <div>Loading...</div>;
       case '/instances':
         fetchInstances(undefined);
         return <Instances /*instances={instances}*/ />;
       case '/incidents':
         return <Incidents />;
       default:
-        fetchProcesses(undefined);
-        //return <Processes socket={socket}/*processes={processes}*/ />;
-        return;
+        if(!processesData) fetchProcesses(undefined);
+        return processesData ? <Processes socket={socket} processes={processesData} /> : <div>Loading...</div>;
     }
   };
 
@@ -56,14 +55,15 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
         console.log('Recieved a message from backend!');
 
         const message = JSON.parse(event.data);
-
+        console.log(`Process ${message}`)
         if(message.type === 'process'){
           console.log(`Process recieved: ${message.data}`)
-          return <Processes socket={socket} processes={message.data} />
+          setProcesses(message.data);
         }
       });
     }
   }, [socket]);
+
   return (
     <div>
       <nav>
