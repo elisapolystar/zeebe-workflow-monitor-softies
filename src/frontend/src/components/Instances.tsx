@@ -3,6 +3,7 @@ import './Instances.css';
 import ReactDOM from 'react-dom/client';
 import Instanceview from './Instanceview.tsx';
 import data from "./instance.json";
+import { format } from 'date-fns';
 
 
 const Instances: React.FC = () => {
@@ -20,33 +21,31 @@ const Instances: React.FC = () => {
   };
 
   const [instancedata, setInstanceData] = useState(data);
-  /*const [selectedkey, setSelectedkey] = useState<number | null>(null);*/
 
   useEffect(() => {
     setInstanceData(data);
   }, []);
 
-  /*const handleInstanceClick = (processDefinitionKey: number) => {
-    // Update the selected BPMN when an instance definition key is clicked
-    setSelectedkey(processDefinitionKey);
-  };*/
+  let formattedDate = '';
+  const date = new Date(instancedata[0].value.Timestamp);
+  formattedDate = format(date, 'dd-MM-yyyy HH:mm:ss');
 
   return (
     <div className="instance-container">
       <div className="instance-item">
-        <span>Instance Definition Key</span>
+        <span>Process Instance Key</span>
         {instancedata &&
           instancedata.map((instancedata, index) => (
-            <div className="definition-key" key={index} 
-            onClick={() => navigate('/Instanceview')}>{instancedata.value.processDefinitionKey}
+            <div className="definition-key" key={index}>
+              <span onClick={() => navigate('/Instanceview')}>{instancedata.value.processInstanceKey}</span>
             </div>
         ))}
-
       </div>
+
       <div className="instance-item">
         <span>BPMN Process Id</span>
         {instancedata &&
-          instancedata.map((instancedata, index) => (
+          instancedata.map((instancedata) => (
             <div className = "instance-info">
               <span>{instancedata.value.bpmnProcessId}</span>
             </div>
@@ -56,7 +55,7 @@ const Instances: React.FC = () => {
       <div className="instance-item">
         <span>State</span>
         {instancedata &&
-          instancedata.map((instancedata, index) => (
+          instancedata.map((instancedata) => (
             <div className="instance-info">
               <span>{instancedata.value.state}</span>
             </div>
@@ -65,12 +64,22 @@ const Instances: React.FC = () => {
       <div className="instance-item">
         <span>Time</span>
         {instancedata &&
-          instancedata.map((instancedata, index) => ( 
+          instancedata.map((instancedata) => ( 
             <div className="instance-info">
-              <span>{instancedata.value.time}</span>
+              <span>{formattedDate}</span>
             </div>
         ))}
       </div>
+
+      <div className="instance-item">
+        <span>Process Definition Key</span>
+        {instancedata &&
+          instancedata.map((instancedata) => (
+            <div className="definition-key">
+              <span>{instancedata.value.parentProcessInstanceKey}</span>
+            </div>
+        ))}
+    </div>
     </div>
   );
 };

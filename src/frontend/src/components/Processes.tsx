@@ -5,16 +5,31 @@ import data from "./test.json";
 import BPMNView from './BPMNView.tsx';
 
 
-const Processes: React.FC = () => {
+interface ProcessProps {
+  socket: WebSocket | null;
+}
+
+const Processes: React.FC<ProcessProps> = ({socket}) => {
   const navigate = (path: string) => {
-    window.history.pushState({}, '', path);
-    ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(path));
+    const view = path.split('/');
+    console.log(view);
+    window.history.pushState({}, '', view[1]);
+    ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(`/${view[1]}`, view[2]));
   };
 
-  const getComponentForPath = (path: string) => {
+  const fetchBpmn = (id: string | undefined) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const messageObject = `{ "process": "${id}" }`;
+      socket.send(messageObject);
+      console.log(`Process request ${messageObject} sent from frontend`);
+    }
+  };
+
+  const getComponentForPath = (path: string, id: string) => {
     switch (path) {
       case '/BPMNView':
-        return <BPMNView />;
+        fetchBpmn(id);
+        return <BPMNView id={id}/>;
     }
   };
 
@@ -24,7 +39,7 @@ const Processes: React.FC = () => {
         <span>Process Definition Key</span>
         {data.map((item, index) => (
           <div className="process-key" key={index}>
-            <span onClick={() => navigate('/BPMNView')}>{item.processDefinitionKey}</span>
+            <span onClick={() => navigate(`/BPMNView/${item.processDefinitionKey}`)}>{item.processDefinitionKey}</span>
           </div>
         ))}
       </div>
@@ -62,6 +77,7 @@ const Processes: React.FC = () => {
       </div>
 
     </div>
+    
   );
 };
 

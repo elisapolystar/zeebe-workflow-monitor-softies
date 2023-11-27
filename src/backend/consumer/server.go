@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -25,12 +26,92 @@ func rootHandler(response http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(response, "Hello there!")
 }
 
-func writer(conn *websocket.Conn) {
+func reader(conn *websocket.Conn) {
+
+	for {
+		messageType, p, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Error reading message from websocket: ", err)
+			return
+		}
+		log.Println(string(p))
+
+		//maybe use conn.ReadJSON()
+		frontMessage, err3 := parseCommunicationItem(p)
+		if err3 != nil {
+			log.Println("Error parsing the message from frontend(!): ", err3)
+		}
+
+		fmt.Println()
+		fmt.Println("Front message process value: ", frontMessage.Process)
+		fmt.Println()
+		fmt.Println("The message from front: ", string(p))
+		fmt.Println()
+
+		if frontMessage.Process == "" {
+
+			fmt.Println()
+			fmt.Println("FRONTEND IS WANTING ALL PROCESSES FRONTEND IS WANTING ALL PROCESSES FRONTEND IS WANTING ALL PROCESSES FRONTEND IS WANTING ALL PROCESSES ")
+			fmt.Println()
+			allProcesses := RetrieveProcesses()
+			if len(string(allProcesses)) == 0 {
+				fmt.Println("No processes to return from database")
+				continue
+			}
+			fmt.Println(string(allProcesses))
+
+			processesData := WebsocketMessage{
+				Type: "process",
+				Data: string(allProcesses),
+			}
+
+			processesDataJson, err := json.Marshal(processesData)
+			if err != nil {
+				fmt.Println("Error JSON Unmarshalling in the websocket comm section")
+				fmt.Println(err.Error())
+			}
+
+			err2 := conn.WriteMessage(messageType, processesDataJson)
+			if err2 != nil {
+				fmt.Println("Error sending message to frontend: ", err2)
+				return
+			}
+
+		} else {
+			//processItem = hae_prosessi(frontMessage.Process)
+			//conn.WriteMessage(processItem)
+			fmt.Println("Kurwa")
+		}
+
+		/*fmt.Println()
+		fmt.Println("Echo trying:D")
+		fmt.Println()
+		err2 := conn.WriteMessage(messageType, p)
+		if err2 != nil {
+			log.Println("Error sending message to frontend: ", err2)
+			return
+		}*/
+	}
+}
+
+func wsEndpoint(w http.ResponseWriter, r *http.Request) {
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println("Client Succesfully Connected...")
+
+	reader(ws)
+}
+
+// Listen for the messages from the consumer and parse the messages into structs
+func listenTmChannel() {
+
 	for {
 
 		tmPair, ok := <-messageChannel
 		if !ok {
-			fmt.Println("Channel is closed.")
+			fmt.Println("Channel is closed")
 			break
 		}
 
@@ -41,11 +122,6 @@ func writer(conn *websocket.Conn) {
 		fmt.Println("------------------------------------------------------------")
 		fmt.Println()
 
-		err := conn.WriteMessage(websocket.TextMessage, tmPair.Message)
-		if err != nil {
-			return
-		}
-
 		// Make a struct of a process JSON
 		if tmPair.Topic == "zeebe-process" {
 
@@ -53,6 +129,12 @@ func writer(conn *websocket.Conn) {
 			if err != nil {
 				fmt.Println("Error parsing the json: ", err)
 			}
+
+			SaveData(*process)
+			processes := RetrieveProcesses()
+			fmt.Println(string(processes))
+
+			// Talenna_tietokantaan(process)
 
 			fmt.Println()
 			fmt.Println("++++++++++++++++++++++++++++++++++++++++++++++++++")
@@ -64,6 +146,7 @@ func writer(conn *websocket.Conn) {
 			fmt.Println("++++++++++++++++++++++++++++++++++++++++++++++++++")
 			fmt.Println()
 
+			// Structi muutetaan fronttiin lähetettäväksi JSONiksi
 			jsonString, err2 := structToJson(&process)
 			if err2 != nil {
 				fmt.Println("Error turning struct to json: ", err2)
@@ -101,6 +184,7 @@ func writer(conn *websocket.Conn) {
 			fmt.Println("//////////////////////////////////////////////////")
 			fmt.Println()
 
+			// Structi muutetaan fronttiin lähetettäväksi JSONiksi
 			jsonString, err2 := structToJson(&processInstanceItem)
 			if err2 != nil {
 				fmt.Println("Error turning struct to json: ", err2)
@@ -202,29 +286,42 @@ func writer(conn *websocket.Conn) {
 			fmt.Println("MESSAGE - MESSAGE - MESSAGE - MESSAGE - MESSAGE - MESSAGE")
 			fmt.Println()
 		}
+
+		// Make a struct of a timer JSON
+		if tmPair.Topic == "zeebe-timer" {
+
+			timerItem, err := parseTimerJson(tmPair.Message)
+			if err != nil {
+				fmt.Println("Error parsing the timer JSON: ", err)
+			}
+
+			fmt.Println("TIMER TIMER TIMER TIMER TIMER TIMER TIMER TIMER ")
+			fmt.Println("Timer key: ", timerItem.Key)
+			fmt.Println("Duedate: ", timerItem.Value.Duedate)
+			fmt.Println("Repetitions: ", timerItem.Value.Repetitions)
+			fmt.Println("Element instance key: ", timerItem.Value.ElementInstanceKey)
+			fmt.Println("Process definition key: ", timerItem.Value.ProcessDefinitionKey)
+
+			fmt.Println("TIMER TIMER TIMER TIMER TIMER TIMER TIMER TIMER ")
+
+		}
+
 	}
 }
 
-func wsEndpoint(w http.ResponseWriter, r *http.Request) {
-
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-	}
-
-	log.Println("Client Succesfully Connected...")
-	writer(ws)
+func setupRoutes() {
+	http.HandleFunc("/", rootHandler)
+	http.HandleFunc("/ws", wsEndpoint)
 }
 
 func main() {
 
 	fmt.Println("Backend started!")
-
 	messageChannel = make(chan topicMessagePair)
 	go Consume(messageChannel)
-	http.HandleFunc("/", rootHandler)
-	http.HandleFunc("/ws", wsEndpoint)
-
+	go listenTmChannel()
+	fmt.Println("We are here")
+	setupRoutes()
 	//Start server and listen port 8000
 	http.ListenAndServe(":8001", nil)
 }

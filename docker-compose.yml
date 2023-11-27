@@ -9,6 +9,8 @@ services:
     depends_on:
       kafka-setup:
         condition: service_completed_successfully
+    ports:
+      - 8001:8001
     networks:
       - testenv
 
@@ -20,7 +22,7 @@ services:
     depends_on:
       - backend
     ports:
-      - 3000:80
+      - 3000:3000
     networks:
       - testenv
 
@@ -111,9 +113,17 @@ services:
       - '5432:5432'
     volumes:
       - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - postgres:/var/lib/postgres/data
     networks:
       - testenv
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - '5050:80'
 
 volumes:
   exporters:

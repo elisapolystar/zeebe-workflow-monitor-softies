@@ -1,15 +1,15 @@
 [
     {
-        "processInstanceKey": 2305862234,
+        "processInstanceKey": 2251799813685251,
         "partitionId": 1,
         "value": {
-            "state": "true",
-            "processDefinitionKey": 2305862234,
-            "bpmnProcessId": "instance1",
+            "state": "Completed",
+            "processInstanceKey": 2251799813685251,
+            "bpmnProcessId": "test-instance",
             "version": 1,
-            "parentProcessInstanceKey": 34085720374,
+            "parentProcessInstanceKey": 225179981368,
             "parentElementInstanceKey": 1,
-            "time": "25.10.2023 14.55.32"
+            "Timestamp":1700324424886
         }
     }
 ,
@@ -17,13 +17,13 @@
         "processInstanceKey": 34085720374,
         "partitionId": 1,
         "value": {
-            "state": "true",
-            "processDefinitionKey": 34085720374,
-            "bpmnProcessId": "instance2",
+            "state": "Terminated",
+            "processInstanceKey": 34085720374,
+            "bpmnProcessId": "Money-loan",
             "version": 1,
             "parentProcessInstanceKey": 34085720374,
             "parentElementInstanceKey": 1,
-            "time": "25.10.2023 14.55.32"
+            "Timestamp":1700324424886
         }
     }
 ,
@@ -31,13 +31,13 @@
         "processInstanceKey": 34085720374,
         "partitionId": 1,
         "value": {
-            "state": "true",
-            "processDefinitionKey": 34085720374,
-            "bpmnProcessId": "instance2",
+            "state": "Terminated",
+            "processInstanceKey": 34085720374,
+            "bpmnProcessId": "order-main",
             "version": 1,
             "parentProcessInstanceKey": 34085720374,
             "parentElementInstanceKey": 1,
-            "time": "25.10.2023 14.55.32"
+            "Timestamp":1700324424886
         }
     }
    

@@ -4,8 +4,8 @@ ADD . /home
 
 WORKDIR /home
 
-RUN go get .
+RUN go build -o consumer .
 
 EXPOSE 8000
 
-CMD ["go","run","."]
+CMD ["/home/consumer"]

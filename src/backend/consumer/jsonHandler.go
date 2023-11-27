@@ -83,6 +83,19 @@ func parseMessageJson(msg []byte) (*Message, error) {
 	return &messageItem, nil
 }
 
+// Turn JSON data into struct of type Timer
+func parseTimerJson(msg []byte) (*Timer, error) {
+
+	var timerItem Timer
+	err := json.Unmarshal(msg, &timerItem)
+	if err != nil {
+		fmt.Println("Error Unmarshalling timer JSON")
+		fmt.Println(err.Error())
+	}
+
+	return &timerItem, nil
+}
+
 // Turn a process struct into JSON data
 func structToJson(data interface{}) (string, error) {
 
@@ -94,4 +107,17 @@ func structToJson(data interface{}) (string, error) {
 
 	jsonString := string(jsonData)
 	return jsonString, err
+}
+
+// Turn a message from the frontend into a struct
+func parseCommunicationItem(msg []byte) (*FrontCommunication, error) {
+
+	var communicationItem FrontCommunication
+	err := json.Unmarshal(msg, &communicationItem)
+	if err != nil {
+		fmt.Println("Le` error in the front json parsings :-(")
+		fmt.Println(err.Error())
+	}
+
+	return &communicationItem, nil
 }
