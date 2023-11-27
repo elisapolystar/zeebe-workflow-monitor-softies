@@ -57,8 +57,9 @@ type JobValue struct {
 }
 
 type Incident struct {
-	Key   int64         `json:"key"`
-	Value IncidentValue `json:"value"`
+	Key       int64         `json:"key"`
+	Timestamp int64         `json:"timestamp"`
+	Value     IncidentValue `json:"value"`
 }
 
 type IncidentValue struct {
@@ -96,4 +97,14 @@ type TimerValue struct {
 	TargetElementId      string `json:"targetElementId"`
 	Duedate              int64  `json:"dueDate"`
 	Repetitions          int64  `json:"repetitions"`
+}
+
+// Message from frontend
+type FrontCommunication struct {
+	Process string `json:"process"`
+}
+
+type WebsocketMessage struct {
+	Type string `json:"type"`
+	Data string `json:"data"`
 }
