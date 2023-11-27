@@ -73,7 +73,7 @@ func reader(conn *websocket.Conn) {
 
 				// Transfrom the retrieved processes to the correct json format that can be sent to the front
 				processesData := WebsocketMessage{
-					Type: "process",
+					Type: "all-processes",
 					Data: string(allProcesses),
 				}
 				processesDataJson, err := json.Marshal(processesData)
