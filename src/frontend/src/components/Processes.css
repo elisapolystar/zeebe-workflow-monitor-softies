@@ -15,6 +15,7 @@
     padding-left: 35px;
     margin-right: 5%; /* Add space between items */
     font-size: 16px;
+    white-space: nowrap;
   }
 
 /*process-info goes under each process-item*/

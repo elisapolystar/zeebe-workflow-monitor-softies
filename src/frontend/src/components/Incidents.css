@@ -14,3 +14,18 @@
     margin-right: 5%; 
     font-size: 16px;
   }
+
+  .instance-key {
+    background-color: white; /* Background color for each item */
+    color: #0000FF; /* Text color */
+    padding: 10px; /* Add padding to each item */
+    font-size: 16px;
+  }
+
+  .incident-info {
+    background-color: white; /* Background color for each item */
+    color: #333; /* Text color */
+    padding: 10px; /* Add padding to each item */
+    font-size: 16px;
+  }
+  

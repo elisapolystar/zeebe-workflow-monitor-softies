@@ -1,7 +1,7 @@
 [
     {
-        "processDefinitionKey": "Money-loan",
-        "bpmnProcessId": 3423582,
+        "processDefinitionKey": 23059852,
+        "bpmnProcessId": "money-loan",
         "instances": 1,
         "version": "1/1",
         "time": "4.11.2023 11.32.16", 
@@ -9,16 +9,16 @@
     }
 ,
     {
-        "processDefinitionKey": "process2",
-        "bpmnProcessId": 7523693,
+        "processDefinitionKey": 2945872,
+        "bpmnProcessId": "money-loan-process",
         "instances": 4,
         "version": 3,
         "time": 13.17 
     }
 ,
     {
-        "processDefinitionKey": "process3",
-        "bpmnProcessId": 4084374,
+        "processDefinitionKey": 958340573,
+        "bpmnProcessId": "process 3",
         "instances": 1,
         "version": 1,
         "time": 13.17 

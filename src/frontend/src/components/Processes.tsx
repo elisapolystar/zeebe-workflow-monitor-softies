@@ -5,9 +5,6 @@ import data from "./test.json";
 import BPMNView from './BPMNView.tsx';
 import Instances from './Instances.tsx';
 
-/*   
-https://blog.logrocket.com/creating-react-sortable-table/     
-https://mui.com/material-ui/react-accordion/*/
 
 interface ProcessProps {
   socket: WebSocket | null;
