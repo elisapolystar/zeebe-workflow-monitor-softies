@@ -11,6 +11,7 @@ interface NavBarProps {
 
 const NavBar: React.FC<NavBarProps> = ({ socket }) => {
   const [processesData, setProcesses] = useState<string | null>(null);
+  const [instancesData, setInstances] = useState<string | null>(null);
 
   const fetchProcesses = (id: string | undefined) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
@@ -20,9 +21,9 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
     }
   };
 
-  const fetchInstances = (id: string | undefined) => {
+  const fetchInstances = () => {
     if (socket && socket.readyState === WebSocket.OPEN) {
-      const messageObject = `{ "instance": "${id}" }`;
+      const messageObject = '{ "instance": "" }';
       socket.send(messageObject);
       console.log(`Instance request ${messageObject} sent from frontend`);
     }
@@ -39,8 +40,8 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
         fetchProcesses(undefined);
         return processesData ? <Processes socket={socket} processes={processesData} /> : <div>Loading...</div>;
       case '/instances':
-        fetchInstances(undefined);
-        return <Instances /*instances={instances}*/ />;
+        fetchInstances();
+        return instancesData ? <Instances socket={socket} instances={instancesData} /> : <div>Loading...</div>;
       case '/incidents':
         return <Incidents />;
       default:
@@ -52,13 +53,19 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
   useEffect(() => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.addEventListener('message', (event) => {
-        console.log('Recieved a message from backend!');
 
         const message = JSON.parse(event.data);
-        console.log(`Process ${message}`)
-        if(message.type === 'process'){
-          console.log(`Process recieved: ${message.data}`)
-          setProcesses(message.data);
+        const type = message.type;
+        switch(type) {
+          case 'process':
+            console.log(`Processes recieved: ${message.data}`)
+            setProcesses(message.data);
+            return;
+          
+          case 'all-instances':
+            console.log(`Instances recieved: ${message.data}`)
+            setInstances(message.data);
+            return;
         }
       });
     }

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './Processes.css'; 
 import data from "./test.json";
 import BPMNView from './BPMNView.tsx';
+import Instances from './Instances.tsx';
 
 /*   
 https://blog.logrocket.com/creating-react-sortable-table/     
@@ -15,6 +16,7 @@ interface ProcessProps {
 
 const Processes: React.FC<ProcessProps> = ({socket}) => {
   const [bpmnData, setBpmnData] = useState<string | null>(null);
+  const [instancesData, setInstances] = useState<string | null>(null);
 
   const navigate = (path: string) => {
     const view = path.split('/');
@@ -31,11 +33,23 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
     }
   };
 
+  const fetchInstancesForProcess = (id: string | undefined) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const messageObject = `{ "instance": "${id}" }`;
+      socket.send(messageObject);
+      console.log(`Instance request for process ${messageObject} sent from frontend`);
+    }
+  };
+
   const getComponentForPath = (path: string, id: string) => {
     switch (path) {
       case '/BPMNView':
         fetchBpmn(id);
         return bpmnData ? <BPMNView process={bpmnData} /> : <div>Loading...</div>;
+
+      case '/instances':
+        fetchInstancesForProcess(id);
+        return instancesData ? <Instances socket={socket} instances={instancesData} /> : <div>Loading...</div>;
 
       default:
         return <div>Not Found</div>;
@@ -46,9 +60,18 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.addEventListener('message', (event) => {
         const message = JSON.parse(event.data);
+        const type = message.type;
 
-        if(message.type === 'all-processes' ){
-          setBpmnData(message.data);
+        switch(type) {
+          case 'all-processes':
+            console.log(`Process recieved: ${message.data}`)
+            setBpmnData(message.data);
+            return;
+          
+          case 'all-instances':
+            console.log(`Instances for a process recieved: ${message.data}`)
+            setInstances(message.data);
+            return;
         }
       });
     }
@@ -76,7 +99,7 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
         <span>Instances</span>
         {data.map((item, index) => (
           <div className="process-info" key={index}>
-            <span>{item.instances}</span>
+            <span onClick={() => navigate(`/Instances/${item.processDefinitionKey}`)}>{item.instances}</span>
           </div>
         ))}
       </div>
