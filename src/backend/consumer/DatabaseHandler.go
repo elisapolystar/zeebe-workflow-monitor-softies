@@ -3,6 +3,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"database/sql"
 	"encoding/json"
 	_ "github.com/lib/pq"
@@ -14,8 +15,9 @@ const (
 	user = "postgres"
 	password = "password"
 	DBname = "workflow"
-	
+
 	ProcessesQuery = "SELECT Key, BpmnProcessId, Version, Timestamp FROM process;"
+	ProcessByIDQuery = "SELECT * FROM process WHERE key = %s"
 )
 
 type SimpleProcess struct {
@@ -25,6 +27,13 @@ type SimpleProcess struct {
 	Timestamp 		int64	`json:"timestamp"`
 }
 
+type FullProcess struct {
+	Key				int64	`json:"key"`
+	BpmnProcessId 	string 	`json:"bpmnProcessId"`
+	Version       	int64  	`json:"version"`
+	Resource 		string 	`json:"resource"`
+	Timestamp 		int64	`json:"timestamp"`
+}
 func SaveData(entity interface{}) {
 	//connect to database
 	db, err := connectToDatabase()
@@ -49,6 +58,9 @@ func SaveData(entity interface{}) {
 	//save an instance entity
 	case ProcessInstance:
 		fmt.Println("saving instance")
+		//TODO add statement
+	case Zeebe:
+		fmt.Println("Zeebe entity supported later")
 		//TODO add statement
 	default:
         fmt.Println("Unsupported entity")
@@ -84,9 +96,40 @@ func RetrieveProcesses() []byte {
 	return jsonData
 }
 
+func RetrieveProcessByID(key int64) []byte {
+	fmt.Println("Retrieving the Process...")
+	// Connect to the DB
+	db, err := connectToDatabase()
+    if err != nil {
+        fmt.Println("Error opening database connection:", err)
+    }
+	// Perform the query
+	var strkey string
+	strkey = strconv.FormatInt(key, 10)
+	db_query := fmt.Sprintf(ProcessByIDQuery, strkey)
+	rows, err := db.Query(db_query)
+	defer rows.Close()
+	fmt.Println("Process retrieved successfully!")
+	fmt.Println("Converting data to JSON...")
+	// Convert data to a JSON format
+	var p FullProcess
+	for rows.Next(){
+		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Resource, &p.Timestamp)
+		if err != nil {
+			fmt.Println("Failed to scan row")
+		}
+	}
+	json, err := json.Marshal(p)
+	if err != nil {
+		fmt.Println("Failed to convert data to JSON")
+	}
+	return json
+
+}
+
 func connectToDatabase() (*sql.DB, error){
 	//pass variables to the connection string
-	DBConnection := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", 
+	DBConnection := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 	host, port, user, password, DBname)
 
 	// Open a database connection, and check that it works
