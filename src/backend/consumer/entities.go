@@ -110,10 +110,17 @@ type WebsocketMessage struct {
 }
 
 type Zeebe struct {
-	Key         int64                `json:"key"`
-	PartitionId int64                `json:"partitionId"`
-	Value       ProcessInstanceValue `json:"value"`
-	Active      bool                 `json:"active"`
+	PartitionId int64      `json:"partitionId"`
+	Value       ZeebeValue `json:"value"`
+	Timestamp   int64      `json:"timestamp"`
+	Active      bool       `json:"active"`
+}
+
+type ZeebeValue struct {
+	ProcessInstanceKey   int64  `json:"processInstanceKey"`
+	ProcessDefinitionKey int64  `json:"processDefinitionKey"`
+	BpmnProcessId        string `json:"bpmnProcessId"`
+	Version              int64  `json:"version"`
 }
 
 type Element struct {
