@@ -1,10 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"encoding/json"
-)
-
 func CreateProcess() Process {
 	//parameters for a process
 	var key int64 = 2251799813685249
