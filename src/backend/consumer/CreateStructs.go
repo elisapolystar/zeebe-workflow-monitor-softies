@@ -26,32 +26,32 @@ func CreateProcess() Process {
 }
 func CreateProcessInstance() Zeebe {
 	//parameters for an instance
-	var key int64 = 2251799813685250
-	var processDefinitionKey int64 = 2345678912345678
-	var partitionId int64 = 2
-	bpmnProcessId := "money-loan"
-	var version int64 = 1
-	var parentProcessInstanceKey int64 = 2251799813685249
-	var parentElementInstanceKey int64 = 1699893451665
-	active := true
+	const processDefinitionKey int64 = 2345678912345678
+	const processInstanceKey int64 = 2593275030505839
+	const partitionId int64 = 2
+	const bpmnProcessId string = "money-loan"
+	const version int64 = 1
+	const timestamp = 1700323209172
+	const active bool = true
 
 	//create a ProcessInstanceValue struct
-	instanceValue := ProcessInstanceValue{
-		ProcessDefinitionKey:     processDefinitionKey,
-		BpmnProcessId:            bpmnProcessId,
-		Version:                  version,
-		ParentProcessInstanceKey: parentProcessInstanceKey,
-		ParentElementInstanceKey: parentElementInstanceKey,
+	instanceValue := ZeebeValue{
+		ProcessDefinitionKey: processDefinitionKey,
+		ProcessInstanceKey:   processInstanceKey,
+		BpmnProcessId:        bpmnProcessId,
+		Version:              version,
+
 	}
 
 	//create a ProcessInstance struct
 	instance := Zeebe{
-		Key:         key,
 		PartitionId: partitionId,
 		Value:       instanceValue,
+		Timestamp: timestamp,
 		Active:      active,
 	}
 	return instance
+
 }
 func CreateVariable() Variable {
 	//variable parameters
