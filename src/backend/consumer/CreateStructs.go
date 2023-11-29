@@ -99,7 +99,7 @@ func CreateJob() Job {
 		Worker:				worker,
 		Retries:			retries,
 	}
-	
+
 	job := Job{
 		Key:	   key,
 		Timestamp: timestamp,
@@ -181,6 +181,7 @@ func CreateTimer() Timer {
 }
 
 //Convert struct to JSON
+//lint:ignore U1000 will be used later
 func doMarshal (entity interface{}) []byte {
 	//parse struct to json
 	entityJSON, err := json.MarshalIndent(entity, "", "  ")
@@ -190,6 +191,7 @@ func doMarshal (entity interface{}) []byte {
 	return entityJSON
 }
 
+//lint:ignore U1000 will be used later
 func testStructs () {
 	//create structs
 	process := CreateProcess()
