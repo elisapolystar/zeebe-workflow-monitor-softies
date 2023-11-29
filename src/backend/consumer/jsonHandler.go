@@ -110,6 +110,18 @@ func parseZeebeJson(msg []byte) (*Zeebe, error) {
 	return &zeebeItem, nil
 }
 
+func parseElementJson(msg []byte) (*Element, error) {
+
+	var elementItem Element
+	err := json.Unmarshal(msg, &elementItem)
+	if err != nil {
+		fmt.Println("Error Unmarshalling Element item JSON")
+		fmt.Println(err.Error())
+	}
+
+	return &elementItem, nil
+}
+
 // Turn a process struct into JSON data
 func structToJson(data interface{}) (string, error) {
 
