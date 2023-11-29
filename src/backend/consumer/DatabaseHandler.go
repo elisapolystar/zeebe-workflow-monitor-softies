@@ -62,6 +62,9 @@ func SaveData(entity interface{}) {
 	case Zeebe:
 		fmt.Println("Zeebe entity supported later")
 		//TODO add statement
+	case Element:
+		fmt.Println("Element entity supported later")
+		//TODO add statement
 	default:
         fmt.Println("Unsupported entity")
 	}
