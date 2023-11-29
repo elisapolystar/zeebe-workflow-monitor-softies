@@ -1,10 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"encoding/json"
-)
-
 func CreateProcess() Process {
 	//parameters for a process
 	var key int64 = 2251799813685249
@@ -99,7 +94,7 @@ func CreateJob() Job {
 		Worker:				worker,
 		Retries:			retries,
 	}
-	
+
 	job := Job{
 		Key:	   key,
 		Timestamp: timestamp,
@@ -178,41 +173,4 @@ func CreateTimer() Timer {
 		Value:timerValue,
 	}
 	return timer
-}
-
-//Convert struct to JSON
-func doMarshal (entity interface{}) []byte {
-	//parse struct to json
-	entityJSON, err := json.MarshalIndent(entity, "", "  ")
-	if err != nil {
-		fmt.Println("generated json could not be parsed.")
-	}
-	return entityJSON
-}
-
-func testStructs () {
-	//create structs
-	process := CreateProcess()
-	processInstance := CreateProcessInstance()
-	variable := CreateVariable()
-	job := CreateJob()
-	incident := CreateIncident()
-	message := CreateMessage()
-	timer := CreateTimer()
-	//convert to JSON
-	processString := doMarshal(process)
-	instanceString := doMarshal(processInstance)
-	variableString := doMarshal(variable)
-	jobString := doMarshal(job)
-	incidentString := doMarshal(incident)
-	messageString := doMarshal(message)
-	timerString := doMarshal(timer)
-	//print
-	fmt.Println(string(processString))
-	fmt.Println(string(instanceString))
-	fmt.Println(string(variableString))
-	fmt.Println(string(jobString))
-	fmt.Println(string(incidentString))
-	fmt.Println(string(messageString))
-	fmt.Println(string(timerString))
 }
