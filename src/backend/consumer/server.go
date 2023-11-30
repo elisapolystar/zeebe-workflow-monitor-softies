@@ -124,9 +124,20 @@ func reader(conn *websocket.Conn) {
 				fmt.Println("For some reason process message value is not empty and does not contain anything?")
 			}
 
-			// Not ready yet.
-		} else if variableValue, ok := messageData["variable:-P"]; ok {
-			fmt.Println("Variable: ", variableValue)
+			// If frontend asks for instances
+		} else if instanceValue, ok := messageData["instance"]; ok {
+			fmt.Println("Instance?: ", instanceValue)
+
+			//Parse the message into a struct
+			//instanceMessage = parseInstanceMessage
+
+			/*if instanceMessage.Instance ==""{
+				get and send all instances
+			} else if instanceMessage.Instance != "" {
+				get specific instace with:
+				getInstance(instanceMessage.Instance)
+			}
+			*/
 		} else {
 			log.Println("hmm maybe some other json")
 		}
