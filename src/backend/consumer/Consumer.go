@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/IBM/sarama"
 )
 
-func Consume(messageChannel chan<- string) {
+func Consume(messageChannel chan<- topicMessagePair) {
 
 	// Define the Kafka broker address and topic we want to subscribe to
 	brokers := []string{"kafka:9093"}
@@ -73,16 +74,26 @@ func Consume(messageChannel chan<- string) {
 
 	// Consume messages from the Kafka topics
 	for {
-		for topic, partitionConsumer := range partitionConsumers {
-			select {
-			case msg := <-partitionConsumer.Messages():
-				fmt.Printf("Received message from topic %s: %s\n", topic, string(msg.Value))
-				messageChannel <- string(msg.Value)
-			case err := <-partitionConsumer.Errors():
-				fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
-			default:
-				continue
+		select {
+		case <-signals:
+			fmt.Println("Received termination signal. Closing consumer.")
+			return
+		default:
+			for topic, partitionConsumer := range partitionConsumers {
+				select {
+				case msg := <-partitionConsumer.Messages():
+
+					messageChannel <- topicMessagePair{topic, msg.Value}
+
+				case err := <-partitionConsumer.Errors():
+					fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
+				default:
+					continue
+				}
 			}
 		}
+
+		// Pause for 0.1 seconds to save cpu usage
+		time.Sleep(100 * time.Millisecond)
 	}
 }
