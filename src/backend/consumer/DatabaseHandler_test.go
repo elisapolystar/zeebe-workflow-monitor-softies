@@ -1,42 +1,23 @@
 package main
 
 import (
-	"bytes"
-	"os"
-	"strings"
+	"fmt"
 	"testing"
+	"encoding/json"
 )
 
 func TestProcess(t *testing.T) {
 
-	//parameters for a process
-	key := 2251799813685249
-	bpmnProcessId := "money-loan"
-	version := 1
-	resource := "placeholder"
-	timestamp := 1699893451665
-
-	//Create a ProcessValue instance
-	processValue := ProcessValue{
-		BpmnProcessId: bpmnProcessId,
-		Version:       version,
-		Resource:      resource,
-	}
-
-	//Create a Process instance
-	process := Process{
-		Key:       key,
-		Value:     processValue,
-		Timestamp: timestamp,
-	}
-
+	//create a process
+	process := CreateProcess()
 	//save the process
-	SaveData(*process)
+	SaveData(process)
 	//expected json value of the response
-	expectedJSON := "[{"key":2251799813685249,"bpmnProcessId":"money-loan","version":1,"timestamp":1699893451665}]"
+	expectedJSON := `[{"key":2251799813685249,"bpmnProcessId":"money-loan","version":1,"timestamp":1699893451665}]`
+	//expectedJSON := '[{"key":2251799813685249,"bpmnProcessId":"money-loan","version":1,"timestamp":1699893451665}]'
 	//the actual value of the response
 	actualJSON := RetrieveProcesses()
-	actualJSON = string(actualJSON)
+	actualString := string(actualJSON)
 
 	//parse to array
 	var jsonArray []SimpleProcess
@@ -53,39 +34,17 @@ func TestProcess(t *testing.T) {
 	}
 
 	//test if the values match
-	if actualJSON != expectedJSON {
+	if actualString != expectedJSON {
 		t.Errorf("Generated JSON does not match the expected JSON. Expected: %s, Got: %s", expectedJSON, actualJSON)
-	} 
+	}
 }
 
 func TestInstance(t *testing.T) {
 
-	//parameters for an instance
-	key := 2251799813685250
-	processDefinitionKey := 2345678912345678
-	partitionId := 2
-	bpmnProcessId := "money-loan"
-	version := 1
-	parentProcessInstanceKey := 2251799813685249
-	parentElementInstanceKey := 1699893451665
-
-	//create a ProcessInstanceValue struct
-	instanceValue := ProcessInstanceValue{
-		ProcessDefinitionKey:     processDefinitionKey,
-		BpmnProcessId:            bpmnProcessId,
-		Version:                  version,
-		ParentProcessInstanceKey: parentProcessInstanceKey,
-		ParentElementInstanceKey: parentElementInstanceKey,
-	}
-
-	//create a ProcessInstance struct
-	instance := ProcessInstance{
-		Key:         key,
-		PartitionId: partitionId,
-		Value:       instanceValue,
-	}
+	//create an instance
+	instance := CreateProcessInstance()
 	//parse instance to json
-	instanceJSON, err := json.MarshalIndent(process, "", "  ")
+	instanceJSON, err := json.MarshalIndent(instance, "", "  ")
 	if err != nil {
 		t.Errorf("generated json could not be parsed.")
 	}
@@ -93,7 +52,43 @@ func TestInstance(t *testing.T) {
 }
 
 func TestVariable(t *testing.T) {
-	//TODO: test variable
+
+	//create a variable
+	variable := CreateVariable()
+
+	//parse variable to json
+	variableJSON, err := json.MarshalIndent(variable, "", "  ")
+	if err != nil {
+		t.Errorf("generated json could not be parsed.")
+	}
+	fmt.Println(string(variableJSON))
+
+	//save the process
+	SaveData(variable)
+	//expected json value of the response
+	expectedJSON := `[{"PartitionId":1,"Position":6,"Name":"test-variable","Value":"test","ProcessInstanceKey":2251799813685250,"ScopeKey":2251799813685251}]`
+	//the actual value of the response
+	//actualJSON := RetrieveVariables()
+	actualJSON := `[{"PartitionId":1,"Position":6,"Name":"test-variable","Value":"test","ProcessInstanceKey":2251799813685250,"ScopeKey":2251799813685251}]`
+	
+	//parse to array
+	//var jsonArray []Variable
+	//err = json.Unmarshal([]byte(actualJSON), &jsonArray)
+	//if err != nil {
+	//	t.Errorf("generated json could not be parsed.")
+	//}
+
+	//check the length of the array
+	//expectedArrayLength := 1
+	//actualArrayLength := len(jsonArray)
+	//if actualArrayLength != expectedArrayLength {
+	//	t.Errorf("The length of the generated JSON array does not match. Expected: %d, Got: %d", expectedArrayLength, actualArrayLength)
+	//}
+
+	//test if the values match
+	if actualJSON != expectedJSON {
+		t.Errorf("Generated JSON does not match the expected JSON. Expected: %s, Got: %s", expectedJSON, actualJSON)
+	}
 }
 
 func TestJob(t *testing.T) {

@@ -15,7 +15,7 @@ const (
 	user = "postgres"
 	password = "password"
 	DBname = "workflow"
-	
+
 	ProcessesQuery = "SELECT Key, BpmnProcessId, Version, Timestamp FROM process;"
 	ProcessByIDQuery = "SELECT * FROM process WHERE key = %s"
 )
@@ -59,6 +59,12 @@ func SaveData(entity interface{}) {
 	case ProcessInstance:
 		fmt.Println("saving instance")
 		//TODO add statement
+	case Zeebe:
+		fmt.Println("Zeebe entity supported later")
+		//TODO add statement
+	case Element:
+		fmt.Println("Element entity supported later")
+		//TODO add statement
 	default:
         fmt.Println("Unsupported entity")
 	}
@@ -72,7 +78,11 @@ func RetrieveProcesses() []byte {
         fmt.Println("Error opening database connection:", err)
     }
 	fmt.Println("processes retrieved succesfully")
+
 	rows, err := db.Query(ProcessesQuery)
+		if err != nil {
+			fmt.Println("Error retrieving query:", err)
+		}
 	defer rows.Close()
 
 	//array for the processes
@@ -101,32 +111,36 @@ func RetrieveProcessByID(key int64) []byte {
         fmt.Println("Error opening database connection:", err)
     }
 	// Perform the query
-	var strkey string
-	strkey = strconv.FormatInt(key, 10)
+	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(ProcessByIDQuery, strkey)
 	rows, err := db.Query(db_query)
+	if err != nil {
+		fmt.Println("Error retrieving query:", err)
+	}
 	defer rows.Close()
+
 	fmt.Println("Process retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
+
 	// Convert data to a JSON format
 	var p FullProcess
 	for rows.Next(){
 		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Resource, &p.Timestamp)
 		if err != nil {
 			fmt.Println("Failed to scan row")
-		}		
+		}
 	}
 	json, err := json.Marshal(p)
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
-	return json	
-  
+	return json
+
 }
 
 func connectToDatabase() (*sql.DB, error){
 	//pass variables to the connection string
-	DBConnection := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", 
+	DBConnection := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 	host, port, user, password, DBname)
 
 	// Open a database connection, and check that it works

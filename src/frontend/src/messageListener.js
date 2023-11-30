@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
 import MessageDisplayer from './messageDisplayer'; 
 
 const MessageListener = () => {
@@ -35,7 +34,7 @@ const MessageListener = () => {
 
     return (
         <div>
-            <MessageDisplayer messages={messages} /> 
+            <MessageDisplayer messages={messages} />
         </div>
     );
 };

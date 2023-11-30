@@ -108,3 +108,31 @@ type WebsocketMessage struct {
 	Type string `json:"type"`
 	Data string `json:"data"`
 }
+
+type Zeebe struct {
+	PartitionId int64      `json:"partitionId"`
+	Value       ZeebeValue `json:"value"`
+	Timestamp   int64      `json:"timestamp"`
+	Active      bool       `json:"active"`
+}
+
+type ZeebeValue struct {
+	ProcessInstanceKey   int64  `json:"processInstanceKey"`
+	ProcessDefinitionKey int64  `json:"processDefinitionKey"`
+	BpmnProcessId        string `json:"bpmnProcessId"`
+	Version              int64  `json:"version"`
+}
+
+type Element struct {
+	Key    int64        `json:"key"`
+	Value  ElementValue `json:"value"`
+	Intent string       `json:"intent"`
+}
+
+type ElementValue struct {
+	ProcessInstanceKey   int64  `json:"processInstanceKey"`
+	ProcessDefinitionKey int64  `json:"processDefinitionKey"`
+	BpmnProcessId        string `json:"bpmnProcessId"`
+	ElementId            string `json:"elementId"`
+	BpmnElementType      string `json:"bpmnElementType"`
+}
