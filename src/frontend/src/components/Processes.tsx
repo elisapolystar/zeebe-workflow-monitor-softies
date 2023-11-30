@@ -8,7 +8,7 @@ import Instances from './Instances.tsx';
 
 interface ProcessProps {
   socket: WebSocket | null;
-  processes: String | null;
+  processes: string | null;
 }
 
 const Processes: React.FC<ProcessProps> = ({socket}) => {
@@ -60,12 +60,12 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
         const type = message.type;
 
         switch(type) {
-          case 'all-processes':
+          case 'process':
             console.log(`Process recieved: ${message.data}`)
             setBpmnData(message.data);
             return;
           
-          case 'all-instances':
+          case 'instances-for-process':
             console.log(`Instances for a process recieved: ${message.data}`)
             setInstances(message.data);
             return;

@@ -5,8 +5,12 @@ import Instanceview from './Instanceview.tsx';
 import data from "./instance.json";
 import { format } from 'date-fns';
 
+interface InstanceProps {
+  socket: WebSocket | null;
+  instances: string | null;
+}
 
-const Instances: React.FC = () => {
+const Instances: React.FC<InstanceProps> = ({socket}) => {
 
   const navigate = (path: string) => {
     window.history.pushState({}, '', path);

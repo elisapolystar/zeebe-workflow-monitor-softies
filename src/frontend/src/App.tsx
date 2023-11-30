@@ -22,11 +22,6 @@ const App: React.FC = () => {
       console.log("Socket Error: ", error);
     };
 
-    newSocket.addEventListener('message', (event) => {
-      //const message = event.data;
-      //console.log(message);
-    });
-
     return () => {
       newSocket.close();
     };

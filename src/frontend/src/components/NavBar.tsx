@@ -13,9 +13,9 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
   const [processesData, setProcesses] = useState<string | null>(null);
   const [instancesData, setInstances] = useState<string | null>(null);
 
-  const fetchProcesses = (id: string | undefined) => {
+  const fetchProcesses = () => {
     if (socket && socket.readyState === WebSocket.OPEN) {
-      const messageObject = !id ? '{ "process": "" }' : `{ "process": "${id}" }`;
+      const messageObject = '{ "process": "" }';
       socket.send(messageObject);
       console.log(`Process request ${messageObject} sent from frontend`);
     }
@@ -37,7 +37,7 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
   const getComponentForPath = (path: string) => {
     switch (path) {
       case '/processes':
-        fetchProcesses(undefined);
+        fetchProcesses();
         return processesData ? <Processes socket={socket} processes={processesData} /> : <div>Loading...</div>;
       case '/instances':
         fetchInstances();
@@ -45,7 +45,7 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
       case '/incidents':
         return <Incidents />;
       default:
-        if(!processesData) fetchProcesses(undefined);
+        if(!processesData) fetchProcesses();
         return processesData ? <Processes socket={socket} processes={processesData} /> : <div>Loading...</div>;
     }
   };
@@ -57,7 +57,7 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
         const message = JSON.parse(event.data);
         const type = message.type;
         switch(type) {
-          case 'process':
+          case 'all-processes':
             console.log(`Processes recieved: ${message.data}`)
             setProcesses(message.data);
             return;
