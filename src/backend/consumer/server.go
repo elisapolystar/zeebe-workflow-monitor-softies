@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -165,39 +167,57 @@ func listenTmChannel() {
 		// Make a struct of a process instance JSON
 		if tmPair.Topic == "zeebe-process-instance" {
 
-			processInstanceItem, err := parseProcessInstanceJson(tmPair.Message)
-			if err != nil {
-				fmt.Println("Error parsing the process instance json: ", err)
+			if strings.Contains(string(tmPair.Message), intent_str) {
+
+				elementItem, err := parseElementJson(tmPair.Message)
+				if err != nil {
+					fmt.Println("Error parsing the process instance json: ", err)
+				}
+
+				SaveData(*elementItem)
+
+				// Structi muutetaan fronttiin lähetettäväksi JSONiksi
+				jsonString, err2 := structToJson(&elementItem)
+				if err2 != nil {
+					fmt.Println("Error turning struct to json: ", err2)
+				}
+
+				fmt.Print(jsonString)
+			} else {
+
+				processInstanceItem, err := parseProcessInstanceJson(tmPair.Message)
+				if err != nil {
+					fmt.Println("Error parsing the process instance json: ", err)
+				}
+
+				fmt.Println()
+				fmt.Println("//////////////////////////////////////////////////")
+				fmt.Println()
+				fmt.Println("Process key of the process instance item: ", processInstanceItem.Key)
+				fmt.Println("PartitionId: ", processInstanceItem.PartitionId)
+				fmt.Println("Process definition key: ", processInstanceItem.Value.ProcessDefinitionKey)
+				fmt.Println("Process instance process id: ", processInstanceItem.Value.BpmnProcessId)
+				fmt.Println("Version: ", processInstanceItem.Value.Version)
+				fmt.Println("Parent process instance key: ", processInstanceItem.Value.ParentProcessInstanceKey)
+				fmt.Println("Parent element instance key: ", processInstanceItem.Value.ParentElementInstanceKey)
+				fmt.Println()
+				fmt.Println("//////////////////////////////////////////////////")
+				fmt.Println()
+
+				// Structi muutetaan fronttiin lähetettäväksi JSONiksi
+				jsonString, err2 := structToJson(&processInstanceItem)
+				if err2 != nil {
+					fmt.Println("Error turning struct to json: ", err2)
+				}
+
+				fmt.Println()
+				fmt.Println("JSON STRING - JSON STRING - JSON STRING - JSON STRING - JSON STRING -")
+				fmt.Println()
+				fmt.Print(jsonString)
+				fmt.Println()
+				fmt.Println("JSON STRING - JSON STRING - JSON STRING - JSON STRING - JSON STRING -")
+				fmt.Println()
 			}
-
-			fmt.Println()
-			fmt.Println("//////////////////////////////////////////////////")
-			fmt.Println()
-			fmt.Println("Process key of the process instance item: ", processInstanceItem.Key)
-			fmt.Println("PartitionId: ", processInstanceItem.PartitionId)
-			fmt.Println("Process definition key: ", processInstanceItem.Value.ProcessDefinitionKey)
-			fmt.Println("Process instance process id: ", processInstanceItem.Value.BpmnProcessId)
-			fmt.Println("Version: ", processInstanceItem.Value.Version)
-			fmt.Println("Parent process instance key: ", processInstanceItem.Value.ParentProcessInstanceKey)
-			fmt.Println("Parent element instance key: ", processInstanceItem.Value.ParentElementInstanceKey)
-			fmt.Println()
-			fmt.Println("//////////////////////////////////////////////////")
-			fmt.Println()
-
-			// Structi muutetaan fronttiin lähetettäväksi JSONiksi
-			jsonString, err2 := structToJson(&processInstanceItem)
-			if err2 != nil {
-				fmt.Println("Error turning struct to json: ", err2)
-			}
-
-			fmt.Println()
-			fmt.Println("JSON STRING - JSON STRING - JSON STRING - JSON STRING - JSON STRING -")
-			fmt.Println()
-			fmt.Print(jsonString)
-			fmt.Println()
-			fmt.Println("JSON STRING - JSON STRING - JSON STRING - JSON STRING - JSON STRING -")
-			fmt.Println()
-
 		}
 
 		// Make a struct of a variable JSON

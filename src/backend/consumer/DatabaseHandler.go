@@ -62,6 +62,9 @@ func SaveData(entity interface{}) {
 	case Zeebe:
 		fmt.Println("Zeebe entity supported later")
 		//TODO add statement
+	case Element:
+		fmt.Println("Element entity supported later")
+		//TODO add statement
 	default:
         fmt.Println("Unsupported entity")
 	}
@@ -75,7 +78,11 @@ func RetrieveProcesses() []byte {
         fmt.Println("Error opening database connection:", err)
     }
 	fmt.Println("processes retrieved succesfully")
+
 	rows, err := db.Query(ProcessesQuery)
+		if err != nil {
+			fmt.Println("Error retrieving query:", err)
+		}
 	defer rows.Close()
 
 	//array for the processes
@@ -104,13 +111,17 @@ func RetrieveProcessByID(key int64) []byte {
         fmt.Println("Error opening database connection:", err)
     }
 	// Perform the query
-	var strkey string
-	strkey = strconv.FormatInt(key, 10)
+	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(ProcessByIDQuery, strkey)
 	rows, err := db.Query(db_query)
+	if err != nil {
+		fmt.Println("Error retrieving query:", err)
+	}
 	defer rows.Close()
+
 	fmt.Println("Process retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
+
 	// Convert data to a JSON format
 	var p FullProcess
 	for rows.Next(){
