@@ -55,7 +55,7 @@ func reader(conn *websocket.Conn) {
 			fmt.Println("Process: ", processValue)
 
 			// Parse the json into struct so we can access the value of the "process" -field
-			processMessage, err3 := parseCommunicationItem(p)
+			processMessage, err3 := parseProcessRequest(p)
 			if err3 != nil {
 				log.Println("Error parsing the message from frontend(!): ", err3)
 			}
@@ -130,15 +130,139 @@ func reader(conn *websocket.Conn) {
 			fmt.Println("Instance?: ", instanceValue)
 
 			//Parse the message into a struct
-			//instanceMessage = parseInstanceMessage
-
-			/*if instanceMessage.Instance ==""{
-				get and send all instances
-			} else if instanceMessage.Instance != "" {
-				get specific instace with:
-				getInstance(instanceMessage.Instance)
+			instanceMessage, err := parseInstanceRequest(p)
+			if err != nil {
+				log.Println("Error parsing instance request to struct: ", err)
 			}
-			*/
+
+			if instanceMessage.Instance == "" {
+				// get all instances
+
+				allInstances := RetrieveInstances()
+
+				fmt.Println()
+				fmt.Println("-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.")
+				fmt.Println()
+				fmt.Println("(J) All the retrieved instances: ", string(allInstances))
+				fmt.Println()
+				fmt.Println("-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.")
+				fmt.Println()
+
+				instancesData := WebsocketMessage{
+					Type: "all-instances",
+					Data: string(allInstances),
+				}
+				instancesDataJson, err := json.Marshal(instancesData)
+				if err != nil {
+					fmt.Println("Error marshalling the instancesData item to json")
+					fmt.Println(err.Error())
+				}
+
+				err2 := conn.WriteMessage(messageType, instancesDataJson)
+				if err2 != nil {
+					fmt.Println("Error sending instances to frontend", err2)
+				}
+
+			} else if instanceMessage.Instance != "" {
+				// Get a specific instance
+
+				// Get the process
+				key, err := strconv.ParseInt(instanceMessage.Instance, 10, 64)
+				if err != nil {
+					log.Println("Error turning string to int: ", err)
+				}
+
+				processJson := RetrieveProcessByID(key)
+				fmt.Println("The retrieved process for the instance item: ", string(processJson))
+
+				// Turn the process json to struct so we can access the processId
+				processStruct, err2 := parseProcessJson(processJson)
+				if err2 != nil {
+					fmt.Println("Error parsing process to struct: ", err2)
+				}
+
+				elements := RetrieveInstanceByID(processStruct.Value.BpmnProcessId, key)
+
+				fmt.Println()
+				fmt.Println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
+				fmt.Println()
+				fmt.Println("The retrieved INSTANCE: ", string(elements))
+				fmt.Println()
+				fmt.Println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
+				fmt.Println()
+
+				variables := RetrieveVariableByID(key)
+
+				fmt.Println()
+				fmt.Println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
+				fmt.Println()
+				fmt.Println("The retrieved VARIABLES: ", string(variables))
+				fmt.Println()
+				fmt.Println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
+				fmt.Println()
+
+				timers := RetrieveTimerByID(key)
+
+				fmt.Println()
+				fmt.Println("tttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
+				fmt.Println()
+				fmt.Println("The retrieved TIMERS: ", string(timers))
+				fmt.Println()
+				fmt.Println("tttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
+				fmt.Println()
+
+				incidents := RetrieveIncidentByID(key)
+
+				fmt.Println()
+				fmt.Println("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+				fmt.Println()
+				fmt.Println("The retrieved INCIDENTS: ", string(incidents))
+				fmt.Println()
+				fmt.Println("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+				fmt.Println()
+
+				combinedJSON, err := concatenateJSON(processJson,
+					elements,
+					variables,
+					timers,
+					incidents)
+
+				if err != nil {
+					fmt.Println("Error combining the jsons: ", err)
+					return
+				}
+				fmt.Println()
+				fmt.Println("!     !     !     !     !     !     !     !     !")
+				fmt.Println()
+				fmt.Println("The combined json: ", string(*combinedJSON))
+				fmt.Println()
+				fmt.Println("!     !     !     !     !     !     !     !     !")
+				fmt.Println()
+
+				instanceData := WebsocketMessage{
+					Type: "instance",
+					Data: string(*combinedJSON),
+				}
+				instanceDataJson, err := json.Marshal(instanceData)
+				if err != nil {
+					fmt.Println("(#asd123J) Error JSON marshalling the instanceData block")
+					fmt.Println(err.Error())
+				}
+
+				fmt.Println()
+				fmt.Println("!     !     !     !     !     !     !     !     !")
+				fmt.Println()
+				fmt.Println("The final json to be sent: ", string(instanceDataJson))
+				fmt.Println()
+				fmt.Println("!     !     !     !     !     !     !     !     !")
+				fmt.Println()
+
+				err3 := conn.WriteMessage(messageType, instanceDataJson)
+				if err3 != nil {
+					fmt.Println("Error sending instances to frontend", err3)
+				}
+			}
+
 		} else {
 			log.Println("hmm maybe some other json")
 		}

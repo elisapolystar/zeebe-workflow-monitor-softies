@@ -100,8 +100,12 @@ type TimerValue struct {
 }
 
 // Message from frontend
-type FrontCommunication struct {
+type ProcessRequest struct {
 	Process string `json:"process"`
+}
+
+type InstanceRequest struct {
+	Instance string `json:"instance"`
 }
 
 type WebsocketMessage struct {
@@ -135,4 +139,20 @@ type ElementValue struct {
 	BpmnProcessId        string `json:"bpmnProcessId"`
 	ElementId            string `json:"elementId"`
 	BpmnElementType      string `json:"bpmnElementType"`
+}
+
+type ElementsContainer struct {
+	Elements []Element `json:"elements"`
+}
+
+type VariablesContainer struct {
+	Variables []Variable `json:"variables"`
+}
+
+type TimersContainer struct {
+	Timers []Timer `json:"timers"`
+}
+
+type IncidentsContainer struct {
+	Incidents []Incident `json:"incidents"`
 }
