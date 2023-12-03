@@ -16,7 +16,6 @@ const (
 	user = "postgres"
 	password = "password"
 	DBname = "workflow"
-	
 	ProcessesQuery = "SELECT p.Key, p.BpmnProcessId, p.Version, p.Timestamp, COUNT(i.ProcessDefinitionKey) FROM process p LEFT JOIN process_instance i ON p.Key = i.ProcessDefinitionKey GROUP BY p.Key ORDER BY Timestamp DESC"
 	ProcessByIDQuery = "SELECT * FROM process WHERE key = %s"
 	InstanceByIDQuery = "SELECT * FROM process_instance WHERE %s = %s ORDER BY Timestamp DESC"
@@ -281,7 +280,7 @@ func RetrieveProcessByID(key int64) string {
 		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Resource, &p.Timestamp)
 		if err != nil {
 			fmt.Println("Failed to scan row")
-		}		
+		}
 	}
 	json, err := json.Marshal(p)
 	if err != nil {
@@ -555,9 +554,7 @@ func RetrieveElementByID(key int64) string {
 
 func connectToDatabase() (*sql.DB, error){
 	//pass variables to the connection string
-	DBConnection := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", 
-	host, port, user, password, DBname)
-
+	DBConnection := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, DBname)
 	// Open a database connection, and check that it works
 	db, err := sql.Open("postgres", DBConnection)
 	if err != nil {
