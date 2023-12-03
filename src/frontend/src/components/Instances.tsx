@@ -11,24 +11,47 @@ interface InstanceProps {
 }
 
 const Instances: React.FC<InstanceProps> = ({socket}) => {
+  const [instancedata, setInstanceData] = useState(data);
+  //const [instancedata, setInstanceData] = useState<string | null>(null);
 
   const navigate = (path: string) => {
-    window.history.pushState({}, '', path);
-    ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(path));
+    const view = path.split('/');
+    console.log(view);
+    window.history.pushState({}, '', view[1]);
+    ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(`/${view[1]}`, view[2]));
   };
 
-  const getComponentForPath = (path: string) => {
-    switch (path) {
-      case '/Instanceview':
-        return <Instanceview />;
+  const fetchInstance = (id: string | undefined) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const messageObject = `{ "instance": "${id}" }`;
+      socket.send(messageObject);
+      console.log(`Instance request for process ${messageObject} sent from frontend`);
     }
   };
 
-  const [instancedata, setInstanceData] = useState(data);
+  const getComponentForPath = (path: string, id: string) => {
+    switch (path) {
+      case '/Instanceview':
+        fetchInstance(id);
+        return instancedata ? <Instanceview instance={instancedata} /> : <div>Loading...</div>;
+    }
+  };
 
   useEffect(() => {
-    setInstanceData(data);
-  }, []);
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.addEventListener('message', (event) => {
+        const message = JSON.parse(event.data);
+        const type = message.type;
+
+        switch(type) {
+          case 'instances':
+            console.log(`Data for an instance recieved: ${message.data}`)
+            setInstanceData(message.data);
+            return;
+        }
+      });
+    }
+  }, [socket]);
 
   let formattedDate = '';
   const date = new Date(instancedata[0].value.Timestamp);
@@ -41,7 +64,7 @@ const Instances: React.FC<InstanceProps> = ({socket}) => {
         {instancedata &&
           instancedata.map((instancedata, index) => (
             <div className="definition-key" key={index}>
-              <span onClick={() => navigate('/Instanceview')}>{instancedata.value.processInstanceKey}</span>
+              <span onClick={() => navigate(`/Instanceview/${instancedata.value.processInstanceKey}`)}>{instancedata.value.processInstanceKey}</span>
             </div>
         ))}
       </div>

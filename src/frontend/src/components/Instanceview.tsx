@@ -3,12 +3,16 @@ import React, { useEffect, useState } from 'react';
 import info from './testinstance.json';
 import './instanceview.css';
 
+interface InstanceViewProps {
+  instance: string | null;
+}
+
 //change base64 coded resource to xml
 const encodedBpmn = info.data.process.Resource;
 const xml = atob(encodedBpmn);
 console.log(xml);
 
-const Instanceview: React.FC = () => {
+const Instanceview: React.FC<InstanceViewProps> = () => {
   const [diagramData, setDiagramData] = useState<string | null>(null);
   const [instanceData, setInstanceData] = useState(info.data.variables);
 
@@ -20,7 +24,7 @@ const Instanceview: React.FC = () => {
   useEffect(() => {
       async function fetchData() {
           try {
-              const response = await fetch(encodedBpmn);;
+              const response = await fetch(encodedBpmn);
               const data = await response.text();
               setDiagramData(data);
           } catch (error) {

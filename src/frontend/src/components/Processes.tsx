@@ -32,7 +32,7 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
 
   const fetchInstancesForProcess = (id: string | undefined) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
-      const messageObject = `{ "instance": "${id}" }`;
+      const messageObject = `{ "instances-for-process": "${id}" }`;
       socket.send(messageObject);
       console.log(`Instance request for process ${messageObject} sent from frontend`);
     }
@@ -40,6 +40,7 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
 
   const getComponentForPath = (path: string, id: string) => {
     switch (path) {
+
       case '/BPMNView':
         fetchBpmn(id);
         return bpmnData ? <BPMNView process={bpmnData} /> : <div>Loading...</div>;
