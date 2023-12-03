@@ -11,6 +11,8 @@ interface NavBarProps {
 
 const NavBar: React.FC<NavBarProps> = ({ socket }) => {
   const [processesData, setProcesses] = useState<string | null>(null);
+  const [instancesData, setInstances] = useState<string | null>(null);
+  const [incidentsData, setIncidents] = useState<string | null>(null);
 
   const fetchProcesses = (id: string | undefined) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
@@ -22,7 +24,7 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
 
   const fetchInstances = (id: string | undefined) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
-      const messageObject = `{ "instance": "${id}" }`;
+      const messageObject = !id ? '{ "instance": "" }' : `{ "instance": "${id}" }`;
       socket.send(messageObject);
       console.log(`Instance request ${messageObject} sent from frontend`);
     }
@@ -40,9 +42,13 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
         return processesData ? <Processes socket={socket} processes={processesData} /> : <div>Loading...</div>;
       case '/instances':
         fetchInstances(undefined);
-        return <Instances /*instances={instances}*/ />;
+        return instancesData ? <Instances socket={socket} instances={instancesData} /> : <div>Loading...</div>;
+
       case '/incidents':
         return <Incidents />;
+        //fetchInstances(undefined);
+        //return incidentsData ? <Incidents socket={socket} incidents={incidentsData} /> : <div>Loading...</div>;
+
       default:
         if(!processesData) fetchProcesses(undefined);
         return processesData ? <Processes socket={socket} processes={processesData} /> : <div>Loading...</div>;
@@ -60,6 +66,14 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
           console.log(`Process recieved: ${message.data}`)
           setProcesses(message.data);
         }
+        if(message.type === 'instance'){
+          console.log(`Instance recieved: ${message.data}`)
+          setInstances(message.data);
+        }
+        /*if(message.type === 'incident'){
+          console.log(`Incident recieved: ${message.data}`)
+          setIncidents(message.data);
+        }*/
       });
     }
   }, [socket]);
@@ -81,5 +95,3 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
 };
 
 export default NavBar;
-
-

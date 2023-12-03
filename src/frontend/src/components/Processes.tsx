@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import './Processes.css'; 
-import data from "./test.json";
 import BPMNView from './BPMNView.tsx';
-
+import {format} from 'date-fns'
 
 interface ProcessProps {
   socket: WebSocket | null;
-  processes: String | null;
+  processes: string | null;
 }
 
-const Processes: React.FC<ProcessProps> = ({socket}) => {
+const Processes: React.FC<ProcessProps> = ({socket, processes}) => {
   const [bpmnData, setBpmnData] = useState<string | null>(null);
+  const processesData = processes ? JSON.parse(processes) : [];
 
   const navigate = (path: string) => {
     const view = path.split('/');
@@ -55,15 +55,15 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
     <div className="process-container">
       <div className="process-item">
         <span>Process Definition Key</span>
-        {data.map((item, index) => (
+        {processesData.map((item, index) => (
           <div className="process-key" key={index}>
-            <span onClick={() => navigate(`/BPMNView/${item.processDefinitionKey}`)}>{item.processDefinitionKey}</span>
+            <span onClick={() => navigate(`/BPMNView/${item.key}`)}>{item.key}</span>
           </div>
         ))}
       </div>
       <div className="process-item">
         <span>BPMN process id</span>
-        {data.map((item, index) => (
+        {processesData.map((item, index) => (
           <div className="process-info" key={index}>
             <span>{item.bpmnProcessId}</span>
           </div>
@@ -71,7 +71,7 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
       </div>
       <div className="process-item">
         <span>Instances</span>
-        {data.map((item, index) => (
+        {processesData.map((item, index) => (
           <div className="process-info" key={index}>
             <span>{item.instances}</span>
           </div>
@@ -79,7 +79,7 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
       </div>
       <div className="process-item">
         <span>Version</span>
-        {data.map((item, index) => (
+        {processesData.map((item, index) => (
           <div className="process-info" key={index}>
             <span>{item.version}</span>
           </div>
@@ -87,9 +87,9 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
       </div>
       <div className="process-item">
         <span>Time</span>
-        {data.map((item, index) => (
+        {processesData.map((item, index) => (
           <div className="process-info" key={index}>
-            <span>{item.time}</span>
+            <span>{format(new Date(item.timestamp), 'dd-MM-yyyy HH:mm:ss')}</span>
           </div>
         ))}
       </div>
@@ -100,4 +100,3 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
 };
 
 export default Processes;
-

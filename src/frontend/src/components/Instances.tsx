@@ -10,7 +10,6 @@ interface InstanceProps {
 }
 
 const Instances: React.FC<InstanceProps> = ({socket, instances}) => {
-  console.log('Instances prop:', instances);
   const [bpmnData, setBpmnData] = useState<string | null>(null);
   const instancesData = instances ? JSON.parse(instances) : [];
 
@@ -57,7 +56,7 @@ const Instances: React.FC<InstanceProps> = ({socket, instances}) => {
         <span>Process Instance Key</span>
         {instancesData.map((item, index) => (
             <div className="definition-key" key={index}>
-              <span onClick={() => navigate('/Instanceview')}>{item.ProcessInstanceKey}</span>
+              <span onClick={() => navigate(`/Instanceview/${item.ProcessInstanceKey}`)}>{item.ProcessInstanceKey}</span>
             </div>
         ))}
       </div>
