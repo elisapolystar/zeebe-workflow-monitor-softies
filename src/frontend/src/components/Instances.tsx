@@ -2,81 +2,97 @@ import React, { useEffect, useState } from 'react';
 import './Instances.css';
 import ReactDOM from 'react-dom/client';
 import Instanceview from './Instanceview.tsx';
-import data from "./instance.json";
 import { format } from 'date-fns';
 
+interface InstanceProps {
+  socket: WebSocket | null;
+  instances: string | null;
+}
 
-const Instances: React.FC = () => {
+const Instances: React.FC<InstanceProps> = ({socket, instances}) => {
+  console.log('Instances prop:', instances);
+  const [bpmnData, setBpmnData] = useState<string | null>(null);
+  const instancesData = instances ? JSON.parse(instances) : [];
 
   const navigate = (path: string) => {
-    window.history.pushState({}, '', path);
-    ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(path));
+    const view = path.split('/');
+    console.log(view);
+    window.history.pushState({}, '', view[1]);
+    ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(`/${view[1]}`, view[2]));
   };
 
-  const getComponentForPath = (path: string) => {
-    switch (path) {
-      case '/Instanceview':
-        return <Instanceview />;
+  const fetchBpmn = (id: string | undefined) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const messageObject = `{ "process_instance": "${id}" }`;
+      socket.send(messageObject);
+      console.log(`Process_instance request ${messageObject} sent from frontend`);
     }
   };
 
-  const [instancedata, setInstanceData] = useState(data);
+  const getComponentForPath = (path: string, id: string) => {
+    switch (path) {
+      case '/Instanceview':
+        fetchBpmn(id);
+        return bpmnData ? <Instanceview process_instance={bpmnData} /> : <div>Loading...</div>;
+
+      default:
+        return <div>Not Found</div>;
+    }
+  };
 
   useEffect(() => {
-    setInstanceData(data);
-  }, []);
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.addEventListener('message', (event) => {
+        const message = JSON.parse(event.data);
 
-  let formattedDate = '';
-  const date = new Date(instancedata[0].value.Timestamp);
-  formattedDate = format(date, 'dd-MM-yyyy HH:mm:ss');
-
+        if(message.type === 'all-instances' ){
+          setBpmnData(message.data);
+        }
+      });
+    }
+  }, [socket]);
   return (
     <div className="instance-container">
       <div className="instance-item">
         <span>Process Instance Key</span>
-        {instancedata &&
-          instancedata.map((instancedata, index) => (
+        {instancesData.map((item, index) => (
             <div className="definition-key" key={index}>
-              <span onClick={() => navigate('/Instanceview')}>{instancedata.value.processInstanceKey}</span>
+              <span onClick={() => navigate('/Instanceview')}>{item.ProcessInstanceKey}</span>
             </div>
         ))}
       </div>
 
       <div className="instance-item">
         <span>BPMN Process Id</span>
-        {instancedata &&
-          instancedata.map((instancedata) => (
-            <div className = "instance-info">
-              <span>{instancedata.value.bpmnProcessId}</span>
+        {instancesData.map((item,index) => (
+            <div className = "instance-info" key={index}>
+              <span>{item.bpmnProcessId}</span>
             </div>
         ))}
         
       </div>
       <div className="instance-item">
         <span>State</span>
-        {instancedata &&
-          instancedata.map((instancedata) => (
-            <div className="instance-info">
-              <span>{instancedata.value.state}</span>
+        {instancesData.map((item, index) => (
+            <div className="instance-info" key={index}>
+              <span>{item.state}</span>
             </div>
         ))}
       </div>
       <div className="instance-item">
         <span>Time</span>
-        {instancedata &&
-          instancedata.map((instancedata) => ( 
-            <div className="instance-info">
-              <span>{formattedDate}</span>
+        {instancesData.map((item, index) => ( 
+            <div className="instance-info" key={index}>
+              <span>{format(new Date(item.timestamp), 'dd-MM-yyyy HH:mm:ss')}</span>
             </div>
         ))}
       </div>
 
       <div className="instance-item">
         <span>Process Definition Key</span>
-        {instancedata &&
-          instancedata.map((instancedata) => (
-            <div className="definition-key">
-              <span>{instancedata.value.parentProcessInstanceKey}</span>
+        {instancesData.map((item, index) => (
+            <div className="definition-key" key={index}>
+              <span>{item.processDefinitionKey}</span>
             </div>
         ))}
     </div>

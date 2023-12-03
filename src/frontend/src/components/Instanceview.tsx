@@ -3,12 +3,16 @@ import React, { useEffect, useState } from 'react';
 import info from './testinstance.json';
 import './instanceview.css';
 
+interface InstanceviewProps {
+  process_instance: string | null;
+}
+
 //change base64 coded resource to xml
 const encodedBpmn = info.data.process.Resource;
 const xml = atob(encodedBpmn);
 console.log(xml);
 
-const Instanceview: React.FC = () => {
+const Instanceview: React.FC<InstanceviewProps> = () => {
   const [diagramData, setDiagramData] = useState<string | null>(null);
   const [instanceData, setInstanceData] = useState(info.data.variables);
 
