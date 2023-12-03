@@ -1,10 +1,14 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import MessageListener from './messageListener';
+import { createRoot } from "react-dom/client";
+import Header from './components/Header.tsx'
+import App from './App.tsx';
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+const root = createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <MessageListener />
-  </React.StrictMode>
-);
+    <div>
+      <Header />
+      <App />
+    </div>
+  </React.StrictMode>,
+); export {root};
