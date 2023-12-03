@@ -4,7 +4,7 @@ package main
 import (
 	"fmt"
 	"strconv"
-//	"errors"
+	"errors"
 	"database/sql"
 	"encoding/json"
 	_ "github.com/lib/pq"
@@ -17,7 +17,7 @@ const (
 	password = "password"
 	DBname = "workflow"
 	
-	ProcessesQuery = "SELECT Key, BpmnProcessId, Version, Timestamp FROM process ORDER BY Timestamp DESC"
+	ProcessesQuery = "SELECT p.Key, p.BpmnProcessId, p.Version, p.Timestamp FROM process ORDER BY Timestamp DESC"
 	ProcessByIDQuery = "SELECT * FROM process WHERE key = %s"
 	InstanceByIDQuery = "SELECT * FROM process_instance WHERE %s = %s ORDER BY Timestamp DESC"
 	InstancesQuery = "SELECT * FROM process_instance ORDER BY Timestamp DESC"
@@ -26,6 +26,7 @@ const (
 	IncidentsQuery = "SELECT * FROM incident ORDER BY Timestamp DESC"
 	MessageByIDQuery = "SELECT * FROM message WHERE key = %s"
 	TimerByIDQuery = "SELECT * FROM timer WHERE ProcessInstanceKey = %s"
+	ElementByIDQuery = "SELECT * FROM element WHERE ProcessInstanceKey = %s"
 )
 
 type SimpleProcess struct {
@@ -33,6 +34,7 @@ type SimpleProcess struct {
 	BpmnProcessId 	string 	`json:"bpmnProcessId"`
 	Version       	int64  	`json:"version"`
 	Timestamp 		int64	`json:"timestamp"`
+	Instances		int64	`json:"instances"`
 }
 type FullProcess struct {
 	Key				int64	`json:"key"`
@@ -195,7 +197,8 @@ func SaveData(entity interface{}) {
 		element := d;
 		// check if the element already exists. If yes, only update then intent value
 		CheckIfExists := `SELECT * FROM element WHERE Key = $1`
-		err = db.QueryRow(CheckIfExists, element.Key).Scan(&element.Key)
+		var storeIntent string = element.Intent
+		err = db.QueryRow(CheckIfExists, element.Key).Scan(&element.Key, &element.Value.ProcessInstanceKey, &element.Value.ProcessDefinitionKey, &element.Value.BpmnProcessId, &element.Value.ElementId, &element.Value.BpmnElementType, &element.Intent)
 		if err == sql.ErrNoRows{
 			insertElement := `INSERT INTO ELEMENT (Key, ProcessInstanceKey, ProcessDefinitionKey, BpmnProcessId, ElementId, BpmnElementType, Intent) VALUES ($1, $2, $3, $4, $5, $6, $7)`	
 			_, err = db.Exec(insertElement, element.Key, element.Value.ProcessInstanceKey, element.Value.ProcessDefinitionKey, element.Value.BpmnProcessId, element.Value.ElementId, element.Value.BpmnElementType, element.Intent)
@@ -209,7 +212,11 @@ func SaveData(entity interface{}) {
 			fmt.Println(err)
 		} else {
 			UpdateIntent := `UPDATE element SET Intent = $1 WHERE Key = $2`
-			_, err = db.Exec(UpdateIntent, element.Intent, element.Key)
+			_, err = db.Exec(UpdateIntent, storeIntent, element.Key)
+			if (err != nil){
+				fmt.Println("Failed to update element: ", err)
+			}
+			fmt.Println("Successfully updated element")
 		}
 
 	default:
@@ -235,7 +242,7 @@ func RetrieveProcesses() []byte {
 
 	for rows.Next(){
 		var p SimpleProcess
-		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Timestamp)
+		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Timestamp, &p.Instances)
 		if err != nil {
 			fmt.Println("Failed to scan rows")
 		}
@@ -278,7 +285,7 @@ func RetrieveProcessByID(key int64) []byte {
 	return json	
   
 }
-/* Retrieves an instance from the database. 
+// Retrieves an instance from the database. 
 // column = ALL or the name of a specific column, key = the value we want to find from the column
 func RetrieveInstanceByID(column string, key int64) (string, error) {
 	if (column == "ProcessDefinitionKey") || (column == "ProcessInstanceKey"){
@@ -344,7 +351,7 @@ func RetrieveInstances() string {
 	return string(jsonData)
 
 }
-*/
+
 // retrieves a variable with the ProcessInstanceKey specified in the parameter key
 func RetrieveVariableByID(key int64) (string){
 	fmt.Println("Retrieving the variable...")
@@ -464,7 +471,7 @@ func RetrieveMessageByID(key int64) string {
 	}
 	return string(json)		
 }
-
+// retrieves a timer with the specified ProcessInstanceKey from the db
 func RetrieveTimerByID(key int64) string {
 	fmt.Println("Retrieving the timer...")
 	// Connect to the DB
@@ -494,6 +501,37 @@ func RetrieveTimerByID(key int64) string {
 	}
 	return string(json)		
 }
+// retrieves an element with the given ProcessInstanceKey
+func RetrieveElementByID(key int64) string {
+	fmt.Println("Retrieving the element...")
+	// Connect to the DB
+	db, err := connectToDatabase()
+    if err != nil {
+        fmt.Println("Error opening database connection:", err)
+    }
+	// Perform the query
+	var strkey string
+	strkey = strconv.FormatInt(key, 10)
+	db_query := fmt.Sprintf(ElementByIDQuery, strkey)
+	rows, err := db.Query(db_query)
+	defer rows.Close()
+	fmt.Println("Element retrieved successfully!")
+	fmt.Println("Converting data to JSON...")
+	// Convert data to a JSON format
+	var e element
+	for rows.Next(){
+		err := rows.Scan(&e.Key, &e.ProcessInstanceKey, &e.ProcessDefinitionKey, &e.BpmnProcessId, &e.ElementId, &e.BpmnElementType, &e.Intent)
+		if err != nil {
+			fmt.Println("Failed to scan row")
+		}		
+	}
+	json, err := json.Marshal(e)
+	if err != nil {
+		fmt.Println("Failed to convert data to JSON")
+	}
+	return string(json)		
+}
+
 func connectToDatabase() (*sql.DB, error){
 	//pass variables to the connection string
 	DBConnection := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", 
