@@ -17,7 +17,7 @@ const (
 	password = "password"
 	DBname = "workflow"
 	
-	ProcessesQuery = "SELECT p.Key, p.BpmnProcessId, p.Version, p.Timestamp FROM process ORDER BY Timestamp DESC"
+	ProcessesQuery = "SELECT p.Key, p.BpmnProcessId, p.Version, p.Timestamp, COUNT(i.ProcessDefinitionKey) FROM process p LEFT JOIN process_instance i ON p.Key = i.ProcessDefinitionKey GROUP BY p.Key ORDER BY Timestamp DESC"
 	ProcessByIDQuery = "SELECT * FROM process WHERE key = %s"
 	InstanceByIDQuery = "SELECT * FROM process_instance WHERE %s = %s ORDER BY Timestamp DESC"
 	InstancesQuery = "SELECT * FROM process_instance ORDER BY Timestamp DESC"
@@ -225,8 +225,8 @@ func SaveData(entity interface{}) {
 
 }
 
-
-func RetrieveProcesses() []byte {
+// retrieves every process, along with the number of instances for each process.
+func RetrieveProcesses() string {
 	fmt.Println("retrieving processes from the database")
 	//connect to database
 	db, err := connectToDatabase()
@@ -252,10 +252,10 @@ func RetrieveProcesses() []byte {
 	if err != nil {
 		fmt.Println("Failed to transform to json")
 	}
-	return jsonData
+	return string(jsonData)
 }
-
-func RetrieveProcessByID(key int64) []byte {
+// retrieves a process with the given Key (Process definition key)
+func RetrieveProcessByID(key int64) string {
 	fmt.Println("Retrieving the Process...")
 	// Connect to the DB
 	db, err := connectToDatabase()
@@ -282,11 +282,12 @@ func RetrieveProcessByID(key int64) []byte {
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
-	return json	
+	return string(json)	
   
 }
 // Retrieves an instance from the database. 
-// column = ALL or the name of a specific column, key = the value we want to find from the column
+// column = The name of a specific column, key = the value we want to find from the column
+// accepts "ProcessDefinitionKey" or "ProcessInstanceKey" as the column parameter
 func RetrieveInstanceByID(column string, key int64) (string, error) {
 	if (column == "ProcessDefinitionKey") || (column == "ProcessInstanceKey"){
 		// open a DB connection
@@ -352,7 +353,7 @@ func RetrieveInstances() string {
 
 }
 
-// retrieves a variable with the ProcessInstanceKey specified in the parameter key
+// retrieves a variable with the ProcessInstanceKey specified in the parameter
 func RetrieveVariableByID(key int64) (string){
 	fmt.Println("Retrieving the variable...")
 	// Connect to the DB
