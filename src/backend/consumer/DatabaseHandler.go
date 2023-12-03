@@ -266,8 +266,7 @@ func RetrieveProcessByID(key int64) string {
         fmt.Println("Error opening database connection")
     }
 	// Perform the query
-	var strkey string
-	strkey = strconv.FormatInt(key, 10)
+	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(ProcessByIDQuery, strkey)
 	rows, err := db.Query(db_query)
 	if err != nil {
@@ -303,14 +302,13 @@ func RetrieveInstanceByID(column string, key int64) (string, error) {
 			fmt.Println("Error opening database connection")
 		}
 		// perform the query
-		var strkey string
-		strkey = strconv.FormatInt(key, 10)
+		var strkey string = strconv.FormatInt(key, 10)
 		db_query := fmt.Sprintf(InstanceByIDQuery, column, strkey)
 		rows, err := db.Query(db_query)
-		defer rows.Close()
 		if err != nil {
 			fmt.Println("Query failed!")
 		}
+		defer rows.Close()
 		// create the JSON and return it
 		var p ProcessInst
 		for rows.Next(){
@@ -371,10 +369,12 @@ func RetrieveVariableByID(key int64) (string){
         fmt.Println("Error opening database connection")
     }
 	// Perform the query
-	var strkey string
-	strkey = strconv.FormatInt(key, 10)
+	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(VariableByIDQuery, strkey)
 	rows, err := db.Query(db_query)
+	if err != nil {
+		fmt.Println("Query failed!")
+	}
 	defer rows.Close()
 	fmt.Println("Variable retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
@@ -401,8 +401,7 @@ func RetrieveIncidentByID(key int64) string{
         fmt.Println("Error opening database connection")
     }
 	// Perform the query
-	var strkey string
-	strkey = strconv.FormatInt(key, 10)
+	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(IncidentByIDQuery, strkey)
 	rows, err := db.Query(db_query)
 	if err != nil {
@@ -466,8 +465,7 @@ func RetrieveMessageByID(key int64) string {
         fmt.Println("Error opening database connection")
     }
 	// Perform the query
-	var strkey string
-	strkey = strconv.FormatInt(key, 10)
+	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(MessageByIDQuery, strkey)
 	rows, err := db.Query(db_query)
 	if err != nil {
@@ -499,8 +497,7 @@ func RetrieveTimerByID(key int64) string {
         fmt.Println("Error opening database connection")
     }
 	// Perform the query
-	var strkey string
-	strkey = strconv.FormatInt(key, 10)
+	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(TimerByIDQuery, strkey)
 	rows, err := db.Query(db_query)
 	if err != nil {
@@ -532,8 +529,7 @@ func RetrieveElementByID(key int64) string {
         fmt.Println("Error opening database connection")
     }
 	// Perform the query
-	var strkey string
-	strkey = strconv.FormatInt(key, 10)
+	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(ElementByIDQuery, strkey)
 	rows, err := db.Query(db_query)
 	if err != nil {
