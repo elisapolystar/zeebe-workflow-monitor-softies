@@ -181,7 +181,10 @@ func reader(conn *websocket.Conn) {
 					fmt.Println("Error parsing process to struct: ", err2)
 				}
 
-				elements := RetrieveInstanceByID(processStruct.Value.BpmnProcessId, key)
+				elements, err3 := RetrieveInstanceByID(processStruct.Value.BpmnProcessId, key)
+				if err3 != nil {
+					fmt.Println("Error getting instance by id: ", err3)
+				}
 
 				fmt.Println()
 				fmt.Println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
@@ -221,14 +224,14 @@ func reader(conn *websocket.Conn) {
 				fmt.Println("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
 				fmt.Println()
 
-				combinedJSON, err := concatenateJSON(processJson,
-					elements,
-					variables,
-					timers,
-					incidents)
+				combinedJSON, err4 := concatenateJSON(processJson,
+					[]byte(elements),
+					[]byte(variables),
+					[]byte(timers),
+					[]byte(incidents))
 
-				if err != nil {
-					fmt.Println("Error combining the jsons: ", err)
+				if err4 != nil {
+					fmt.Println("Error combining the jsons: ", err4)
 					return
 				}
 				fmt.Println()
@@ -243,10 +246,10 @@ func reader(conn *websocket.Conn) {
 					Type: "instance",
 					Data: string(*combinedJSON),
 				}
-				instanceDataJson, err := json.Marshal(instanceData)
-				if err != nil {
+				instanceDataJson, err5 := json.Marshal(instanceData)
+				if err5 != nil {
 					fmt.Println("(#asd123J) Error JSON marshalling the instanceData block")
-					fmt.Println(err.Error())
+					fmt.Println(err5.Error())
 				}
 
 				fmt.Println()
@@ -257,9 +260,9 @@ func reader(conn *websocket.Conn) {
 				fmt.Println("!     !     !     !     !     !     !     !     !")
 				fmt.Println()
 
-				err3 := conn.WriteMessage(messageType, instanceDataJson)
-				if err3 != nil {
-					fmt.Println("Error sending instances to frontend", err3)
+				err6 := conn.WriteMessage(messageType, instanceDataJson)
+				if err6 != nil {
+					fmt.Println("Error sending instances to frontend", err6)
 				}
 			}
 
