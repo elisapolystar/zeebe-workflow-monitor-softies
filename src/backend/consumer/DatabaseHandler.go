@@ -235,6 +235,9 @@ func RetrieveProcesses() string {
     }
 	fmt.Println("processes retrieved succesfully")
 	rows, err := db.Query(ProcessesQuery)
+	if err != nil {
+		fmt.Println("Query failed!")
+	}
 	defer rows.Close()
 
 	//array for the processes
@@ -260,13 +263,16 @@ func RetrieveProcessByID(key int64) string {
 	// Connect to the DB
 	db, err := connectToDatabase()
     if err != nil {
-        fmt.Println("Error opening database connection:", err)
+        fmt.Println("Error opening database connection")
     }
 	// Perform the query
 	var strkey string
 	strkey = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(ProcessByIDQuery, strkey)
 	rows, err := db.Query(db_query)
+	if err != nil {
+		fmt.Println("Query failed")
+	}
 	defer rows.Close()
 	fmt.Println("Process retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
@@ -294,7 +300,7 @@ func RetrieveInstanceByID(column string, key int64) (string, error) {
 		fmt.Println("retrieving an instance")
 		db, err := connectToDatabase()
 		if err != nil {
-			fmt.Println("Error opening database connection:", err)
+			fmt.Println("Error opening database connection")
 		}
 		// perform the query
 		var strkey string
@@ -303,7 +309,7 @@ func RetrieveInstanceByID(column string, key int64) (string, error) {
 		rows, err := db.Query(db_query)
 		defer rows.Close()
 		if err != nil {
-			fmt.Println("Query failed: ", err)
+			fmt.Println("Query failed!")
 		}
 		// create the JSON and return it
 		var p ProcessInst
@@ -319,7 +325,7 @@ func RetrieveInstanceByID(column string, key int64) (string, error) {
 		}
 		return string(json), nil
 		} else {
-		return "", errors.New("invalid column!")
+		return "", errors.New("invalid column")
 	}
 }
 // retrieves all process instances from the database, and returns them ordered from newest to oldest.
@@ -328,10 +334,13 @@ func RetrieveInstances() string {
 	//connect to database
 	db, err := connectToDatabase()
     if err != nil {
-        fmt.Println("Error opening database connection:", err)
+        fmt.Println("Error opening database connection")
     }
 	fmt.Println("processes retrieved succesfully")
 	rows, err := db.Query(InstancesQuery)
+	if err != nil {
+		fmt.Println("Query failed!")
+	}
 	defer rows.Close()
 
 	//array for the process instances
@@ -359,7 +368,7 @@ func RetrieveVariableByID(key int64) (string){
 	// Connect to the DB
 	db, err := connectToDatabase()
     if err != nil {
-        fmt.Println("Error opening database connection:", err)
+        fmt.Println("Error opening database connection")
     }
 	// Perform the query
 	var strkey string
@@ -389,13 +398,16 @@ func RetrieveIncidentByID(key int64) string{
 	// Connect to the DB
 	db, err := connectToDatabase()
     if err != nil {
-        fmt.Println("Error opening database connection:", err)
+        fmt.Println("Error opening database connection")
     }
 	// Perform the query
 	var strkey string
 	strkey = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(IncidentByIDQuery, strkey)
 	rows, err := db.Query(db_query)
+	if err != nil {
+        fmt.Println("Query failed")
+    }
 	defer rows.Close()
 	fmt.Println("incident retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
@@ -419,10 +431,13 @@ func RetrieveIncidents() string {
 	//connect to database
 	db, err := connectToDatabase()
     if err != nil {
-        fmt.Println("Error opening database connection:", err)
+        fmt.Println("Error opening database connection")
     }
 	fmt.Println("incidents retrieved succesfully")
 	rows, err := db.Query(IncidentsQuery)
+	if err != nil {
+        fmt.Println("Query failed")
+    }
 	defer rows.Close()
 
 	//array for the incidents
@@ -448,13 +463,16 @@ func RetrieveMessageByID(key int64) string {
 	// Connect to the DB
 	db, err := connectToDatabase()
     if err != nil {
-        fmt.Println("Error opening database connection:", err)
+        fmt.Println("Error opening database connection")
     }
 	// Perform the query
 	var strkey string
 	strkey = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(MessageByIDQuery, strkey)
 	rows, err := db.Query(db_query)
+	if err != nil {
+        fmt.Println("Query failed")
+    }
 	defer rows.Close()
 	fmt.Println("Message retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
@@ -478,13 +496,16 @@ func RetrieveTimerByID(key int64) string {
 	// Connect to the DB
 	db, err := connectToDatabase()
     if err != nil {
-        fmt.Println("Error opening database connection:", err)
+        fmt.Println("Error opening database connection")
     }
 	// Perform the query
 	var strkey string
 	strkey = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(TimerByIDQuery, strkey)
 	rows, err := db.Query(db_query)
+	if err != nil {
+        fmt.Println("Query failed")
+    }
 	defer rows.Close()
 	fmt.Println("Message retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
@@ -508,13 +529,16 @@ func RetrieveElementByID(key int64) string {
 	// Connect to the DB
 	db, err := connectToDatabase()
     if err != nil {
-        fmt.Println("Error opening database connection:", err)
+        fmt.Println("Error opening database connection")
     }
 	// Perform the query
 	var strkey string
 	strkey = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(ElementByIDQuery, strkey)
 	rows, err := db.Query(db_query)
+	if err != nil {
+        fmt.Println("Query failed")
+    }
 	defer rows.Close()
 	fmt.Println("Element retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
