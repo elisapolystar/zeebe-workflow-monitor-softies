@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 	"encoding/json"
-	"database/sql"
 )
 
 func TestProcess(t *testing.T) {
