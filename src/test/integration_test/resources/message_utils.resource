@@ -1,6 +1,10 @@
 *** Settings ***
 Library      Collections
 Library      JSONLibrary
+Library      String
+Library      OperatingSystem
+Library      ./utils/conversions.py
+Variables    ../variables/bpmn.yml
 
 
 *** Keywords ***
@@ -40,4 +44,29 @@ Get All Items With Key From List Of Dicts
         Append To List    ${items}    ${value}
     END
     [Return]    ${items}
+
+
+Get Contents Of A BPMN File
+    [Documentation]   Return the contents of a BPMN file.
+    [Arguments]    ${process_name}
+    ${process_instance} =    Collections.Get From Dictionary    ${bpmn}    ${process_name}
+    ${bpmn_filepath} =    Collections.Get From Dictionary    ${process_instance}    filepath
+    ${bpmn_contents} =    OperatingSystem.Get File    ${bpmn_filepath}
+    [Return]    ${bpmn_contents}
+
+
+Decode Base64 To String
+    [Documentation]    Decode a base64 string. E.g. a Process BPMN.
+    [Arguments]    ${base64}
+    ${bytes} =     conversions.Base64 To Bytes    ${base64}
+    ${string} =    conversions.Bytes To String    ${bytes}
+    [Return]    ${string}
+
+
+Get BPMN From Message
+    [Documentation]    Get the BPMN from a message of string-type JSON.
+    [Arguments]    ${message}
+    ${bpmn_encoded} =    Collections.Get From Dictionary    ${message}    resource
+    ${bpmn} =            Decode Base64 To String    ${bpmn_encoded}
+    [Return]    ${bpmn}
 
