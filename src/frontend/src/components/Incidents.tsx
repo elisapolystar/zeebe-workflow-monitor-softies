@@ -5,31 +5,59 @@ import './Incidents.css';
 import info from './testinstance.json';
 import { format } from 'date-fns';
 
-const Incidents: React.FC = () => {
+interface IncidentProps {
+  socket: WebSocket | null;
+  incidents: string | null;
+}
+
+const Incidents: React.FC<IncidentProps> = ({socket}) => {
 
   const [incidentdata, setincidentData] = useState(info.data.incidents);
+  const [bpmnData, setBpmnData] = useState<string | null>(null);
+
   useEffect(() => {
     setincidentData(info.data.incidents);
   }, []);
 
   const navigate = (path: string) => {
-    window.history.pushState({}, '', path);
-    ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(path));
+    const view = path.split('/');
+    console.log(view);
+    window.history.pushState({}, '', view[1]);
+    ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(`/${view[1]}`, view[2]));
   };
 
-  const getComponentForPath = (path: string) => {
-    switch (path) {
-      case '/Instanceview':
-        return <Instanceview />;
+  const fetchBpmn = (id: string | undefined) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const messageObject = `{ "process_instance": "${id}" }`;
+      socket.send(messageObject);
+      console.log(`Process_instance request ${messageObject} sent from frontend`);
     }
   };
 
+  const getComponentForPath = (path: string, id: string) => {
+    switch (path) {
+      case '/Instanceview':
+        fetchBpmn(id);
+        return bpmnData ? <Instanceview process_instance={bpmnData} /> : <div>Loading...</div>;
+
+      default:
+        return <div>Not Found</div>;
+    }
+  };
+
+  useEffect(() => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.addEventListener('message', (event) => {
+        const message = JSON.parse(event.data);
+
+        if(message.type === 'all-instances' ){
+          setBpmnData(message.data);
+        }
+      });
+    }
+  }, [socket]);
   
   if(incidentdata.length > 0){
-
-    let formattedDate = '';
-    const date = new Date(incidentdata[0].Timestamp);
-    formattedDate = format(date, 'dd-MM-yyyy HH:mm:ss');
     
     return(
       <div className="incident-container">
@@ -37,7 +65,7 @@ const Incidents: React.FC = () => {
         <span>Process Instance Key</span>
           {incidentdata && incidentdata.map((incidentdata, index) => (
             <div className="instance-key" key={index}>
-              <span onClick={() => navigate('/Instanceview')}>{incidentdata.ProcessInstanceKey}</span>
+              <span onClick={() => navigate(`/Instanceview/${incidentdata.ProcessInstanceKey}`)}>{incidentdata.ProcessInstanceKey}</span>
         </div>
         ))}
         </div>
@@ -61,7 +89,7 @@ const Incidents: React.FC = () => {
           <span>Time</span>
           {incidentdata && incidentdata.map((incidentdata, index) => (
             <div className="incident-info">
-              <span>{formattedDate}</span>
+              <span>{format(new Date(incidentdata.Timestamp), 'dd-MM-yyyy HH:mm:ss')}</span>
         </div>
         ))}
         </div>

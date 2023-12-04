@@ -14,17 +14,17 @@ services:
     networks:
       - testenv
 
-  frontend:
-    build:
-      dockerfile: Dockerfile
-      context: src/frontend/
-    container_name: frontend
-    depends_on:
-      - backend
-    ports:
-      - 3000:3000
-    networks:
-      - testenv
+  # frontend:
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: src/frontend/
+  #   container_name: frontend
+  #   depends_on:
+  #     - backend
+  #   ports:
+  #     - 3000:3000
+  #   networks:
+  #     - testenv
 
   zookeeper:
     image: bitnami/zookeeper:3.8.0
