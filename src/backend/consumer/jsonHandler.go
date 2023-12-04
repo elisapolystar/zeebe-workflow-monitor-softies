@@ -163,7 +163,7 @@ func parseInstanceRequest(msg []byte) (*InstanceRequest, error) {
 
 // Add two JSONs together
 func concatenateJSON(json1, json2, json3, json4, json5 []byte) (*[]byte, error) {
-	var process ProcessForFrontend
+	var process ProcessContainer
 	var elements ElementsContainer
 	var variables VariablesContainer
 	var timers TimersContainer
@@ -200,13 +200,13 @@ func concatenateJSON(json1, json2, json3, json4, json5 []byte) (*[]byte, error) 
 	}
 
 	combinedItem := struct {
-		ProcessForFrontend
+		ProcessContainer
 		ElementsContainer
 		VariablesContainer
 		TimersContainer
 		IncidentsContainer
 	}{
-		ProcessForFrontend: process,
+		ProcessContainer:   process,
 		ElementsContainer:  elements,
 		VariablesContainer: variables,
 		TimersContainer:    timers,

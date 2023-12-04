@@ -157,7 +157,7 @@ type IncidentsContainer struct {
 	Incidents []Incident `json:"incidents"`
 }
 type ProcessContainer struct {
-	Process ProcessForFrontend `json:"incidents"`
+	Process ProcessForFrontend `json:"process"`
 }
 
 type ProcessForFrontend struct {
