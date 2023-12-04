@@ -257,21 +257,33 @@ func RetrieveProcessByID(db *sql.DB, key int64) string {
 		fmt.Println("Query failed")
 	}
 	defer rows.Close()
+
+	counter := 0
 	fmt.Println("Process retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
-	// Convert data to a JSON format
+	// Try to convert data to a JSON format
 	var p FullProcess
 	for rows.Next(){
+		counter++
 		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Resource, &p.Timestamp)
 		if err != nil {
 			fmt.Println("Failed to scan row")
 		}
 	}
-	json, err := json.Marshal(p)
-	if err != nil {
-		fmt.Println("Failed to convert data to JSON")
+	//check if rows exist and if not return an error JSON.
+	fmt.Println("Checking if query return rows")
+	if counter == 0 {
+		fmt.Println("results empty. Returning error.")
+		message := GenerateErrorMessage("Process not found")	
+		return message
+	//convert to string otherwise
+	} else {
+		json, err := json.Marshal(p)
+		if err != nil {
+			fmt.Println("Failed to convert data to JSON")
+		}
+		return string(json)	
 	}
-	return string(json)	
   
 }
 // Retrieves an instance from the database. 
@@ -292,20 +304,32 @@ func RetrieveInstanceByID(db *sql.DB, column string, key int64) (string, error) 
 			fmt.Println("Query failed!")
 		}
 		defer rows.Close()
+
+		counter := 0
+
 		// create the JSON and return it
 		var p ProcessInst
 		for rows.Next(){
+			counter++
 			err := rows.Scan(&p.ProcessInstanceKey, &p.PartitionID, &p.ProcessDefinitionKey, &p.BpmnProcessId, &p.Version, &p.Timestamp, &p.Active)
 			if err != nil {
 				fmt.Println("Failed to scan row:", err)
 			}
 		}
-		json, err := json.Marshal(p)
-		if err != nil {
-			fmt.Println("Failed to conver data to JSON")
-		}
-		return string(json), nil
+		if counter == 0 {
+			fmt.Println("results empty. Returning error.")
+			message := GenerateErrorMessage("Instance not found")	
+			return message, nil
+		//convert to string otherwise
 		} else {
+			json, err := json.Marshal(p)
+			if err != nil {
+				fmt.Println("Failed to conver data to JSON")
+			}
+			return string(json), nil
+		}
+
+	} else {
 		return "", errors.New("invalid column")
 	}
 }
@@ -501,3 +525,15 @@ func RetrieveElementByID(db *sql.DB, key int64) string {
 	return string(json)		
 }
 
+//generates message for error
+func GenerateErrorMessage(message string) string {
+	fmt.Println("results empty. Returning error.")
+	errorMessageValue := ErrorMessageValue {
+		Error: message,
+	}
+	errorJSON, err := json.MarshalIndent(errorMessageValue, "", "  ")
+	if err != nil {
+		fmt.Println("generated error message could not be parsed.")
+	}
+	return string(errorJSON)
+}

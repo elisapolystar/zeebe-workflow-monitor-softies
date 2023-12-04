@@ -136,3 +136,7 @@ type ElementValue struct {
 	ElementId            string `json:"elementId"`
 	BpmnElementType      string `json:"bpmnElementType"`
 }
+
+type ErrorMessageValue struct {
+	Error string
+}
