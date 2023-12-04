@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import './Processes.css'; 
 import BPMNView from './BPMNView.tsx';
-import {format} from 'date-fns'
+import Instances from './Instances.tsx';
+import { format } from 'date-fns';
+
 
 interface ProcessProps {
   socket: WebSocket | null;
@@ -12,12 +14,13 @@ interface ProcessProps {
 const Processes: React.FC<ProcessProps> = ({socket, processes}) => {
   const [bpmnData, setBpmnData] = useState<string | null>(null);
   const processesData = processes ? JSON.parse(processes) : [];
+  const [instancesData, setInstances] = useState<string | null>(null);
 
-  const navigate = (path: string) => {
-    const view = path.split('/');
-    console.log(view);
-    window.history.pushState({}, '', view[1]);
-    ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(`/${view[1]}`, view[2]));
+  const navigate = (navData: string) => {
+    const view = navData.split('/');
+    const path = `/${view[1]}`;
+    const id = view[2];
+    getComponentForPath(path, id)
   };
 
   const fetchBpmn = (id: string | undefined) => {
@@ -28,14 +31,24 @@ const Processes: React.FC<ProcessProps> = ({socket, processes}) => {
     }
   };
 
+  const fetchInstancesForProcess = (id: string | undefined) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const messageObject = `{ "instances-for-process": "${id}" }`;
+      socket.send(messageObject);
+      console.log(`Instance request for process ${messageObject} sent from frontend`);
+    }
+  };
+
   const getComponentForPath = (path: string, id: string) => {
     switch (path) {
+
       case '/BPMNView':
         fetchBpmn(id);
-        return bpmnData ? <BPMNView process={bpmnData} /> : <div>Loading...</div>;
+        return;
 
-      default:
-        return <div>Not Found</div>;
+      case '/instances':
+        fetchInstancesForProcess(id);
+        return;
     }
   };
 
@@ -43,10 +56,30 @@ const Processes: React.FC<ProcessProps> = ({socket, processes}) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.addEventListener('message', (event) => {
         const message = JSON.parse(event.data);
+        const type = message.type;
+        let data;
+        let path;
 
-        if(message.type === 'all-processes' ){
-          setBpmnData(message.data);
+        switch(type) {
+          case 'process':
+            console.log(`Process recieved: ${message.data}`)
+            setBpmnData(message.data);
+            data = <BPMNView process={bpmnData}/>;
+            path = '/BPMNView'
+            break;
+          
+          case 'instances-for-process':
+            console.log(`Instances for a process recieved: ${message.data}`)
+            setInstances(message.data);
+            data = <Instances socket={socket} instances={instancesData} />;
+            path = '/instances';
+            break;
+          
+          default: return;
         }
+        window.history.pushState({}, '', path);
+        const root = ReactDOM.createRoot(document.getElementById('content') as HTMLElement);
+        root.render(data);
       });
     }
   }, [socket]);
@@ -73,7 +106,7 @@ const Processes: React.FC<ProcessProps> = ({socket, processes}) => {
         <span>Instances</span>
         {processesData.map((item, index) => (
           <div className="process-info" key={index}>
-            <span>{item.instances}</span>
+            <span onClick={() => navigate(`/Instances/${item.processDefinitionKey}`)}>{item.instances}</span>
           </div>
         ))}
       </div>

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import info from './testinstance.json';
 import './instanceview.css';
 
-interface InstanceviewProps {
+interface InstanceViewProps {
   process_instance: string | null;
 }
 
@@ -12,7 +12,7 @@ const encodedBpmn = info.data.process.Resource;
 const xml = atob(encodedBpmn);
 console.log(xml);
 
-const Instanceview: React.FC<InstanceviewProps> = () => {
+const Instanceview: React.FC<InstanceViewProps> = () => {
   const [diagramData, setDiagramData] = useState<string | null>(null);
   const [instanceData, setInstanceData] = useState(info.data.variables);
 
