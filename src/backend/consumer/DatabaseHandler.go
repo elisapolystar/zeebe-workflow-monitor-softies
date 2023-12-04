@@ -304,20 +304,32 @@ func RetrieveInstanceByID(db *sql.DB, column string, key int64) (string, error) 
 			fmt.Println("Query failed!")
 		}
 		defer rows.Close()
+
+		counter := 0
+
 		// create the JSON and return it
 		var p ProcessInst
 		for rows.Next(){
+			counter++
 			err := rows.Scan(&p.ProcessInstanceKey, &p.PartitionID, &p.ProcessDefinitionKey, &p.BpmnProcessId, &p.Version, &p.Timestamp, &p.Active)
 			if err != nil {
 				fmt.Println("Failed to scan row:", err)
 			}
 		}
-		json, err := json.Marshal(p)
-		if err != nil {
-			fmt.Println("Failed to conver data to JSON")
-		}
-		return string(json), nil
+		if counter == 0 {
+			fmt.Println("results empty. Returning error.")
+			message := GenerateErrorMessage("Instance not found")	
+			return message, nil
+		//convert to string otherwise
 		} else {
+			json, err := json.Marshal(p)
+			if err != nil {
+				fmt.Println("Failed to conver data to JSON")
+			}
+			return string(json), nil
+		}
+
+	} else {
 		return "", errors.New("invalid column")
 	}
 }
