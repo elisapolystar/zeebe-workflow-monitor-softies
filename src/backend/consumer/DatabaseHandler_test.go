@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 	"encoding/json"
+	"database/sql"
 )
 
 func TestProcess(t *testing.T) {
@@ -24,7 +25,7 @@ func TestProcess(t *testing.T) {
 
 	//parse to array
 	var jsonArray []SimpleProcess
-	err := json.Unmarshal([]byte(actualJSON), &jsonArray)
+	err = json.Unmarshal([]byte(actualJSON), &jsonArray)
 	if err != nil {
 		t.Errorf("generated json could not be parsed.")
 	}
@@ -56,6 +57,10 @@ func TestInstance(t *testing.T) {
 
 func TestVariable(t *testing.T) {
 
+	db, err := connectToDatabase()
+	if err != nil {
+		fmt.Println("Database connection failed")
+	}
 	//create a variable
 	variable := CreateVariable()
 
@@ -110,14 +115,3 @@ func TestTimer(t *testing.T) {
 	//TODO: test timer
 }
 
-func connectToDatabase() (*sql.DB, error){
-	//pass variables to the connection string
-	DBConnection := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, DBname)
-	// Open a database connection, and check that it works
-	db, err := sql.Open("postgres", DBConnection)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println("Connected to the database!")
-	return db, nil
-}
