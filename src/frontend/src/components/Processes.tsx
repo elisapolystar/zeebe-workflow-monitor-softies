@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom/client';
 import './Processes.css'; 
 import BPMNView from './BPMNView.tsx';
 import {format} from 'date-fns';
@@ -9,11 +8,10 @@ import Instances from './Instances.tsx';
 interface ProcessProps {
   socket: WebSocket | null;
   processes: string | null;
+  setContent: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
 }
 
-const Processes: React.FC<ProcessProps> = ({socket, processes}) => {
-  const [bpmnData, setBpmnData] = useState<string | null>(null);
-  const [instancesData, setInstances ] = useState<string | null>(null);
+const Processes: React.FC<ProcessProps> = ({ socket, processes, setContent }) => {
   const processesData = processes ? JSON.parse(processes) : [];
 
   const navigate = (navData: string) => {
@@ -69,15 +67,14 @@ const Processes: React.FC<ProcessProps> = ({socket, processes}) => {
           
           case 'instances-for-process':
             console.log(`Instances for a process recieved: ${message.data}`)
-            data = <Instances socket={socket} instances={message.data} />;
+            data = <Instances socket={socket} instances={message.data} setContent={setContent} />;
             path = '/instances';
             break;
           
           default: return;
         }
         window.history.pushState({}, '', path);
-        const root = ReactDOM.createRoot(document.getElementById('content') as HTMLElement);
-        root.render(data);
+        setContent(data);
       });
     }
   }, [socket]);

@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import './Instances.css';
-import ReactDOM from 'react-dom/client';
 import Instanceview from './Instanceview.tsx';
 import { format } from 'date-fns';
 
 interface InstanceProps {
   socket: WebSocket | null;
   instances: string | null;
+  setContent: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
 }
 
-const Instances: React.FC<InstanceProps> = ({socket, instances}) => {
+const Instances: React.FC<InstanceProps> = ({socket, instances, setContent}) => {
   const [instanceData, setInstanceData] = useState<string | null>(null);
   const instancesData = instances ? JSON.parse(instances) : [];
 
@@ -53,8 +53,7 @@ const Instances: React.FC<InstanceProps> = ({socket, instances}) => {
 
           default: return;
         }
-        window.history.pushState({}, '', path);
-        ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(data);
+        setContent(data);
       });
     }
   }, [socket]);

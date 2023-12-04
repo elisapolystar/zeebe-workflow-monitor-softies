@@ -1,16 +1,15 @@
-import React, {useState, useEffect} from 'react';
-import ReactDOM from 'react-dom/client';
+import React, {useEffect} from 'react';
 import Instanceview from './Instanceview.tsx';
 import './Incidents.css';
-import info from './testinstance.json';
 import { format } from 'date-fns';
 
 interface IncidentProps {
   socket: WebSocket | null;
   incidents: string | null;
+  setContent: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
 }
 
-const Incidents: React.FC<IncidentProps> = ({socket, incidents}) => {
+const Incidents: React.FC<IncidentProps> = ({socket, incidents, setContent}) => {
   //const [incidentdata, setincidentData] = useState(info.data.incidents);
   const incidentdata = incidents ? JSON.parse(incidents) : [];
 
@@ -59,8 +58,7 @@ const Incidents: React.FC<IncidentProps> = ({socket, incidents}) => {
 
           default: return;
         }
-        window.history.pushState({}, '', path);
-        ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(data);
+        setContent(data);
       });
     }
   }, [socket]);
