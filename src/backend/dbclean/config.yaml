@@ -1,0 +1,3 @@
+tz: Europe/Helsinki
+cron: "15 */8 * * *"
+days: 5

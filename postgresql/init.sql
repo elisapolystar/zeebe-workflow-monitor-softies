@@ -1,6 +1,4 @@
-CREATE USER test PASSWORD 'password';
-CREATE DATABASE workflow OWNER test;
-GRANT CONNECT ON DATABASE workflow TO test;
+CREATE DATABASE workflow OWNER postgres;
 \c workflow;
 
 CREATE TABLE IF NOT EXISTS process (
@@ -14,7 +12,8 @@ CREATE TABLE IF NOT EXISTS process (
 CREATE TABLE IF NOT EXISTS process_instance (
     ProcessInstanceKey BIGINT PRIMARY KEY,
     PartitionID BIGINT NOT NULL,
-    ProcessDefinitionKey BIGINT NOT NULL,
+    ProcessDefinitionKey BIGINT NOT NULL
+    REFERENCES process(Key) ON DELETE CASCADE,
     BpmnProcessId VARCHAR(50) NOT NULL,
     Version INT NOT NULL,
     Timestamp BIGINT NOT NULL,
@@ -26,14 +25,18 @@ CREATE TABLE IF NOT EXISTS variable (
     Position BIGINT NOT NULL,
     Name VARCHAR(50) NOT NULL,
     Value VARCHAR(50) NOT NULL,
-    ProcessInstanceKey BIGINT REFERENCES process_instance (ProcessInstanceKey),
+    ProcessInstanceKey BIGINT
+    REFERENCES process_instance(ProcessInstanceKey)
+    ON DELETE CASCADE,
     ScopeKey BIGINT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS job (
     Key BIGINT PRIMARY KEY,
     Timestamp BIGINT NOT NULL,
-    ProcessInstanceKey BIGINT REFERENCES process_instance (ProcessInstanceKey),
+    ProcessInstanceKey BIGINT
+    REFERENCES process_instance(ProcessInstanceKey)
+    ON DELETE CASCADE,
     ElementInstanceKey BIGINT NOT NULL,
     JobType VARCHAR(50),
     Worker VARCHAR(50),
@@ -43,7 +46,9 @@ CREATE TABLE IF NOT EXISTS job (
 CREATE TABLE IF NOT EXISTS incident (
     Key BIGINT PRIMARY KEY,
     BpmnProcessId VARCHAR(50) NOT NULL,
-    ProcessInstanceKey BIGINT REFERENCES process_instance (ProcessInstanceKey),
+    ProcessInstanceKey BIGINT
+    REFERENCES process_instance(ProcessInstanceKey)
+    ON DELETE CASCADE,
     ElementInstanceKey BIGINT NOT NULL,
     JobKey BIGINT NOT NULL,
     ErrorType VARCHAR(50) NOT NULL,
@@ -63,7 +68,9 @@ CREATE TABLE IF NOT EXISTS timer (
     Key BIGINT PRIMARY KEY,
     Timestamp BIGINT NOT NULL,
     ProcessDefinitionKey BIGINT NOT NULL,
-    ProcessInstanceKey BIGINT NOT NULL,
+    ProcessInstanceKey BIGINT NOT NULL
+    REFERENCES process_instance(ProcessInstanceKey)
+    ON DELETE CASCADE,
     ElementInstanceKey BIGINT NOT NULL,
     TargetElementId VARCHAR(50) NOT NULL,
     Duedate BIGINT NOT NULL,
@@ -72,7 +79,9 @@ CREATE TABLE IF NOT EXISTS timer (
 
 CREATE TABLE IF NOT EXISTS element (
     Key BIGINT PRIMARY KEY,
-    ProcessInstanceKey BIGINT NOT NULL,
+    ProcessInstanceKey BIGINT NOT NULL
+    REFERENCES process_instance(ProcessInstanceKey)
+    ON DELETE CASCADE,
     ProcessDefinitionKey BIGINT NOT NULL,
     BpmnProcessId VARCHAR(50) NOT NULL,
     ElementId VARCHAR(50) NOT NULL,
