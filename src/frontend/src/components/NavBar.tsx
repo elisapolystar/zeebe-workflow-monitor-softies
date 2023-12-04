@@ -14,6 +14,7 @@ interface NavBarProps {
 const NavBar: React.FC<NavBarProps> = ({ socket }) => {
   const [processesData, setProcesses] = useState<string | null>(null);
   const [instancesData, setInstances] = useState<string | null>(null);
+  const [incidentsData, setIncidents] = useState<string | null>(null);
 
   const fetchProcesses = () => {
     if (socket && socket.readyState === WebSocket.OPEN) {
@@ -46,6 +47,9 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
         return
       case '/incidents':
         return <Incidents />;
+        //fetchInstances(undefined);
+        //return incidentsData ? <Incidents socket={socket} incidents={incidentsData} /> : <div>Loading...</div>;
+
       default:
         if(!processesData) fetchProcesses();
     }
@@ -104,5 +108,3 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
 };
 
 export default NavBar;
-
-
