@@ -156,6 +156,9 @@ type TimersContainer struct {
 type IncidentsContainer struct {
 	Incidents []Incident `json:"incidents"`
 }
+type ProcessContainer struct {
+	Process ProcessForFrontend `json:"incidents"`
+}
 
 type ProcessForFrontend struct {
 	Key           int64  `json:"key"`
