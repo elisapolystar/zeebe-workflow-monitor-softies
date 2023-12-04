@@ -11,14 +11,13 @@ interface InstanceProps {
 }
 
 const Instances: React.FC<InstanceProps> = ({socket}) => {
-  const [instancedata, setInstanceData] = useState(data);
+  const [instanceData, setInstanceData] = useState(data);
   //const [instancedata, setInstanceData] = useState<string | null>(null);
 
   const navigate = (path: string) => {
     const view = path.split('/');
     console.log(view);
-    window.history.pushState({}, '', view[1]);
-    ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(`/${view[1]}`, view[2]));
+    getComponentForPath(`/${view[1]}`, view[2])
   };
 
   const fetchInstance = (id: string | undefined) => {
@@ -33,7 +32,7 @@ const Instances: React.FC<InstanceProps> = ({socket}) => {
     switch (path) {
       case '/Instanceview':
         fetchInstance(id);
-        return instancedata ? <Instanceview instance={instancedata} /> : <div>Loading...</div>;
+        return instanceData ? <Instanceview instance={instanceData} /> : <div>Loading...</div>;
     }
   };
 
@@ -42,27 +41,35 @@ const Instances: React.FC<InstanceProps> = ({socket}) => {
       socket.addEventListener('message', (event) => {
         const message = JSON.parse(event.data);
         const type = message.type;
+        let path;
+        let data;
 
         switch(type) {
           case 'instances':
             console.log(`Data for an instance recieved: ${message.data}`)
             setInstanceData(message.data);
-            return;
+            path = '/instances';
+            data = <Instances socket={socket} instances={instanceData} />
+            break;
+
+          default: return;
         }
+        window.history.pushState({}, '', path);
+        ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(data);
       });
     }
   }, [socket]);
 
   let formattedDate = '';
-  const date = new Date(instancedata[0].value.Timestamp);
+  const date = new Date(instanceData[0].value.Timestamp);
   formattedDate = format(date, 'dd-MM-yyyy HH:mm:ss');
 
   return (
     <div className="instance-container">
       <div className="instance-item">
         <span>Process Instance Key</span>
-        {instancedata &&
-          instancedata.map((instancedata, index) => (
+        {instanceData &&
+          instanceData.map((instancedata, index) => (
             <div className="definition-key" key={index}>
               <span onClick={() => navigate(`/Instanceview/${instancedata.value.processInstanceKey}`)}>{instancedata.value.processInstanceKey}</span>
             </div>
@@ -71,8 +78,8 @@ const Instances: React.FC<InstanceProps> = ({socket}) => {
 
       <div className="instance-item">
         <span>BPMN Process Id</span>
-        {instancedata &&
-          instancedata.map((instancedata) => (
+        {instanceData &&
+          instanceData.map((instancedata) => (
             <div className = "instance-info">
               <span>{instancedata.value.bpmnProcessId}</span>
             </div>
@@ -81,8 +88,8 @@ const Instances: React.FC<InstanceProps> = ({socket}) => {
       </div>
       <div className="instance-item">
         <span>State</span>
-        {instancedata &&
-          instancedata.map((instancedata) => (
+        {instanceData &&
+          instanceData.map((instancedata) => (
             <div className="instance-info">
               <span>{instancedata.value.state}</span>
             </div>
@@ -90,8 +97,8 @@ const Instances: React.FC<InstanceProps> = ({socket}) => {
       </div>
       <div className="instance-item">
         <span>Time</span>
-        {instancedata &&
-          instancedata.map((instancedata) => ( 
+        {instanceData &&
+          instanceData.map((instancedata) => ( 
             <div className="instance-info">
               <span>{formattedDate}</span>
             </div>
@@ -100,8 +107,8 @@ const Instances: React.FC<InstanceProps> = ({socket}) => {
 
       <div className="instance-item">
         <span>Process Definition Key</span>
-        {instancedata &&
-          instancedata.map((instancedata) => (
+        {instanceData &&
+          instanceData.map((instancedata) => (
             <div className="definition-key">
               <span>{instancedata.value.parentProcessInstanceKey}</span>
             </div>

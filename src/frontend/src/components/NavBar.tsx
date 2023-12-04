@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom/client';
+import ReactDOM, { Root } from 'react-dom/client';
 import Processes from './Processes.tsx';
 import Instances from './Instances.tsx';
 import Incidents from './Incidents.tsx';
 import './NavBar.css';
+import App from '../App.tsx';
+
 
 interface NavBarProps {
   socket: WebSocket | null;
@@ -29,29 +31,33 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
     }
   };
 
-  const navigate = (path: string) => {
-    window.history.pushState({}, '', path);
-    ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(path));
+  const navigate = async (path: string) => {
+    getComponentForPath(path);
+    return;
   };
 
   const getComponentForPath = (path: string) => {
     switch (path) {
       case '/processes':
         fetchProcesses();
-        return processesData ? <Processes socket={socket} processes={processesData} /> : <div>Loading...</div>;
+        return 
       case '/instances':
         fetchInstances();
-        return instancesData ? <Instances socket={socket} instances={instancesData} /> : <div>Loading...</div>;
+        return
       case '/incidents':
         return <Incidents />;
       default:
         if(!processesData) fetchProcesses();
-        return processesData ? <Processes socket={socket} processes={processesData} /> : <div>Loading...</div>;
     }
   };
 
   useEffect(() => {
+    console.log('checking connection');
     if (socket && socket.readyState === WebSocket.OPEN) {
+      console.log('connection OK');
+      let path;
+      let data;
+    
       socket.addEventListener('message', (event) => {
 
         const message = JSON.parse(event.data);
@@ -60,13 +66,24 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
           case 'all-processes':
             console.log(`Processes recieved: ${message.data}`)
             setProcesses(message.data);
-            return;
+            path = '/processes';
+            data = <Processes socket={socket} processes={processesData} />
+            console.log(path);
+            break;
           
           case 'all-instances':
             console.log(`Instances recieved: ${message.data}`)
             setInstances(message.data);
-            return;
+            path = '/instances';
+            data = <Instances socket={socket} instances={instancesData} />
+            break;
+          
+          default: return;
         }
+        console.log('Trying to render content')
+        window.history.pushState({}, '', path);
+        ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(data);
+        
       });
     }
   }, [socket]);
@@ -81,7 +98,6 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
         </ul>
       </nav>
       <div id="content">
-        {getComponentForPath(window.location.pathname)}
       </div>
     </div>
   );

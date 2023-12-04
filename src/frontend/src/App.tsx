@@ -10,7 +10,6 @@ const App: React.FC = () => {
 
     newSocket.onopen = () => {
       console.log("Successfully Connected");
-      //newSocket.send('Hi from the client!');
       setSocket(newSocket);
     };
 

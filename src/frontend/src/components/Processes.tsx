@@ -15,11 +15,11 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
   const [bpmnData, setBpmnData] = useState<string | null>(null);
   const [instancesData, setInstances] = useState<string | null>(null);
 
-  const navigate = (path: string) => {
-    const view = path.split('/');
-    console.log(view);
-    window.history.pushState({}, '', view[1]);
-    ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(`/${view[1]}`, view[2]));
+  const navigate = (navData: string) => {
+    const view = navData.split('/');
+    const path = `/${view[1]}`;
+    const id = view[2];
+    getComponentForPath(path, id)
   };
 
   const fetchBpmn = (id: string | undefined) => {
@@ -43,14 +43,11 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
 
       case '/BPMNView':
         fetchBpmn(id);
-        return bpmnData ? <BPMNView process={bpmnData} /> : <div>Loading...</div>;
+        return;
 
       case '/instances':
         fetchInstancesForProcess(id);
-        return instancesData ? <Instances socket={socket} instances={instancesData} /> : <div>Loading...</div>;
-
-      default:
-        return <div>Not Found</div>;
+        return;
     }
   };
 
@@ -59,18 +56,29 @@ const Processes: React.FC<ProcessProps> = ({socket}) => {
       socket.addEventListener('message', (event) => {
         const message = JSON.parse(event.data);
         const type = message.type;
+        let data;
+        let path;
 
         switch(type) {
           case 'process':
             console.log(`Process recieved: ${message.data}`)
             setBpmnData(message.data);
-            return;
+            data = <BPMNView process={bpmnData}/>;
+            path = '/BPMNView'
+            break;
           
           case 'instances-for-process':
             console.log(`Instances for a process recieved: ${message.data}`)
             setInstances(message.data);
-            return;
+            data = <Instances socket={socket} instances={instancesData} />;
+            path = '/instances';
+            break;
+          
+          default: return;
         }
+        window.history.pushState({}, '', path);
+        const root = ReactDOM.createRoot(document.getElementById('content') as HTMLElement);
+        root.render(data);
       });
     }
   }, [socket]);
