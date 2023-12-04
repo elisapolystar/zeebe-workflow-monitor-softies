@@ -156,3 +156,11 @@ type TimersContainer struct {
 type IncidentsContainer struct {
 	Incidents []Incident `json:"incidents"`
 }
+
+type ProcessForFrontend struct {
+	Key           int64  `json:"key"`
+	BpmnProcessId string `json:"bpmnProcessId"`
+	Version       int64  `json:"version"`
+	Resource      string `json:"resource"`
+	Timestamp     int64  `json:"timestamp"`
+}
