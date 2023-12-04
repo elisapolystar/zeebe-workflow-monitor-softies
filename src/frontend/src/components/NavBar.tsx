@@ -45,7 +45,8 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
         fetchInstances();
         return
       case '/incidents':
-        return <Incidents />;
+        fetchInstances();
+        return
       default:
         if(!processesData) fetchProcesses();
     }
@@ -65,17 +66,15 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
         switch(type) {
           case 'all-processes':
             console.log(`Processes recieved: ${message.data}`)
-            setProcesses(message.data);
             path = '/processes';
-            data = <Processes socket={socket} processes={processesData} />
+            data = <Processes socket={socket} processes={message.data} />
             console.log(path);
             break;
           
           case 'all-instances':
             console.log(`Instances recieved: ${message.data}`)
-            setInstances(message.data);
             path = '/instances';
-            data = <Instances socket={socket} instances={instancesData} />
+            data = <Instances socket={socket} instances={message.data} />
             break;
           
           default: return;

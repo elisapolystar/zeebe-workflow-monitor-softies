@@ -4,7 +4,7 @@ import info from './testinstance.json';
 import './instanceview.css';
 
 interface InstanceViewProps {
-  instance: string | null;
+  process_instance: string | null;
 }
 
 //change base64 coded resource to xml

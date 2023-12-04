@@ -10,9 +10,9 @@ interface InstanceProps {
   instances: string | null;
 }
 
-const Instances: React.FC<InstanceProps> = ({socket}) => {
-  const [instanceData, setInstanceData] = useState(data);
-  //const [instancedata, setInstanceData] = useState<string | null>(null);
+const Instances: React.FC<InstanceProps> = ({socket, instances}) => {
+  const [instanceData, setInstanceData] = useState<string | null>(null);
+  const instancesData = instances ? JSON.parse(instances) : [];
 
   const navigate = (path: string) => {
     const view = path.split('/');
@@ -32,7 +32,7 @@ const Instances: React.FC<InstanceProps> = ({socket}) => {
     switch (path) {
       case '/Instanceview':
         fetchInstance(id);
-        return instanceData ? <Instanceview instance={instanceData} /> : <div>Loading...</div>;
+        return instanceData ? <Instanceview process_instance={instanceData} /> : <div>Loading...</div>;
     }
   };
 
@@ -60,57 +60,48 @@ const Instances: React.FC<InstanceProps> = ({socket}) => {
     }
   }, [socket]);
 
-  let formattedDate = '';
-  const date = new Date(instanceData[0].value.Timestamp);
-  formattedDate = format(date, 'dd-MM-yyyy HH:mm:ss');
-
   return (
     <div className="instance-container">
       <div className="instance-item">
         <span>Process Instance Key</span>
-        {instanceData &&
-          instanceData.map((instancedata, index) => (
+        {instancesData.map((instancedata, index) => (
             <div className="definition-key" key={index}>
-              <span onClick={() => navigate(`/Instanceview/${instancedata.value.processInstanceKey}`)}>{instancedata.value.processInstanceKey}</span>
+              <span onClick={() => navigate(`/Instanceview/${instancedata.ProcessInstanceKey}`)}>{instancedata.ProcessInstanceKey}</span>
             </div>
         ))}
       </div>
 
       <div className="instance-item">
         <span>BPMN Process Id</span>
-        {instanceData &&
-          instanceData.map((instancedata) => (
+        {instancesData.map((instancedata) => (
             <div className = "instance-info">
-              <span>{instancedata.value.bpmnProcessId}</span>
+              <span>{instancedata.BpmnProcessId}</span>
             </div>
         ))}
         
       </div>
       <div className="instance-item">
-        <span>State</span>
-        {instanceData &&
-          instanceData.map((instancedata) => (
+        <span>Active</span>
+        {instancesData.map((instancedata) => (
             <div className="instance-info">
-              <span>{instancedata.value.state}</span>
+              <span>{instancedata.Active.toString()}</span>
             </div>
         ))}
       </div>
       <div className="instance-item">
         <span>Time</span>
-        {instanceData &&
-          instanceData.map((instancedata) => ( 
+        {instancesData.map((instancedata) => ( 
             <div className="instance-info">
-              <span>{formattedDate}</span>
+              <span>{format(new Date(instancedata.Timestamp), 'dd-MM-yyyy HH:mm:ss')}</span>
             </div>
         ))}
       </div>
 
       <div className="instance-item">
         <span>Process Definition Key</span>
-        {instanceData &&
-          instanceData.map((instancedata) => (
+        {instancesData.map((instancedata) => (
             <div className="definition-key">
-              <span>{instancedata.value.parentProcessInstanceKey}</span>
+              <span>{instancedata.ProcessDefinitionKey}</span>
             </div>
         ))}
     </div>
