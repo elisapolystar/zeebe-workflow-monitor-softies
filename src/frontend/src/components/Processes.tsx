@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import './Processes.css'; 
 import BPMNView from './BPMNView.tsx';
-import {format} from 'date-fns'import Instances from './Instances.tsx';
+import {format} from 'date-fns';
+import Instances from './Instances.tsx';
 
 
 interface ProcessProps {
@@ -12,6 +13,7 @@ interface ProcessProps {
 
 const Processes: React.FC<ProcessProps> = ({socket, processes}) => {
   const [bpmnData, setBpmnData] = useState<string | null>(null);
+  const [instancesData, setInstances ] = useState<string | null>(null);
   const processesData = processes ? JSON.parse(processes) : [];
 
   const navigate = (navData: string) => {
@@ -39,7 +41,7 @@ const Processes: React.FC<ProcessProps> = ({socket, processes}) => {
 
   const getComponentForPath = (path: string, id: string) => {
     switch (path) {
-
+      
       case '/BPMNView':
         fetchBpmn(id);
         return;
@@ -61,15 +63,13 @@ const Processes: React.FC<ProcessProps> = ({socket, processes}) => {
         switch(type) {
           case 'process':
             console.log(`Process recieved: ${message.data}`)
-            setBpmnData(message.data);
-            data = <BPMNView process={bpmnData}/>;
+            data = <BPMNView process={message.data}/>;
             path = '/BPMNView'
             break;
           
           case 'instances-for-process':
             console.log(`Instances for a process recieved: ${message.data}`)
-            setInstances(message.data);
-            data = <Instances socket={socket} instances={instancesData} />;
+            data = <Instances socket={socket} instances={message.data} />;
             path = '/instances';
             break;
           

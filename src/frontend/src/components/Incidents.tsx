@@ -5,25 +5,65 @@ import './Incidents.css';
 import info from './testinstance.json';
 import { format } from 'date-fns';
 
-const Incidents: React.FC = () => {
+interface IncidentProps {
+  socket: WebSocket | null;
+  incidents: string | null;
+}
 
-  const [incidentdata, setincidentData] = useState(info.data.incidents);
+const Incidents: React.FC<IncidentProps> = ({socket, incidents}) => {
+  //const [incidentdata, setincidentData] = useState(info.data.incidents);
+  const incidentdata = incidents ? JSON.parse(incidents) : [];
+
+
   useEffect(() => {
-    setincidentData(info.data.incidents);
+    //setincidentData(info.data.incidents);
   }, []);
 
-  const navigate = (path: string) => {
-    window.history.pushState({}, '', path);
-    ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(getComponentForPath(path));
-  };
-
-  const getComponentForPath = (path: string) => {
-    switch (path) {
-      case '/Instanceview':
-        return <Instanceview />;
+  const fetchInstance = (id: string | undefined) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const messageObject = `{ "instance": "${id}" }`;
+      socket.send(messageObject);
+      console.log(`Instance request for process ${messageObject} sent from frontend`);
     }
   };
 
+  const navigate = (navData: string) => {
+    const view = navData.split('/');
+    const path = `/${view[1]}`;
+    const id = view[2];
+    getComponentForPath(path, id)
+  };
+
+  const getComponentForPath = (path: string, id: string) => {
+    switch (path) {
+      case '/Instanceview':
+        fetchInstance(id)
+        return 
+    }
+  };
+
+  useEffect(() => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.addEventListener('message', (event) => {
+        const message = JSON.parse(event.data);
+        const type = message.type;
+        let path;
+        let data;
+
+        switch(type) {
+          case 'instances':
+            console.log(`Data for an instance recieved: ${message.data}`)
+            path = '/Instanceview';
+            data = <Instanceview process_instance={message.data} />;
+            break;
+
+          default: return;
+        }
+        window.history.pushState({}, '', path);
+        ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(data);
+      });
+    }
+  }, [socket]);
   
   if(incidentdata.length > 0){
 
@@ -37,7 +77,7 @@ const Incidents: React.FC = () => {
         <span>Process Instance Key</span>
           {incidentdata && incidentdata.map((incidentdata, index) => (
             <div className="instance-key" key={index}>
-              <span onClick={() => navigate('/Instanceview')}>{incidentdata.ProcessInstanceKey}</span>
+              <span onClick={() => navigate(`/Instanceview/${incidentdata.ProcessInstanceKey}`)}>{incidentdata.ProcessInstanceKey}</span>
         </div>
         ))}
         </div>

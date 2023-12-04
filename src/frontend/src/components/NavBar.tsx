@@ -32,6 +32,14 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
     }
   };
 
+  const fetchIncidents = () => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const messageObject = '{ "incident": "" }';
+      socket.send(messageObject);
+      console.log(`Incident request ${messageObject} sent from frontend`);
+    }
+  };
+
   const navigate = async (path: string) => {
     getComponentForPath(path);
     return;
@@ -46,7 +54,8 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
         fetchInstances();
         return
       case '/incidents':
-        return <Incidents />;
+        fetchIncidents();
+        return
         //fetchInstances(undefined);
         //return incidentsData ? <Incidents socket={socket} incidents={incidentsData} /> : <div>Loading...</div>;
 
@@ -67,19 +76,23 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
         const message = JSON.parse(event.data);
         const type = message.type;
         switch(type) {
+          
           case 'all-processes':
             console.log(`Processes recieved: ${message.data}`)
-            setProcesses(message.data);
             path = '/processes';
-            data = <Processes socket={socket} processes={processesData} />
-            console.log(path);
+            data = <Processes socket={socket} processes={message.data} />
             break;
           
           case 'all-instances':
             console.log(`Instances recieved: ${message.data}`)
-            setInstances(message.data);
             path = '/instances';
-            data = <Instances socket={socket} instances={instancesData} />
+            data = <Instances socket={socket} instances={message.data} />
+            break;
+
+          case 'all-incidents':
+            console.log(`Incidents recieved: ${message.data}`)
+            path = '/incidents';
+            data = <Incidents socket={socket} incidents={message.data} />
             break;
           
           default: return;

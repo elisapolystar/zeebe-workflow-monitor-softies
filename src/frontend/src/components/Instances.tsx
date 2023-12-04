@@ -8,13 +8,9 @@ interface InstanceProps {
   socket: WebSocket | null;
   instances: string | null;
 }
-interface InstanceProps {
-  socket: WebSocket | null;
-  instances: string | null;
-}
 
 const Instances: React.FC<InstanceProps> = ({socket, instances}) => {
-  const [bpmnData, setBpmnData] = useState<string | null>(null);
+  const [instanceData, setInstanceData] = useState<string | null>(null);
   const instancesData = instances ? JSON.parse(instances) : [];
 
   const navigate = (path: string) => {
@@ -32,11 +28,10 @@ const Instances: React.FC<InstanceProps> = ({socket, instances}) => {
   };
 
   const getComponentForPath = (path: string, id: string) => {
-  const getComponentForPath = (path: string, id: string) => {
     switch (path) {
       case '/Instanceview':
         fetchInstance(id);
-        return instanceData ? <Instanceview instance={instanceData} /> : <div>Loading...</div>;
+        return;
     }
   };
 
@@ -52,8 +47,8 @@ const Instances: React.FC<InstanceProps> = ({socket, instances}) => {
           case 'instances':
             console.log(`Data for an instance recieved: ${message.data}`)
             setInstanceData(message.data);
-            path = '/instances';
-            data = <Instances socket={socket} instances={instanceData} />
+            path = '/Instanceview';
+            data = <Instanceview process_instance={instanceData} />;
             break;
 
           default: return;
@@ -63,10 +58,6 @@ const Instances: React.FC<InstanceProps> = ({socket, instances}) => {
       });
     }
   }, [socket]);
-
-  let formattedDate = '';
-  const date = new Date(instanceData[0].value.Timestamp);
-  formattedDate = format(date, 'dd-MM-yyyy HH:mm:ss');
 
   return (
     <div className="instance-container">
