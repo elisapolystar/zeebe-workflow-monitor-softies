@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"database/sql"
 
 	"github.com/gorilla/websocket"
 )
@@ -29,7 +30,10 @@ func rootHandler(response http.ResponseWriter, request *http.Request) {
 }
 
 func reader(conn *websocket.Conn) {
-
+	db, err := connectToDatabase()
+	if err != nil {
+		fmt.Println("Database connection failed")
+	}
 	for {
 		// Read messages sent by frontend
 		messageType, p, err := conn.ReadMessage()
@@ -69,7 +73,7 @@ func reader(conn *websocket.Conn) {
 				fmt.Println()
 
 				// Retrieve the processes from the database
-				allProcesses := RetrieveProcesses()
+				allProcesses := RetrieveProcesses(db)
 				fmt.Println("(J)The processes retrieved: ", string(allProcesses))
 
 				// Transfrom the retrieved processes to the correct json format that can be sent to the front
@@ -102,7 +106,7 @@ func reader(conn *websocket.Conn) {
 					log.Println("Error turning string to int: ", err)
 				}
 
-				process := RetrieveProcessByID(key)
+				process := RetrieveProcessByID(db, key)
 				fmt.Println("(J) The retrieved process: ", string(process))
 
 				processData := WebsocketMessage{
@@ -146,7 +150,10 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 // Listen for the messages from the consumer and parse the messages into structs
 func listenTmChannel() {
-
+	db, err := connectToDatabase()
+	if err != nil {
+		fmt.Println("Database connection failed")
+	}
 	for {
 
 		tmPair, ok := <-messageChannel
@@ -169,7 +176,7 @@ func listenTmChannel() {
 				fmt.Println("Error parsing the process instance json: ", err)
 			}
 
-			SaveData(*zeebeItem)
+			SaveData(db, *zeebeItem)
 
 			// Structi muutetaan fronttiin lähetettäväksi JSONiksi
 			jsonString, err2 := structToJson(&zeebeItem)
@@ -195,8 +202,8 @@ func listenTmChannel() {
 				fmt.Println("Error parsing the json: ", err)
 			}
 
-			SaveData(*process)
-			processes := RetrieveProcessByID(process.Key)
+			SaveData(db, *process)
+			processes := RetrieveProcessByID(db, process.Key)
 			fmt.Println("The process we just saved: ", string(processes))
 
 			// Talenna_tietokantaan(process)
@@ -237,7 +244,7 @@ func listenTmChannel() {
 					fmt.Println("Error parsing the process instance json: ", err)
 				}
 
-				SaveData(*elementItem)
+				SaveData(db, *elementItem)
 
 				// Structi muutetaan fronttiin lähetettäväksi JSONiksi
 				jsonString, err2 := structToJson(&elementItem)
@@ -396,6 +403,18 @@ func listenTmChannel() {
 func setupRoutes() {
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/ws", wsEndpoint)
+}
+
+func connectToDatabase() (*sql.DB, error){
+	//pass variables to the connection string
+	DBConnection := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, DBname)
+	// Open a database connection, and check that it works
+	db, err := sql.Open("postgres", DBConnection)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("Connected to the database!")
+	return db, nil
 }
 
 func main() {

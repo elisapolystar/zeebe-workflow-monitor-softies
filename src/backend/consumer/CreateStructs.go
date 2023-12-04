@@ -55,11 +55,11 @@ func CreateProcessInstance() Zeebe {
 }
 func CreateVariable() Variable {
 	//variable parameters
-	name := "test-variable"
-	value := "test"
+	name := "test-variable2"
+	value := "test2"
 	var processInstanceKey int64 = 2593275030505839
 	var scopeKey int64 = 2251799813685251
-	var partitionId int64 = 1
+	var partitionId int64 = 2
 	var position int64 = 6
 
 	//Create a variableValue instance
