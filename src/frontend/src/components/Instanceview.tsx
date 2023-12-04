@@ -24,7 +24,7 @@ const Instanceview: React.FC<InstanceviewProps> = () => {
   useEffect(() => {
       async function fetchData() {
           try {
-              const response = await fetch(encodedBpmn);;
+              const response = await fetch(encodedBpmn);
               const data = await response.text();
               setDiagramData(data);
           } catch (error) {

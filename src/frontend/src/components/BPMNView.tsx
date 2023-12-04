@@ -4,7 +4,7 @@ import diagram from './money-loan.bpmn';
 import tippy from 'tippy.js';
 
 interface BpmnProps {
-    process: String | null;
+    process: string | null;
   }
 // const BPMNView: React.FC = () => {
 //     const containerRef = useRef<HTMLDivElement>(null);

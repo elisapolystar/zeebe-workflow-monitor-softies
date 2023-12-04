@@ -95,5 +95,3 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
 };
 
 export default NavBar;
-
-

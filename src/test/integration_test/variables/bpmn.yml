@@ -1,0 +1,45 @@
+to-deploy:
+  process:
+    - money-loan
+    - multi-instance-process
+    - order-main
+    - order-subprocess
+  sub-process:
+    - order-subprocess
+  instance:
+    money-loan: ok-debt
+    money-loan: too-much-debt
+    multi-instance-process: all-in-stock
+    multi-instance-process: none-in-stock
+    multi-instance-process: some-in-stock
+  worker:
+    - send-acceptance-letter
+    - send-rejection-letter
+    - transfer-money
+
+bpmn:
+  money-loan:
+    filepath: resources/bpmn/money-loan.bpmn
+    process-id: SET-DYNAMICALLY
+    taskDefinitions:
+      - send-acceptance-letter
+      - send-rejection-letter
+      - transfer-money
+    variables:
+      ok-debt: '{"debt": "100"}'
+      too-much-debt: '{"debt": "2000"}'
+  multi-instance-process:
+    filepath: resources/bpmn/multi-instance-process.bpmn
+    process-id: SET-DYNAMICALLY
+    variables:
+      all-in-stock: '{"items": [{"id": 1, "value": 10, "inCart": 10, "inStock": 20}, {"id": 2, "value": 20, "inCart": 2, "inStock": 5}], "orderId": "1"}'
+      none-in-stock: '{"items": [{"id": 1, "value": 10, "inCart": 10, "inStock": 0}, {"id": 2, "value": 20, "inCart": 2, "inStock": 0}], "orderId": "2"}'
+      some-in-stock: '{"items": [{"id": 1, "value": 10, "inCart": 10, "inStock": 5}, {"id": 2, "value": 20, "inCart": 2, "inStock": 1}], "orderId": "3"}'
+  order-main:
+    filepath: resources/bpmn/order-main.bpmn
+    process-id: SET-DYNAMICALLY
+    sub-process:
+      - order-subprocess
+  order-subprocess:
+    filepath: resources/bpmn/order-subprocess.bpmn
+    process-id: SET-DYNAMICALLY

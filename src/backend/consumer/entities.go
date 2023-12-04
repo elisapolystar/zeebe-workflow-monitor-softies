@@ -57,8 +57,9 @@ type JobValue struct {
 }
 
 type Incident struct {
-	Key   int64         `json:"key"`
-	Value IncidentValue `json:"value"`
+	Key       int64         `json:"key"`
+	Timestamp int64         `json:"timestamp"`
+	Value     IncidentValue `json:"value"`
 }
 
 type IncidentValue struct {
@@ -99,11 +100,59 @@ type TimerValue struct {
 }
 
 // Message from frontend
-type FrontCommunication struct {
+type ProcessRequest struct {
 	Process string `json:"process"`
+}
+
+type InstanceRequest struct {
+	Instance string `json:"instance"`
 }
 
 type WebsocketMessage struct {
 	Type string `json:"type"`
 	Data string `json:"data"`
+}
+
+type Zeebe struct {
+	PartitionId int64      `json:"partitionId"`
+	Value       ZeebeValue `json:"value"`
+	Timestamp   int64      `json:"timestamp"`
+	Active      bool       `json:"active"`
+}
+
+type ZeebeValue struct {
+	ProcessInstanceKey   int64  `json:"processInstanceKey"`
+	ProcessDefinitionKey int64  `json:"processDefinitionKey"`
+	BpmnProcessId        string `json:"bpmnProcessId"`
+	Version              int64  `json:"version"`
+}
+
+type Element struct {
+	Key    int64        `json:"key"`
+	Value  ElementValue `json:"value"`
+	Intent string       `json:"intent"`
+}
+
+type ElementValue struct {
+	ProcessInstanceKey   int64  `json:"processInstanceKey"`
+	ProcessDefinitionKey int64  `json:"processDefinitionKey"`
+	BpmnProcessId        string `json:"bpmnProcessId"`
+	ElementId            string `json:"elementId"`
+	BpmnElementType      string `json:"bpmnElementType"`
+}
+
+type ElementsContainer struct {
+	Elements []Element `json:"elements"`
+}
+
+type VariablesContainer struct {
+	Variables []Variable `json:"variables"`
+}
+
+type TimersContainer struct {
+	Timers []Timer `json:"timers"`
+}
+
+type IncidentsContainer struct {
+	Incidents []Incident `json:"incidents"`
 }

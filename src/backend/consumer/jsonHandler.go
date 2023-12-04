@@ -96,6 +96,32 @@ func parseTimerJson(msg []byte) (*Timer, error) {
 	return &timerItem, nil
 }
 
+func parseZeebeJson(msg []byte) (*Zeebe, error) {
+
+	var zeebeItem Zeebe
+	err := json.Unmarshal(msg, &zeebeItem)
+	if err != nil {
+		fmt.Println("Error Unmarshalling Zeebe item JSON")
+		fmt.Println(err.Error())
+	}
+
+	zeebeItem.Active = true
+
+	return &zeebeItem, nil
+}
+
+func parseElementJson(msg []byte) (*Element, error) {
+
+	var elementItem Element
+	err := json.Unmarshal(msg, &elementItem)
+	if err != nil {
+		fmt.Println("Error Unmarshalling Element item JSON")
+		fmt.Println(err.Error())
+	}
+
+	return &elementItem, nil
+}
+
 // Turn a process struct into JSON data
 func structToJson(data interface{}) (string, error) {
 
@@ -109,10 +135,10 @@ func structToJson(data interface{}) (string, error) {
 	return jsonString, err
 }
 
-// Turn a message from the frontend into a struct
-func parseCommunicationItem(msg []byte) (*FrontCommunication, error) {
+// Turn a process request message from the frontend into a struct
+func parseProcessRequest(msg []byte) (*ProcessRequest, error) {
 
-	var communicationItem FrontCommunication
+	var communicationItem ProcessRequest
 	err := json.Unmarshal(msg, &communicationItem)
 	if err != nil {
 		fmt.Println("Le` error in the front json parsings :-(")
@@ -120,4 +146,78 @@ func parseCommunicationItem(msg []byte) (*FrontCommunication, error) {
 	}
 
 	return &communicationItem, nil
+}
+
+// Turn a instance request message into a struct
+func parseInstanceRequest(msg []byte) (*InstanceRequest, error) {
+
+	var instanceMessage InstanceRequest
+	err := json.Unmarshal(msg, &instanceMessage)
+	if err != nil {
+		fmt.Println("Error turning json to struct: ")
+		fmt.Print(err.Error())
+	}
+
+	return &instanceMessage, nil
+}
+
+// Add two JSONs together
+func concatenateJSON(json1, json2, json3, json4, json5 []byte) (*[]byte, error) {
+	var process Process
+	var elements ElementsContainer
+	var variables VariablesContainer
+	var timers TimersContainer
+	var incidents IncidentsContainer
+
+	err1 := json.Unmarshal(json1, &process)
+	if err1 != nil {
+		fmt.Println("Error turning json to struct: ", err1)
+		return nil, err1
+	}
+
+	err2 := json.Unmarshal(json2, &elements)
+	if err2 != nil {
+		fmt.Println("Error turning json to struct: ", err2)
+		return nil, err2
+	}
+
+	err3 := json.Unmarshal(json3, &variables)
+	if err3 != nil {
+		fmt.Println("Error turning json to struct: ", err3)
+		return nil, err3
+	}
+
+	err4 := json.Unmarshal(json4, &timers)
+	if err4 != nil {
+		fmt.Println("Error turning json to struct: ", err4)
+		return nil, err4
+	}
+
+	err5 := json.Unmarshal(json5, &incidents)
+	if err5 != nil {
+		fmt.Println("Error turning json to struct: ", err5)
+		return nil, err5
+	}
+
+	combinedItem := struct {
+		Process
+		ElementsContainer
+		VariablesContainer
+		TimersContainer
+		IncidentsContainer
+	}{
+		Process:            process,
+		ElementsContainer:  elements,
+		VariablesContainer: variables,
+		TimersContainer:    timers,
+		IncidentsContainer: incidents,
+	}
+
+	combinedJSON, err := json.Marshal(combinedItem)
+	if err != nil {
+		fmt.Println("Failed to marshal json: ", err)
+		return nil, err
+	}
+
+	return &combinedJSON, nil
 }

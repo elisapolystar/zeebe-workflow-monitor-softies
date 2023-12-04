@@ -35,7 +35,7 @@ const MessageListener = () => {
 
     return (
         <div>
-            <MessageDisplayer messages={messages} /> 
+            <MessageDisplayer messages={messages} />
         </div>
     );
 };
