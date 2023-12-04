@@ -273,29 +273,32 @@ func RetrieveProcessByID(key int64) string {
 	}
 	defer rows.Close()
 
-	//check if rows exist and if not return an error JSON.
-	fmt.Println("Checking if query return rows")
-	if !rows.Next() {
-		fmt.Println("results empty. Returning error.")
-		message := GenerateErrorMessage("Process not found")	
-		return message
-	}
-
+	counter := 0
 	fmt.Println("Process retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
-	// Convert data to a JSON format
+	// Try to convert data to a JSON format
 	var p FullProcess
 	for rows.Next(){
+		counter++
 		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Resource, &p.Timestamp)
 		if err != nil {
 			fmt.Println("Failed to scan row")
 		}
 	}
-	json, err := json.Marshal(p)
-	if err != nil {
-		fmt.Println("Failed to convert data to JSON")
+	//check if rows exist and if not return an error JSON.
+	fmt.Println("Checking if query return rows")
+	if counter == 0 {
+		fmt.Println("results empty. Returning error.")
+		message := GenerateErrorMessage("Process not found")	
+		return message
+	//convert to string otherwise
+	} else {
+		json, err := json.Marshal(p)
+		if err != nil {
+			fmt.Println("Failed to convert data to JSON")
+		}
+		return string(json)	
 	}
-	return string(json)	
   
 }
 // Retrieves an instance from the database. 
