@@ -7,16 +7,19 @@ import (
 )
 
 func TestProcess(t *testing.T) {
-
+	db, err := connectToDatabase()
+	if err != nil {
+		fmt.Println("Database connection failed")
+	}
 	//create a process
 	process := CreateProcess()
 	//save the process
-	SaveData(process)
+	SaveData(db, process)
 	//expected json value of the response
 	expectedJSON := `[{"key":2251799813685249,"bpmnProcessId":"money-loan","version":1,"timestamp":1699893451665}]`
 	//expectedJSON := '[{"key":2251799813685249,"bpmnProcessId":"money-loan","version":1,"timestamp":1699893451665}]'
 	//the actual value of the response
-	actualJSON := RetrieveProcesses()
+	actualJSON := RetrieveProcesses(db)
 	actualString := string(actualJSON)
 
 	//parse to array
@@ -64,7 +67,7 @@ func TestVariable(t *testing.T) {
 	fmt.Println(string(variableJSON))
 
 	//save the process
-	SaveData(variable)
+	SaveData(db, variable)
 	//expected json value of the response
 	expectedJSON := `[{"PartitionId":1,"Position":6,"Name":"test-variable","Value":"test","ProcessInstanceKey":2251799813685250,"ScopeKey":2251799813685251}]`
 	//the actual value of the response
@@ -105,4 +108,16 @@ func TestMessage(t *testing.T) {
 
 func TestTimer(t *testing.T) {
 	//TODO: test timer
+}
+
+func connectToDatabase() (*sql.DB, error){
+	//pass variables to the connection string
+	DBConnection := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, DBname)
+	// Open a database connection, and check that it works
+	db, err := sql.Open("postgres", DBConnection)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("Connected to the database!")
+	return db, nil
 }
