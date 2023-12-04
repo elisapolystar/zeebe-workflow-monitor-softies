@@ -272,6 +272,15 @@ func RetrieveProcessByID(key int64) string {
 		fmt.Println("Query failed")
 	}
 	defer rows.Close()
+
+	//check if rows exist and if not return an error JSON.
+	fmt.Println("Checking if query return rows")
+	if !rows.Next() {
+		fmt.Println("results empty. Returning error.")
+		message := GenerateErrorMessage("Process not found")	
+		return message
+	}
+
 	fmt.Println("Process retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
@@ -577,3 +586,15 @@ func CreateTables() {
 	}
 }
 
+//generates message for error
+func GenerateErrorMessage(message string) string {
+	fmt.Println("results empty. Returning error.")
+	errorMessageValue := ErrorMessageValue {
+		Error: message,
+	}
+	errorJSON, err := json.MarshalIndent(errorMessageValue, "", "  ")
+	if err != nil {
+		fmt.Println("generated error message could not be parsed.")
+	}
+	return string(errorJSON)
+}
