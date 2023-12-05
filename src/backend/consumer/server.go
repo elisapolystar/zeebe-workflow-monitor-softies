@@ -182,12 +182,12 @@ func reader(conn *websocket.Conn) {
 				fmt.Println("The retrieved process for the instance item: ", string(processJson))
 
 				// Turn the process json to struct so we can access the processId
-				processStruct, err2 := parseProcessJson([]byte(processJson))
+				/*processStruct, err2 := parseProcessJson([]byte(processJson))
 				if err2 != nil {
 					fmt.Println("Error parsing process to struct: ", err2)
-				}
+				}*/
 
-				elements, err3 := RetrieveInstanceByID(processStruct.Value.BpmnProcessId, key)
+				elements, err3 := RetrieveInstanceByID("ProcessDefinitionKey", key)
 				if err3 != nil {
 					fmt.Println("Error getting instance by id: ", err3)
 				}

@@ -4,6 +4,7 @@ import NavBar from './components/NavBar.tsx';
 const App: React.FC = () => {
 
   const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [content, setContent] = useState<JSX.Element | null>(null);
 
   useEffect(() => {
     const newSocket = new WebSocket("ws://localhost:8001/ws");
@@ -26,10 +27,10 @@ const App: React.FC = () => {
     };
   }, []);
 
-
   return (
     <div>
-      <NavBar socket={socket}/>
+      <NavBar socket={socket} setContent={setContent} />
+      <div className="content">{content}</div>
     </div>
   );
 };

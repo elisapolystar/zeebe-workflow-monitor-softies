@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BpmnVisualization, ShapeBpmnElementKind } from 'bpmn-visualization';
 import tippy from 'tippy.js';
+import './BPMNView.css';
 
 interface BpmnProps {
     process: string | null;
@@ -10,20 +11,24 @@ const BPMNView: React.FC<BpmnProps> = ({process}) => {
   const [diagramData, setDiagramData] = useState<string | null>(null);
   const bpmnContainerElt = window.document.getElementById('bpmn-container');
   const processesData = process ? JSON.parse(process) : {};
+  
+  const encodedBpmn = processesData.resource;
+  const xml = atob(encodedBpmn);
+  console.log(xml);
 
   useEffect(() => {
-      async function fetchData() {
-          try {
-              const response = await fetch(processesData.resource);
-              const data = await response.text();
-              setDiagramData(data);
-          } catch (error) {
-              console.error('Error fetching diagram:', error);
-          }
-      }
+      //async function fetchData() {
+          //try {
+            //const response = await fetch(encodedBpmn);
+            //const data = await response.text();
+              setDiagramData(xml);
+          //} catch (error) {
+              //console.error('Error fetching diagram:', error);
+          //}
+      //}
 
-      fetchData();
-  }, []);
+      //fetchData();
+  }, [xml]);
 
   useEffect(() => {
       if (diagramData) {
@@ -102,7 +107,7 @@ const BPMNView: React.FC<BpmnProps> = ({process}) => {
 
   return (
     <div className='bpmnview'>
-    <h2>{processesData.BpmnProcessId}</h2>
+    <h2>{processesData.bpmnProcessId}</h2>
     <br/>
 
     <div id="bpmn-container"></div>
@@ -112,7 +117,7 @@ const BPMNView: React.FC<BpmnProps> = ({process}) => {
       <div className='process-item'>
         <span>Key</span>
         <div className="process-info">
-          <span>{processesData.Key}</span>
+          <span>{processesData.key}</span>
         </div>
       </div>
       

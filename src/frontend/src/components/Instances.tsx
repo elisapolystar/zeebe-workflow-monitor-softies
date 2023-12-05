@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import './Instances.css';
-import ReactDOM from 'react-dom/client';
 import Instanceview from './Instanceview.tsx';
-import data from "./instance.json";
 import { format } from 'date-fns';
 
 interface InstanceProps {
   socket: WebSocket | null;
   instances: string | null;
+  setContent: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
 }
 
-const Instances: React.FC<InstanceProps> = ({socket, instances}) => {
+const Instances: React.FC<InstanceProps> = ({socket, instances, setContent}) => {
   const [instanceData, setInstanceData] = useState<string | null>(null);
   const instancesData = instances ? JSON.parse(instances) : [];
 
@@ -32,7 +31,7 @@ const Instances: React.FC<InstanceProps> = ({socket, instances}) => {
     switch (path) {
       case '/Instanceview':
         fetchInstance(id);
-        return instanceData ? <Instanceview process_instance={instanceData} /> : <div>Loading...</div>;
+        return;
     }
   };
 
@@ -48,14 +47,13 @@ const Instances: React.FC<InstanceProps> = ({socket, instances}) => {
           case 'instances':
             console.log(`Data for an instance recieved: ${message.data}`)
             setInstanceData(message.data);
-            path = '/instances';
-            data = <Instances socket={socket} instances={instanceData} />
+            path = '/Instanceview';
+            data = <Instanceview process_instance={instanceData} />;
             break;
 
           default: return;
         }
-        window.history.pushState({}, '', path);
-        ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(data);
+        setContent(data);
       });
     }
   }, [socket]);
@@ -64,44 +62,44 @@ const Instances: React.FC<InstanceProps> = ({socket, instances}) => {
     <div className="instance-container">
       <div className="instance-item">
         <span>Process Instance Key</span>
-        {instancesData.map((instancedata, index) => (
+        {instancesData.map((item, index) => (
             <div className="definition-key" key={index}>
-              <span onClick={() => navigate(`/Instanceview/${instancedata.ProcessInstanceKey}`)}>{instancedata.ProcessInstanceKey}</span>
+              <span onClick={() => navigate(`/Instanceview/${item.ProcessInstanceKey}`)}>{item.ProcessInstanceKey}</span>
             </div>
         ))}
       </div>
 
       <div className="instance-item">
         <span>BPMN Process Id</span>
-        {instancesData.map((instancedata) => (
-            <div className = "instance-info">
-              <span>{instancedata.BpmnProcessId}</span>
+        {instancesData.map((item,index) => (
+            <div className = "instance-info" key={index}>
+              <span>{item.bpmnProcessId}</span>
             </div>
         ))}
         
       </div>
       <div className="instance-item">
-        <span>Active</span>
-        {instancesData.map((instancedata) => (
-            <div className="instance-info">
-              <span>{instancedata.Active.toString()}</span>
+        <span>State</span>
+        {instancesData.map((item, index) => (
+            <div className="instance-info" key={index}>
+              <span>{item.state}</span>
             </div>
         ))}
       </div>
       <div className="instance-item">
         <span>Time</span>
-        {instancesData.map((instancedata) => ( 
-            <div className="instance-info">
-              <span>{format(new Date(instancedata.Timestamp), 'dd-MM-yyyy HH:mm:ss')}</span>
+        {instancesData.map((item, index) => ( 
+            <div className="instance-info" key={index}>
+              <span>{format(new Date(item.timestamp), 'dd-MM-yyyy HH:mm:ss')}</span>
             </div>
         ))}
       </div>
 
       <div className="instance-item">
         <span>Process Definition Key</span>
-        {instancesData.map((instancedata) => (
-            <div className="definition-key">
-              <span>{instancedata.ProcessDefinitionKey}</span>
+        {instancesData.map((item, index) => (
+            <div className="definition-key" key={index}>
+              <span>{item.processDefinitionKey}</span>
             </div>
         ))}
     </div>
