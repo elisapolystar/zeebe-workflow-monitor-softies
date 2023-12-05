@@ -1,13 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
-	"database/sql"
 
 	"github.com/gorilla/websocket"
 )
@@ -148,7 +148,7 @@ func reader(conn *websocket.Conn) {
 			if instanceMessage.Instance == "" {
 				// get all instances
 
-				allInstances := RetrieveInstances()
+				allInstances := RetrieveInstances(db)
 
 				fmt.Println()
 				fmt.Println("-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.")
@@ -174,24 +174,19 @@ func reader(conn *websocket.Conn) {
 					fmt.Println("Error sending instances to frontend", err2)
 				}
 
-			} else if instanceMessage.Instance != "" {
 				// Get a specific instance
+			} else if instanceMessage.Instance != "" {
 
-				// Get the process
+				// Muunnetaan parametrina saatu avain intiksi
 				key, err := strconv.ParseInt(instanceMessage.Instance, 10, 64)
 				if err != nil {
 					log.Println("Error turning string to int: ", err)
 				}
 
-				// Turn the process json to struct so we can access the processId
-				/*processStruct, err2 := parseProcessJson([]byte(processJson))
+				// Haetaan yksi instanssi jotta voidaan hakea prosessi instanssin processDefinition avaimella
+				instance, err2 := RetrieveInstanceByID(db, "ProcessInstanceKey", key)
 				if err2 != nil {
-					fmt.Println("Error parsing process to struct: ", err2)
-				}*/
-
-				instance, err3 := RetrieveInstanceByID("ProcessInstanceKey", key)
-				if err3 != nil {
-					fmt.Println("Error getting instance by id: ", err3)
+					fmt.Println("Error getting instance by id: ", err2)
 				}
 
 				fmt.Println()
@@ -202,21 +197,32 @@ func reader(conn *websocket.Conn) {
 				fmt.Println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
 				fmt.Println()
 
-				//processinstancekey
+				// Luodaan haetusta instanssi-jsonista strukti
 				var instanceItem ProcessInst
-				err4 := json.Unmarshal([]byte(instance), &instanceItem)
-				if err4 != nil {
-					fmt.Println("error unmarshalin instance json: ", err4)
+				err3 := json.Unmarshal([]byte(instance), &instanceItem)
+				if err3 != nil {
+					fmt.Println("error unmarshalin instance json: ", err3)
 				}
 
 				fmt.Println()
 				fmt.Println("Processinstance key: ", instanceItem.ProcessInstanceKey)
 				fmt.Println()
 
-				processJson := RetrieveProcessByID(instanceItem.ProcessDefinitionKey)
-				fmt.Println("The retrieved process for the instance item: ", string(processJson))
+				// Haetaan prosessi
+				processJson := RetrieveProcessByID(db, instanceItem.ProcessDefinitionKey)
+				//fmt.Println("The retrieved process for the instance item: ", string(processJson))
 
-				variables := RetrieveVariableByID(key)
+				elements := RetrieveElementByID(db, key)
+
+				fmt.Println()
+				fmt.Println("E      E     E      E      E      E   E      E    E      E ")
+				fmt.Println()
+				fmt.Println("The retrieved ELEMENTS: ", string(elements))
+				fmt.Println()
+				fmt.Println("E      E     E      E      E      E   E      E    E      E ")
+				fmt.Println()
+
+				variables := RetrieveVariableByID(db, key)
 
 				fmt.Println()
 				fmt.Println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
@@ -226,7 +232,7 @@ func reader(conn *websocket.Conn) {
 				fmt.Println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
 				fmt.Println()
 
-				timers := RetrieveTimerByID(key)
+				timers := RetrieveTimerByID(db, key)
 
 				fmt.Println()
 				fmt.Println("tttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
@@ -236,7 +242,7 @@ func reader(conn *websocket.Conn) {
 				fmt.Println("tttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
 				fmt.Println()
 
-				incidents := RetrieveIncidentByID(key)
+				incidents := RetrieveIncidentByID(db, key)
 
 				fmt.Println()
 				fmt.Println("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
@@ -246,6 +252,8 @@ func reader(conn *websocket.Conn) {
 				fmt.Println("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
 				fmt.Println()
 
+				// concatenateJSON funktion ois tarkotus yhistää noi haetut jsonit
+				// concatenateJSON funktio löytyy jsonHandler.gon pohjalta
 				combinedJSON, err4 := concatenateJSON([]byte(processJson),
 					[]byte(instance),
 					[]byte(variables),
@@ -256,6 +264,8 @@ func reader(conn *websocket.Conn) {
 					fmt.Println("Error combining the jsons: ", err4)
 					return
 				}
+				// Tällä printillä näkee onko halutun vastauksen sisemmällä jsonilla haluttu rakenne
+				// Googlesta jsonformatterilla on helppo tarkastella onko oikeen näkönen json
 				fmt.Println()
 				fmt.Println("!     !     !     !     !     !     !     !     !")
 				fmt.Println()
@@ -264,6 +274,10 @@ func reader(conn *websocket.Conn) {
 				fmt.Println("!     !     !     !     !     !     !     !     !")
 				fmt.Println()
 
+				/* Siihen lopulliseen jsoniin saa lisättyä semmosen halutun
+				ulkokuoren tekemällä näistä jutuista WebsocketMessage structin
+				ja muuttamalla sen jsoniks
+				*/
 				instanceData := WebsocketMessage{
 					Type: "instance",
 					Data: string(*combinedJSON),
@@ -274,6 +288,7 @@ func reader(conn *websocket.Conn) {
 					fmt.Println(err5.Error())
 				}
 
+				// tätä json printtiä on vaikee tarkastella ku tähän tulee semmosia kenoviivoja niin toi ylempi on parempi
 				fmt.Println()
 				fmt.Println("!     !     !     !     !     !     !     !     !")
 				fmt.Println()
@@ -282,6 +297,7 @@ func reader(conn *websocket.Conn) {
 				fmt.Println("!     !     !     !     !     !     !     !     !")
 				fmt.Println()
 
+				// Send the instance json to frontend
 				err6 := conn.WriteMessage(messageType, instanceDataJson)
 				if err6 != nil {
 					fmt.Println("Error sending instances to frontend", err6)
@@ -562,7 +578,7 @@ func setupRoutes() {
 	http.HandleFunc("/ws", wsEndpoint)
 }
 
-func connectToDatabase() (*sql.DB, error){
+func connectToDatabase() (*sql.DB, error) {
 	//pass variables to the connection string
 	DBConnection := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, DBname)
 	// Open a database connection, and check that it works
