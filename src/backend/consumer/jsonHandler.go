@@ -163,7 +163,7 @@ func parseInstanceRequest(msg []byte) (*InstanceRequest, error) {
 
 // Add two JSONs together
 func concatenateJSON(json1, json2, json3, json4, json5 []byte) (*[]byte, error) {
-	var process ProcessContainer
+	var process ProcessForFrontend
 	var elements ElementsContainer
 	var variables VariablesContainer
 	var timers TimersContainer
@@ -175,6 +175,20 @@ func concatenateJSON(json1, json2, json3, json4, json5 []byte) (*[]byte, error) 
 		return nil, err1
 	}
 
+	processContainer := ProcessContainer{
+		Process: process,
+	}
+
+	fmt.Println()
+	fmt.Println("Processcontainer item: ", processContainer.Process.BpmnProcessId)
+	fmt.Println("Processcontainer item: ", processContainer.Process.Key)
+	fmt.Println()
+
+	/*
+		fmt.Println("Process fields: ", process.Process.BpmnProcessId)
+		fmt.Println("Process fields: ", process.Process.Key)
+		fmt.Println("Process fields: ", process.Process.Version)
+	*/
 	err2 := json.Unmarshal(json2, &elements)
 	if err2 != nil {
 		fmt.Println("Error turning json to struct: ", err2)
@@ -206,18 +220,26 @@ func concatenateJSON(json1, json2, json3, json4, json5 []byte) (*[]byte, error) 
 		TimersContainer
 		IncidentsContainer
 	}{
-		ProcessContainer:   process,
+		ProcessContainer:   processContainer,
 		ElementsContainer:  elements,
 		VariablesContainer: variables,
 		TimersContainer:    timers,
 		IncidentsContainer: incidents,
 	}
 
+	fmt.Println()
+	fmt.Println("combined item process field: ", combinedItem.ProcessContainer.Process.Key)
+	fmt.Println("combined item fields: ", combinedItem.Elements)
+
 	combinedJSON, err := json.Marshal(combinedItem)
 	if err != nil {
 		fmt.Println("Failed to marshal json: ", err)
 		return nil, err
 	}
+
+	fmt.Println()
+	fmt.Println("1 combinded json ", string(combinedJSON))
+	fmt.Println()
 
 	return &combinedJSON, nil
 }

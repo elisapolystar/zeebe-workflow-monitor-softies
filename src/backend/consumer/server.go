@@ -179,16 +179,13 @@ func reader(conn *websocket.Conn) {
 					log.Println("Error turning string to int: ", err)
 				}
 
-				processJson := RetrieveProcessByID(key)
-				fmt.Println("The retrieved process for the instance item: ", string(processJson))
-
 				// Turn the process json to struct so we can access the processId
 				/*processStruct, err2 := parseProcessJson([]byte(processJson))
 				if err2 != nil {
 					fmt.Println("Error parsing process to struct: ", err2)
 				}*/
 
-				elements, err3 := RetrieveInstanceByID("ProcessDefinitionKey", key)
+				instance, err3 := RetrieveInstanceByID("ProcessInstanceKey", key)
 				if err3 != nil {
 					fmt.Println("Error getting instance by id: ", err3)
 				}
@@ -196,10 +193,24 @@ func reader(conn *websocket.Conn) {
 				fmt.Println()
 				fmt.Println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
 				fmt.Println()
-				fmt.Println("The retrieved INSTANCE: ", string(elements))
+				fmt.Println("The retrieved INSTANCE: ", string(instance))
 				fmt.Println()
 				fmt.Println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
 				fmt.Println()
+
+				//processinstancekey
+				var instanceItem ProcessInst
+				err4 := json.Unmarshal([]byte(instance), &instanceItem)
+				if err4 != nil {
+					fmt.Println("error unmarshalin instance json: ", err4)
+				}
+
+				fmt.Println()
+				fmt.Println("Processinstance key: ", instanceItem.ProcessInstanceKey)
+				fmt.Println()
+
+				processJson := RetrieveProcessByID(instanceItem.ProcessDefinitionKey)
+				fmt.Println("The retrieved process for the instance item: ", string(processJson))
 
 				variables := RetrieveVariableByID(key)
 
@@ -232,7 +243,7 @@ func reader(conn *websocket.Conn) {
 				fmt.Println()
 
 				combinedJSON, err4 := concatenateJSON([]byte(processJson),
-					[]byte(elements),
+					[]byte(instance),
 					[]byte(variables),
 					[]byte(timers),
 					[]byte(incidents))
