@@ -362,7 +362,7 @@ func RetrieveInstances(db *sql.DB) string {
 
 }
 
-// retrieves a variable with the ProcessInstanceKey specified in the parameter
+// retrieves all variables with the ProcessInstanceKey specified in the parameter
 func RetrieveVariableByID(db *sql.DB, key int64) (string){
 	fmt.Println("Retrieving the variable...")
 	// Perform the query
@@ -376,20 +376,22 @@ func RetrieveVariableByID(db *sql.DB, key int64) (string){
 	fmt.Println("Variable retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
-	var v variable
+	var variables []variable
 	for rows.Next(){
+		var v variable
 		err := rows.Scan(&v.PartitionId, &v.Position, &v.Name, &v.Value, &v.ProcessInstanceKey, &v.ScopeKey)
 		if err != nil {
 			fmt.Println("Failed to scan row")
-		}		
+		}
+		variables = append(variables, v)
 	}
-	json, err := json.Marshal(v)
+	json, err := json.Marshal(variables)
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
 	return string(json)	
 }
-// Retrieves an incident with the given ProcessInstanceKey
+// Retrieves all incidents with the given ProcessInstanceKey
 func RetrieveIncidentByID(db *sql.DB, key int64) string{
 	fmt.Println("Retrieving the incident...")
 	// Perform the query
@@ -403,14 +405,16 @@ func RetrieveIncidentByID(db *sql.DB, key int64) string{
 	fmt.Println("incident retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
-	var i incident
+	var incidents []incident
 	for rows.Next(){
+		var i incident
 		err := rows.Scan(&i.Key, &i.BpmnProcessId, &i.ProcessInstanceKey, &i.ElementInstanceKey, &i.JobKey, &i.ErrorType, &i.ErrorMessage, &i.Timestamp)
 		if err != nil {
 			fmt.Println("Failed to scan row")
-		}		
+		}
+		incidents = append(incidents, i)
 	}
-	json, err := json.Marshal(i)
+	json, err := json.Marshal(incidents)
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
@@ -443,7 +447,7 @@ func RetrieveIncidents(db *sql.DB) string {
 	}
 	return string(jsonData)	
 }
-// retrieves a message with a given key
+// retrieves all messages with a given key
 func RetrieveMessageByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the Message...")
 	// Perform the query
@@ -457,20 +461,22 @@ func RetrieveMessageByID(db *sql.DB, key int64) string {
 	fmt.Println("Message retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
-	var m message
+	var messages []message
 	for rows.Next(){
+		var m message
 		err := rows.Scan(&m.Key, &m.Name, &m.CorrelationKey, &m.MessageId, &m.Timestamp)
 		if err != nil {
 			fmt.Println("Failed to scan row")
-		}		
+		}
+		messages = append(messages, m)
 	}
-	json, err := json.Marshal(m)
+	json, err := json.Marshal(messages)
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
 	return string(json)		
 }
-// retrieves a timer with the specified ProcessInstanceKey from the db
+// retrieves all timers with the specified ProcessInstanceKey from the db
 func RetrieveTimerByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the timer...")
 	// Perform the query
@@ -484,20 +490,22 @@ func RetrieveTimerByID(db *sql.DB, key int64) string {
 	fmt.Println("Message retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
-	var t timer
+	var timers []timer
 	for rows.Next(){
+		var t timer
 		err := rows.Scan(&t.Key, &t.Timestamp, &t.ProcessDefinitionKey, &t.ProcessInstanceKey, &t.ElementInstanceKey, &t.TargetElementId, &t.Duedate, &t.Repetitions)
 		if err != nil {
 			fmt.Println("Failed to scan row")
-		}		
+		}
+		timers = append(timers, t)
 	}
-	json, err := json.Marshal(t)
+	json, err := json.Marshal(timers)
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
 	return string(json)		
 }
-// retrieves an element with the given ProcessInstanceKey
+// retrieves all elements with the given ProcessInstanceKey
 func RetrieveElementByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the element...")
 	// Perform the query
@@ -511,14 +519,17 @@ func RetrieveElementByID(db *sql.DB, key int64) string {
 	fmt.Println("Element retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
-	var e element
+	var elements []element
+
 	for rows.Next(){
+		var e element
 		err := rows.Scan(&e.Key, &e.ProcessInstanceKey, &e.ProcessDefinitionKey, &e.BpmnProcessId, &e.ElementId, &e.BpmnElementType, &e.Intent)
 		if err != nil {
 			fmt.Println("Failed to scan row")
-		}		
+		}
+		elements = append(elements, e)
 	}
-	json, err := json.Marshal(e)
+	json, err := json.Marshal(elements)
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
