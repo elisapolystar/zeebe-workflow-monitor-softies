@@ -1,15 +1,14 @@
 import { BpmnVisualization } from 'bpmn-visualization';
 import React, { useEffect, useState } from 'react';
-import info from './testinstance.json';
 import './instanceview.css';
 
 interface InstanceViewProps {
-  instance: string | null;
+  process_instance: string | null;
 }
 
-const Instanceview: React.FC<InstanceViewProps> = ({instance}) => {
+const Instanceview: React.FC<InstanceViewProps> = ({process_instance}) => {
   const [diagramData, setDiagramData] = useState<string | null>(null);
-  const instancesData = instance ? JSON.parse(instance) : {};
+  const instancesData = process_instance ? JSON.parse(process_instance) : {};
   const [instanceData, setInstanceData] = useState(instancesData.data.variables);
 
   //change base64 coded resource to xml

@@ -27,10 +27,22 @@ const Instances: React.FC<InstanceProps> = ({socket, instances, setContent}) => 
     }
   };
 
+  const fetchBpmn = (id: string | undefined) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const messageObject = `{ "process": "${id}" }`;
+      socket.send(messageObject);
+      console.log(`Process request ${messageObject} sent from frontend`);
+    }
+  };
+
   const getComponentForPath = (path: string, id: string) => {
     switch (path) {
       case '/Instanceview':
         fetchInstance(id);
+        return;
+
+      case '/BPMNView':
+        fetchBpmn(id);
         return;
     }
   };
@@ -73,16 +85,16 @@ const Instances: React.FC<InstanceProps> = ({socket, instances, setContent}) => 
         <span>BPMN Process Id</span>
         {instancesData.map((item,index) => (
             <div className = "instance-info" key={index}>
-              <span>{item.bpmnProcessId}</span>
+              <span>{item.BpmnProcessId}</span>
             </div>
         ))}
         
       </div>
       <div className="instance-item">
-        <span>State</span>
+        <span>Active</span>
         {instancesData.map((item, index) => (
             <div className="instance-info" key={index}>
-              <span>{item.state}</span>
+              <span>{item.Active.toString()}</span>
             </div>
         ))}
       </div>
@@ -90,7 +102,7 @@ const Instances: React.FC<InstanceProps> = ({socket, instances, setContent}) => 
         <span>Time</span>
         {instancesData.map((item, index) => ( 
             <div className="instance-info" key={index}>
-              <span>{format(new Date(item.timestamp), 'dd-MM-yyyy HH:mm:ss')}</span>
+              <span>{format(new Date(item.Timestamp), 'dd-MM-yyyy HH:mm:ss')}</span>
             </div>
         ))}
       </div>
@@ -99,7 +111,7 @@ const Instances: React.FC<InstanceProps> = ({socket, instances, setContent}) => 
         <span>Process Definition Key</span>
         {instancesData.map((item, index) => (
             <div className="definition-key" key={index}>
-              <span>{item.processDefinitionKey}</span>
+              <span onClick={() => navigate(`/BPMNView/${item.ProcessDefinitionKey}`)}>{item.ProcessDefinitionKey}</span>
             </div>
         ))}
     </div>
