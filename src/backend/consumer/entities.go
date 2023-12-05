@@ -141,6 +141,10 @@ type ElementValue struct {
 	BpmnElementType      string `json:"bpmnElementType"`
 }
 
+type ErrorMessageValue struct {
+	Error string
+}
+
 type ElementsContainer struct {
 	Elements []Element `json:"elements"`
 }

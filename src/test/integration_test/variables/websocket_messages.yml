@@ -1,2 +1,8 @@
 query:
-  all_processes: '{"process": ""}'
+  all-processes: '{"process": ""}'
+  process-by-id: '{"process": "${process_id}"}'
+  all-instances: '{"instance": ""}'
+  instance-by-id: '{"instance": "${instance_id}"}'
+
+response:
+  process-not-found: "{'Error': 'Process not found'}"

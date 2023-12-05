@@ -21,23 +21,11 @@ Close Websocket Connection
 Request From Websocket
     [Documentation]    Send message with the given name to the websocket and return the response.
     ...
-    ...                Messages are defined in the websocket_messages.yml file.
-    ...                The message name is the key of the message in the 'query' dictionary.
     ...                The response message is assumed to be string-type JSON and returned as a dictionary.
-    [Arguments]    ${websocket}    ${message_name}
-    Send To Websocket    ${websocket}    ${message_name}
+    [Arguments]    ${websocket}    ${message}
+    WebSocketClient.Send    ${websocket}    ${message}
     ${message} =    Receive From Websocket    ${websocket}
     [Return]    ${message}
-
-
-Send To Websocket
-    [Documentation]    Send message with the given name to the websocket.
-    ...
-    ...                Messages are defined in the websocket_messages.yml file.
-    ...                The message name is the key of the message in the 'query' dictionary.
-    [Arguments]    ${websocket}    ${message_name}
-    ${message} =    Collections.Get From Dictionary    ${query}    ${message_name}
-    WebSocketClient.Send    ${websocket}    ${message_name}
 
 
 Receive From Websocket

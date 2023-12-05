@@ -96,12 +96,7 @@ type element struct {
 	Intent               string `json:"Intent"`
 }
 
-func SaveData(entity interface{}) {
-	//connect to database
-	db, err := connectToDatabase()
-	if err != nil {
-		fmt.Println("Error opening database connection when saving:", err)
-	}
+func SaveData(db *sql.DB, entity interface{}) {
 	//check what type of entity we are saving
 	switch d := entity.(type) {
 	//save a process entity
@@ -110,7 +105,7 @@ func SaveData(entity interface{}) {
 		fmt.Println("saving process")
 		insertProcess := `INSERT INTO process (Key, BpmnProcessId, Version, Resource, Timestamp) VALUES ($1, $2, $3, $4, $5)`
 		//execute the insertion command with entity as parameters
-		_, err = db.Exec(insertProcess, process.Key, process.Value.BpmnProcessId, process.Value.Version, process.Value.Resource, process.Timestamp)
+		_, err := db.Exec(insertProcess, process.Key, process.Value.BpmnProcessId, process.Value.Version, process.Value.Resource, process.Timestamp)
 		if err != nil {
 			fmt.Println("Data insertion into database failed")
 			fmt.Println(err)
@@ -122,7 +117,7 @@ func SaveData(entity interface{}) {
 		fmt.Println("saving zeebe")
 		zeebe := d
 		insertZeebe := `INSERT INTO process_instance (ProcessInstanceKey, PartitionID, ProcessDefinitionKey, BpmnProcessId, Version, Timestamp, Active) VALUES ($1, $2, $3, $4, $5, $6, $7)`
-		_, err = db.Exec(insertZeebe, zeebe.Value.ProcessInstanceKey, zeebe.PartitionId, zeebe.Value.ProcessDefinitionKey, zeebe.Value.BpmnProcessId, zeebe.Value.Version, zeebe.Timestamp, zeebe.Active)
+		_, err := db.Exec(insertZeebe, zeebe.Value.ProcessInstanceKey, zeebe.PartitionId, zeebe.Value.ProcessDefinitionKey, zeebe.Value.BpmnProcessId, zeebe.Value.Version, zeebe.Timestamp, zeebe.Active)
 		if err != nil {
 			fmt.Println("Failed to save instance to the database")
 			fmt.Println(err)
@@ -134,7 +129,7 @@ func SaveData(entity interface{}) {
 		fmt.Println("saving timer")
 		timer := d
 		insertTimer := `INSERT INTO timer (Key, Timestamp, ProcessDefinitionKey, ProcessInstanceKey, ElementInstanceKey, TargetElementId, Duedate, Repetitions) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
-		_, err = db.Exec(insertTimer, timer.Key, timer.Timestamp, timer.Value.ProcessDefinitionKey, timer.Value.ProcessInstanceKey, timer.Value.ElementInstanceKey, timer.Value.TargetElementId, timer.Value.Duedate, timer.Value.Repetitions)
+		_, err := db.Exec(insertTimer, timer.Key, timer.Timestamp, timer.Value.ProcessDefinitionKey, timer.Value.ProcessInstanceKey, timer.Value.ElementInstanceKey, timer.Value.TargetElementId, timer.Value.Duedate, timer.Value.Repetitions)
 		if err != nil {
 			fmt.Println("Failed to save timer to the database")
 			fmt.Println(err)
@@ -146,7 +141,7 @@ func SaveData(entity interface{}) {
 		fmt.Println("saving job")
 		job := d
 		insertJob := `INSERT INTO job (Key, Timestamp, ProcessInstanceKey, ElementInstanceKey, JobType, Worker, Retries) VALUES ($1, $2, $3, $4, $5, $6, $7)`
-		_, err = db.Exec(insertJob, job.Key, job.Timestamp, job.Value.ProcessInstanceKey, job.Value.ElementInstanceKey, job.Value.JobType, job.Value.Worker, job.Value.Retries)
+		_, err := db.Exec(insertJob, job.Key, job.Timestamp, job.Value.ProcessInstanceKey, job.Value.ElementInstanceKey, job.Value.JobType, job.Value.Worker, job.Value.Retries)
 		if err != nil {
 			fmt.Println("Failed to save job to the database")
 			fmt.Println(err)
@@ -158,7 +153,7 @@ func SaveData(entity interface{}) {
 		fmt.Println("saving message")
 		msg := d
 		insertMsg := `INSERT INTO message (Key, Name, CorrelationKey, MessageId, Timestamp) VALUES ($1, $2, $3, $4, $5)`
-		_, err = db.Exec(insertMsg, msg.Key, msg.Value.Name, msg.Value.CorrelationKey, msg.Value.MessageId, msg.Timestamp)
+		_, err := db.Exec(insertMsg, msg.Key, msg.Value.Name, msg.Value.CorrelationKey, msg.Value.MessageId, msg.Timestamp)
 		if err != nil {
 			fmt.Println("Failed to save message to the database")
 			fmt.Println(err)
@@ -170,7 +165,7 @@ func SaveData(entity interface{}) {
 		fmt.Println("saving incident")
 		incident := d
 		insertIncident := `INSERT INTO incident (Key, BpmnProcessId, ProcessInstanceKey, ElementInstanceKey, JobKey, ErrorType, ErrorMessage, Timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
-		_, err = db.Exec(insertIncident, incident.Key, incident.Value.BpmnProcessId, incident.Value.ProcessInstanceKey, incident.Value.ElementInstanceKey, incident.Value.JobKey, incident.Value.ErrorType, incident.Value.ErrorMessage, incident.Timestamp)
+		_, err := db.Exec(insertIncident, incident.Key, incident.Value.BpmnProcessId, incident.Value.ProcessInstanceKey, incident.Value.ElementInstanceKey, incident.Value.JobKey, incident.Value.ErrorType, incident.Value.ErrorMessage, incident.Timestamp)
 		if err != nil {
 			fmt.Println("Failed to save incident to the database")
 			fmt.Println(err)
@@ -182,7 +177,7 @@ func SaveData(entity interface{}) {
 		fmt.Println("saving variable")
 		variable := d
 		insertVariable := `INSERT INTO variable (PartitionID, Position, Name, Value, ProcessInstanceKey, ScopeKey) VALUES ($1, $2, $3, $4, $5, $6)`
-		_, err = db.Exec(insertVariable, variable.PartitionId, variable.Position, variable.Value.Name, variable.Value.Value, variable.Value.ProcessInstanceKey, variable.Value.ScopeKey)
+		_, err := db.Exec(insertVariable, variable.PartitionId, variable.Position, variable.Value.Name, variable.Value.Value, variable.Value.ProcessInstanceKey, variable.Value.ScopeKey)
 		if err != nil {
 			fmt.Println("Failed to save variable to the database")
 			fmt.Println(err)
@@ -197,7 +192,7 @@ func SaveData(entity interface{}) {
 		// check if the element already exists. If yes, only update then intent value
 		CheckIfExists := `SELECT * FROM element WHERE Key = $1`
 		var storeIntent string = element.Intent
-		err = db.QueryRow(CheckIfExists, element.Key).Scan(&element.Key, &element.Value.ProcessInstanceKey, &element.Value.ProcessDefinitionKey, &element.Value.BpmnProcessId, &element.Value.ElementId, &element.Value.BpmnElementType, &element.Intent)
+		err := db.QueryRow(CheckIfExists, element.Key).Scan(&element.Key, &element.Value.ProcessInstanceKey, &element.Value.ProcessDefinitionKey, &element.Value.BpmnProcessId, &element.Value.ElementId, &element.Value.BpmnElementType, &element.Intent)
 		if err == sql.ErrNoRows {
 			insertElement := `INSERT INTO ELEMENT (Key, ProcessInstanceKey, ProcessDefinitionKey, BpmnProcessId, ElementId, BpmnElementType, Intent) VALUES ($1, $2, $3, $4, $5, $6, $7)`
 			_, err = db.Exec(insertElement, element.Key, element.Value.ProcessInstanceKey, element.Value.ProcessDefinitionKey, element.Value.BpmnProcessId, element.Value.ElementId, element.Value.BpmnElementType, element.Intent)
@@ -225,13 +220,8 @@ func SaveData(entity interface{}) {
 }
 
 // retrieves every process, along with the number of instances for each process.
-func RetrieveProcesses() string {
+func RetrieveProcesses(db *sql.DB) string {
 	fmt.Println("retrieving processes from the database")
-	//connect to database
-	db, err := connectToDatabase()
-	if err != nil {
-		fmt.Println("Error opening database connection:", err)
-	}
 	fmt.Println("processes retrieved succesfully")
 	rows, err := db.Query(ProcessesQuery)
 	if err != nil {
@@ -258,13 +248,8 @@ func RetrieveProcesses() string {
 }
 
 // retrieves a process with the given Key (Process definition key)
-func RetrieveProcessByID(key int64) string {
+func RetrieveProcessByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the Process...")
-	// Connect to the DB
-	db, err := connectToDatabase()
-	if err != nil {
-		fmt.Println("Error opening database connection")
-	}
 	// Perform the query
 	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(ProcessByIDQuery, strkey)
@@ -273,30 +258,41 @@ func RetrieveProcessByID(key int64) string {
 		fmt.Println("Query failed")
 	}
 	defer rows.Close()
+
+	counter := 0
 	fmt.Println("Process retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
-	// Convert data to a JSON format
+	// Try to convert data to a JSON format
 	var p FullProcess
 	for rows.Next() {
+		counter++
 		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Resource, &p.Timestamp)
 		if err != nil {
 			fmt.Println("Failed to scan row")
 		}
 	}
-	json, err := json.Marshal(p)
-	if err != nil {
-		fmt.Println("Failed to convert data to JSON")
+	//check if rows exist and if not return an error JSON.
+	fmt.Println("Checking if query return rows")
+	if counter == 0 {
+		fmt.Println("results empty. Returning error.")
+		message := GenerateErrorMessage("Process not found")
+		return message
+		//convert to string otherwise
+	} else {
+		json, err := json.Marshal(p)
+		if err != nil {
+			fmt.Println("Failed to convert data to JSON")
+		}
+		return string(json)
 	}
-	return string(json)
 
 }
 
 // Retrieves an instance from the database.
 // column = The name of a specific column, key = the value we want to find from the column
 // accepts "ProcessDefinitionKey" or "ProcessInstanceKey" as the column parameter
-func RetrieveInstanceByID(column string, key int64) (string, error) {
+func RetrieveInstanceByID(db *sql.DB, column string, key int64) (string, error) {
 	if (column == "ProcessDefinitionKey") || (column == "ProcessInstanceKey") {
-		// open a DB connection
 		fmt.Println("retrieving an instance")
 		db, err := connectToDatabase()
 		if err != nil {
@@ -310,32 +306,39 @@ func RetrieveInstanceByID(column string, key int64) (string, error) {
 			fmt.Println("Query failed!")
 		}
 		defer rows.Close()
+
+		counter := 0
+
 		// create the JSON and return it
 		var p ProcessInst
 		for rows.Next() {
+			counter++
 			err := rows.Scan(&p.ProcessInstanceKey, &p.PartitionID, &p.ProcessDefinitionKey, &p.BpmnProcessId, &p.Version, &p.Timestamp, &p.Active)
 			if err != nil {
 				fmt.Println("Failed to scan row:", err)
 			}
 		}
-		json, err := json.Marshal(p)
-		if err != nil {
-			fmt.Println("Failed to conver data to JSON")
+		if counter == 0 {
+			fmt.Println("results empty. Returning error.")
+			message := GenerateErrorMessage("Instance not found")
+			return message, nil
+			//convert to string otherwise
+		} else {
+			json, err := json.Marshal(p)
+			if err != nil {
+				fmt.Println("Failed to conver data to JSON")
+			}
+			return string(json), nil
 		}
-		return string(json), nil
+
 	} else {
 		return "", errors.New("invalid column")
 	}
 }
 
 // retrieves all process instances from the database, and returns them ordered from newest to oldest.
-func RetrieveInstances() string {
+func RetrieveInstances(db *sql.DB) string {
 	fmt.Println("retrieving all instances from the database")
-	//connect to database
-	db, err := connectToDatabase()
-	if err != nil {
-		fmt.Println("Error opening database connection")
-	}
 	fmt.Println("processes retrieved succesfully")
 	rows, err := db.Query(InstancesQuery)
 	if err != nil {
@@ -362,14 +365,9 @@ func RetrieveInstances() string {
 
 }
 
-// retrieves a variable with the ProcessInstanceKey specified in the parameter
-func RetrieveVariableByID(key int64) string {
+// retrieves all variables with the ProcessInstanceKey specified in the parameter
+func RetrieveVariableByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the variable...")
-	// Connect to the DB
-	db, err := connectToDatabase()
-	if err != nil {
-		fmt.Println("Error opening database connection")
-	}
 	// Perform the query
 	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(VariableByIDQuery, strkey)
@@ -381,28 +379,25 @@ func RetrieveVariableByID(key int64) string {
 	fmt.Println("Variable retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
-	var v variable
+	var variables []variable
 	for rows.Next() {
+		var v variable
 		err := rows.Scan(&v.PartitionId, &v.Position, &v.Name, &v.Value, &v.ProcessInstanceKey, &v.ScopeKey)
 		if err != nil {
 			fmt.Println("Failed to scan row")
 		}
+		variables = append(variables, v)
 	}
-	json, err := json.Marshal(v)
+	json, err := json.Marshal(variables)
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
 	return string(json)
 }
 
-// Retrieves an incident with the given ProcessInstanceKey
-func RetrieveIncidentByID(key int64) string {
+// Retrieves all incidents with the given ProcessInstanceKey
+func RetrieveIncidentByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the incident...")
-	// Connect to the DB
-	db, err := connectToDatabase()
-	if err != nil {
-		fmt.Println("Error opening database connection")
-	}
 	// Perform the query
 	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(IncidentByIDQuery, strkey)
@@ -414,14 +409,16 @@ func RetrieveIncidentByID(key int64) string {
 	fmt.Println("incident retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
-	var i incident
+	var incidents []incident
 	for rows.Next() {
+		var i incident
 		err := rows.Scan(&i.Key, &i.BpmnProcessId, &i.ProcessInstanceKey, &i.ElementInstanceKey, &i.JobKey, &i.ErrorType, &i.ErrorMessage, &i.Timestamp)
 		if err != nil {
 			fmt.Println("Failed to scan row")
 		}
+		incidents = append(incidents, i)
 	}
-	json, err := json.Marshal(i)
+	json, err := json.Marshal(incidents)
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
@@ -429,13 +426,8 @@ func RetrieveIncidentByID(key int64) string {
 }
 
 // Returns all incidents in the database, sorted from newest to oldest.
-func RetrieveIncidents() string {
+func RetrieveIncidents(db *sql.DB) string {
 	fmt.Println("retrieving all incidents from the database")
-	//connect to database
-	db, err := connectToDatabase()
-	if err != nil {
-		fmt.Println("Error opening database connection")
-	}
 	fmt.Println("incidents retrieved succesfully")
 	rows, err := db.Query(IncidentsQuery)
 	if err != nil {
@@ -461,14 +453,9 @@ func RetrieveIncidents() string {
 	return string(jsonData)
 }
 
-// retrieves a message with a given key
-func RetrieveMessageByID(key int64) string {
+// retrieves all messages with a given key
+func RetrieveMessageByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the Message...")
-	// Connect to the DB
-	db, err := connectToDatabase()
-	if err != nil {
-		fmt.Println("Error opening database connection")
-	}
 	// Perform the query
 	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(MessageByIDQuery, strkey)
@@ -480,28 +467,25 @@ func RetrieveMessageByID(key int64) string {
 	fmt.Println("Message retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
-	var m message
+	var messages []message
 	for rows.Next() {
+		var m message
 		err := rows.Scan(&m.Key, &m.Name, &m.CorrelationKey, &m.MessageId, &m.Timestamp)
 		if err != nil {
 			fmt.Println("Failed to scan row")
 		}
+		messages = append(messages, m)
 	}
-	json, err := json.Marshal(m)
+	json, err := json.Marshal(messages)
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
 	return string(json)
 }
 
-// retrieves a timer with the specified ProcessInstanceKey from the db
-func RetrieveTimerByID(key int64) string {
+// retrieves all timers with the specified ProcessInstanceKey from the db
+func RetrieveTimerByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the timer...")
-	// Connect to the DB
-	db, err := connectToDatabase()
-	if err != nil {
-		fmt.Println("Error opening database connection")
-	}
 	// Perform the query
 	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(TimerByIDQuery, strkey)
@@ -513,28 +497,25 @@ func RetrieveTimerByID(key int64) string {
 	fmt.Println("Message retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
-	var t timer
+	var timers []timer
 	for rows.Next() {
+		var t timer
 		err := rows.Scan(&t.Key, &t.Timestamp, &t.ProcessDefinitionKey, &t.ProcessInstanceKey, &t.ElementInstanceKey, &t.TargetElementId, &t.Duedate, &t.Repetitions)
 		if err != nil {
 			fmt.Println("Failed to scan row")
 		}
+		timers = append(timers, t)
 	}
-	json, err := json.Marshal(t)
+	json, err := json.Marshal(timers)
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
 	return string(json)
 }
 
-// retrieves an element with the given ProcessInstanceKey
-func RetrieveElementByID(key int64) string {
+// retrieves all elements with the given ProcessInstanceKey
+func RetrieveElementByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the element...")
-	// Connect to the DB
-	db, err := connectToDatabase()
-	if err != nil {
-		fmt.Println("Error opening database connection")
-	}
 	// Perform the query
 	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(ElementByIDQuery, strkey)
@@ -546,41 +527,32 @@ func RetrieveElementByID(key int64) string {
 	fmt.Println("Element retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
-	var e element
+	var elements []element
+
 	for rows.Next() {
+		var e element
 		err := rows.Scan(&e.Key, &e.ProcessInstanceKey, &e.ProcessDefinitionKey, &e.BpmnProcessId, &e.ElementId, &e.BpmnElementType, &e.Intent)
 		if err != nil {
 			fmt.Println("Failed to scan row")
 		}
+		elements = append(elements, e)
 	}
-	json, err := json.Marshal(e)
+	json, err := json.Marshal(elements)
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
 	return string(json)
 }
 
-func connectToDatabase() (*sql.DB, error) {
-	//pass variables to the connection string
-	DBConnection := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, DBname)
-	// Open a database connection, and check that it works
-	db, err := sql.Open("postgres", DBConnection)
-	if err != nil {
-		return nil, err
+// generates message for error
+func GenerateErrorMessage(message string) string {
+	fmt.Println("results empty. Returning error.")
+	errorMessageValue := ErrorMessageValue{
+		Error: message,
 	}
-	fmt.Println("Connected to the database!")
-	return db, nil
-}
-
-// manual table creation REDUNDANT!!!
-func CreateTables() {
-	db, err := connectToDatabase()
+	errorJSON, err := json.MarshalIndent(errorMessageValue, "", "  ")
 	if err != nil {
-		fmt.Println("Error opening database connection:", err)
+		fmt.Println("generated error message could not be parsed.")
 	}
-	create_process := "CREATE TABLE process ( Key BIGINT, BpmnProcessId VARCHAR(50) NOT NULL, Version INT NOT NULL, Resource TEXT NOT NULL, Timestamp BIGINT NOT NULL);"
-	_, err = db.Exec(create_process)
-	if err != nil {
-		fmt.Println("Table creation failed")
-	}
+	return string(errorJSON)
 }
