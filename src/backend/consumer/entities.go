@@ -146,19 +146,29 @@ type ErrorMessageValue struct {
 }
 
 type ElementsContainer struct {
-	Elements []Element `json:"elements"`
+	Elements []ElementForFrontend `json:"elements"`
+}
+
+type ElementForFrontend struct {
+	Key                  int64  `json:"key"`
+	ProcessInstanceKey   int64  `json:"processInstanceKey"`
+	ProcessDefinitionKey int64  `json:"processDefinitionKey"`
+	BpmnProcessId        string `json:"bpmnProcessId"`
+	ElementId            string `json:"elementId"`
+	BpmnElementType      string `json:"bpmnElementType"`
+	Intent               string `json:"intent"`
 }
 
 type VariablesContainer struct {
-	Variables []Variable `json:"variables"`
+	Variables []VariableForFrontend `json:"variables"`
 }
 
 type TimersContainer struct {
-	Timers []Timer `json:"timers"`
+	Timers []TimerForFrontend `json:"timers"`
 }
 
 type IncidentsContainer struct {
-	Incidents []Incident `json:"incidents"`
+	Incidents []IncidentForFrontend `json:"incidents"`
 }
 type ProcessContainer struct {
 	Process ProcessForFrontend `json:"process"`
@@ -170,4 +180,36 @@ type ProcessForFrontend struct {
 	Version       int64  `json:"version"`
 	Resource      string `json:"resource"`
 	Timestamp     int64  `json:"timestamp"`
+}
+
+type VariableForFrontend struct {
+	PartitionId        int64  `json:"partitionId"`
+	Position           int64  `json:"position"`
+	Name               string `json:"name"`
+	Value              string `json:"value"`
+	ProcessInstanceKey int64  `json:"processInstanceKey"`
+	ScopeKey           int64  `json:"scopeKey"`
+}
+
+type TimerForFrontend struct {
+	Key                  int64  `json:"key"`
+	Timestamp            int64  `json:"timestamp"`
+	ProcessDefinitionKey int64  `json:"processDefinitionKey"`
+	ProcessInstanceKey   int64  `json:"processInstanceKey"`
+	ElementInstanceKey   int64  `json:"elementInstanceKey"`
+	TargetElementId      string `json:"targetElementId"`
+	Duedate              int64  `json:"dueDate"`
+	Repetitions          int64  `json:"repetitions"`
+}
+
+type IncidentForFrontend struct {
+	Key                  int64  `json:"key"`
+	Timestamp            int64  `json:"timestamp"`
+	BpmnProcessId        string `json:"bpmnProcessId"`
+	ProcessDefinitionKey int64  `json:"processDefinitionKey"`
+	ProcessInstanceKey   int64  `json:"processInstanceKey"`
+	ElementInstanceKey   int64  `json:"elementInstanceKey"`
+	JobKey               int64  `json:"jobKey"`
+	ErrorType            string `json:"errorType"`
+	ErrorMessage         string `json:"errorMessage"`
 }

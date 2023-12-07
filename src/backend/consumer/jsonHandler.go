@@ -179,19 +179,14 @@ func concatenateJSON(json1, json2, json3, json4, json5 []byte) (*[]byte, error) 
 		Process: process,
 	}
 
-	fmt.Println()
+	/*fmt.Println()
 	fmt.Println("Processcontainer item: ", processContainer.Process.BpmnProcessId)
 	fmt.Println("Processcontainer item: ", processContainer.Process.Key)
-	fmt.Println()
+	fmt.Println("jarkko")*/
 
-	/*
-		fmt.Println("Process fields: ", process.Process.BpmnProcessId)
-		fmt.Println("Process fields: ", process.Process.Key)
-		fmt.Println("Process fields: ", process.Process.Version)
-	*/
 	err2 := json.Unmarshal(json2, &elements)
 	if err2 != nil {
-		fmt.Println("Error turning json to struct: ", err2)
+		fmt.Println("Error turning elements json to struct: ", err2)
 		return nil, err2
 	}
 
@@ -215,13 +210,13 @@ func concatenateJSON(json1, json2, json3, json4, json5 []byte) (*[]byte, error) 
 
 	combinedItem := struct {
 		ProcessContainer
-		ElementsContainer
+		//ElementsContainer
 		VariablesContainer
 		TimersContainer
 		IncidentsContainer
 	}{
-		ProcessContainer:   processContainer,
-		ElementsContainer:  elements,
+		ProcessContainer: processContainer,
+		//ElementsContainer:  elements,
 		VariablesContainer: variables,
 		TimersContainer:    timers,
 		IncidentsContainer: incidents,
@@ -229,7 +224,7 @@ func concatenateJSON(json1, json2, json3, json4, json5 []byte) (*[]byte, error) 
 
 	fmt.Println()
 	fmt.Println("combined item process field: ", combinedItem.ProcessContainer.Process.Key)
-	fmt.Println("combined item fields: ", combinedItem.Elements)
+	//fmt.Println("combined item fields: ", combinedItem.Elements)
 
 	combinedJSON, err := json.Marshal(combinedItem)
 	if err != nil {

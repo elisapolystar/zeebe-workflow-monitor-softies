@@ -254,8 +254,9 @@ func reader(conn *websocket.Conn) {
 
 				// concatenateJSON funktion ois tarkotus yhistää noi haetut jsonit
 				// concatenateJSON funktio löytyy jsonHandler.gon pohjalta
-				combinedJSON, err4 := concatenateJSON([]byte(processJson),
-					[]byte(instance),
+				combinedJSON, err4 := concatenateJSON(
+					[]byte(processJson),
+					[]byte(elements),
 					[]byte(variables),
 					[]byte(timers),
 					[]byte(incidents))
