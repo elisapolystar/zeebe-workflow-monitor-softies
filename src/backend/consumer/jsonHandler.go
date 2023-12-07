@@ -164,10 +164,10 @@ func parseInstanceRequest(msg []byte) (*InstanceRequest, error) {
 // Add two JSONs together
 func concatenateJSON(json1, json2, json3, json4, json5 []byte) (*[]byte, error) {
 	var process ProcessForFrontend
-	var elements ElementsContainer
-	var variables VariablesContainer
-	var timers TimersContainer
-	var incidents IncidentsContainer
+	var elements []interface{}
+	var variables []interface{}
+	var timers []interface{}
+	var incidents []interface{}
 
 	err1 := json.Unmarshal(json1, &process)
 	if err1 != nil {
@@ -189,42 +189,43 @@ func concatenateJSON(json1, json2, json3, json4, json5 []byte) (*[]byte, error) 
 		fmt.Println("Process fields: ", process.Process.Key)
 		fmt.Println("Process fields: ", process.Process.Version)
 	*/
+
 	err2 := json.Unmarshal(json2, &elements)
 	if err2 != nil {
-		fmt.Println("Error turning json to struct: ", err2)
+		fmt.Println("Error turning instance to struct: ", err2)
 		return nil, err2
 	}
 
 	err3 := json.Unmarshal(json3, &variables)
 	if err3 != nil {
-		fmt.Println("Error turning json to struct: ", err3)
+		fmt.Println("Error turning variables to struct: ", err3)
 		return nil, err3
 	}
 
 	err4 := json.Unmarshal(json4, &timers)
 	if err4 != nil {
-		fmt.Println("Error turning json to struct: ", err4)
+		fmt.Println("Error turning timers to struct: ", err4)
 		return nil, err4
 	}
 
 	err5 := json.Unmarshal(json5, &incidents)
 	if err5 != nil {
-		fmt.Println("Error turning json to struct: ", err5)
+		fmt.Println("Error turning incidents to struct: ", err5)
 		return nil, err5
 	}
 
 	combinedItem := struct {
 		ProcessContainer
-		ElementsContainer
-		VariablesContainer
-		TimersContainer
-		IncidentsContainer
+		Elements []interface{}
+		Variables []interface{}
+		Timers []interface{}
+		Incidents []interface{}
 	}{
 		ProcessContainer:   processContainer,
-		ElementsContainer:  elements,
-		VariablesContainer: variables,
-		TimersContainer:    timers,
-		IncidentsContainer: incidents,
+		Elements:  elements,
+		Variables: variables,
+		Timers:    timers,
+		Incidents: incidents,
 	}
 
 	fmt.Println()

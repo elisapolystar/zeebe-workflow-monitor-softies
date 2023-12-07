@@ -168,7 +168,7 @@ func reader(conn *websocket.Conn) {
 					fmt.Println(err.Error())
 				}
 
-				fmt.Println("Instances json we are sending to front: ", instancesDataJson)
+				fmt.Println("Instances json we are sending to front: ", string(instancesDataJson))
 				err2 := conn.WriteMessage(messageType, instancesDataJson)
 				if err2 != nil {
 					fmt.Println("Error sending instances to frontend", err2)
@@ -255,7 +255,7 @@ func reader(conn *websocket.Conn) {
 				// concatenateJSON funktion ois tarkotus yhistää noi haetut jsonit
 				// concatenateJSON funktio löytyy jsonHandler.gon pohjalta
 				combinedJSON, err4 := concatenateJSON([]byte(processJson),
-					[]byte(instance),
+					[]byte(elements),
 					[]byte(variables),
 					[]byte(timers),
 					[]byte(incidents))
