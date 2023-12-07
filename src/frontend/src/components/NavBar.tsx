@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import ReactDOM, { Root } from 'react-dom/client';
 import Processes from './Processes.tsx';
 import Instances from './Instances.tsx';
 import Incidents from './Incidents.tsx';
 import './NavBar.css';
-import App from '../App.tsx';
 
 
 interface NavBarProps {
   socket: WebSocket | null;
+  setContent: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
 }
 
-const NavBar: React.FC<NavBarProps> = ({ socket }) => {
-  const [processesData, setProcesses] = useState<string | null>(null);
-  const [instancesData, setInstances] = useState<string | null>(null);
+const NavBar: React.FC<NavBarProps> = ({ socket, setContent }) => {
 
   const fetchProcesses = () => {
     if (socket && socket.readyState === WebSocket.OPEN) {
@@ -31,6 +28,14 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
     }
   };
 
+  const fetchIncidents = () => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const messageObject = '{ "incident": "" }';
+      socket.send(messageObject);
+      console.log(`Incident request ${messageObject} sent from frontend`);
+    }
+  };
+
   const navigate = async (path: string) => {
     getComponentForPath(path);
     return;
@@ -45,10 +50,13 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
         fetchInstances();
         return
       case '/incidents':
-        fetchInstances();
+        fetchIncidents();
         return
+        //fetchInstances(undefined);
+        //return incidentsData ? <Incidents socket={socket} incidents={incidentsData} /> : <div>Loading...</div>;
+
       default:
-        if(!processesData) fetchProcesses();
+        fetchProcesses();
     }
   };
 
@@ -64,24 +72,30 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
         const message = JSON.parse(event.data);
         const type = message.type;
         switch(type) {
+          
           case 'all-processes':
             console.log(`Processes recieved: ${message.data}`)
             path = '/processes';
-            data = <Processes socket={socket} processes={message.data} />
-            console.log(path);
+            data = <Processes socket={socket} processes={message.data} setContent={setContent} />
             break;
           
           case 'all-instances':
             console.log(`Instances recieved: ${message.data}`)
             path = '/instances';
-            data = <Instances socket={socket} instances={message.data} />
+            data = <Instances socket={socket} instances={message.data} setContent={setContent} />
+            break;
+
+          case 'all-incidents':
+            console.log(`Incidents recieved: ${message.data}`)
+            path = '/incidents';
+            data = <Incidents socket={socket} incidents={message.data} setContent={setContent} />
             break;
           
           default: return;
         }
         console.log('Trying to render content')
         window.history.pushState({}, '', path);
-        ReactDOM.createRoot(document.getElementById('content') as HTMLElement).render(data);
+        setContent(data);
         
       });
     }
@@ -96,8 +110,6 @@ const NavBar: React.FC<NavBarProps> = ({ socket }) => {
           <li onClick={() => navigate('/incidents')}>Incidents</li>
         </ul>
       </nav>
-      <div id="content">
-      </div>
     </div>
   );
 };

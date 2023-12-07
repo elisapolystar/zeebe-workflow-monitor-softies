@@ -1,23 +1,23 @@
 import { BpmnVisualization } from 'bpmn-visualization';
 import React, { useEffect, useState } from 'react';
-import info from './testinstance.json';
 import './instanceview.css';
 
 interface InstanceViewProps {
   process_instance: string | null;
 }
 
-//change base64 coded resource to xml
-const encodedBpmn = info.data.process.Resource;
-const xml = atob(encodedBpmn);
-console.log(xml);
-
-const Instanceview: React.FC<InstanceViewProps> = () => {
+const Instanceview: React.FC<InstanceViewProps> = ({process_instance}) => {
   const [diagramData, setDiagramData] = useState<string | null>(null);
-  const [instanceData, setInstanceData] = useState(info.data.variables);
+  const instancesData = process_instance ? JSON.parse(process_instance) : {};
+  const [instanceData, setInstanceData] = useState(instancesData.data.variables);
+
+  //change base64 coded resource to xml
+  const encodedBpmn = instancesData.data.process.Resource;
+  const xml = atob(encodedBpmn);
+  console.log(xml);
 
   useEffect(() => {
-    setInstanceData(info.data.variables);
+    setInstanceData(instancesData.data.variables);
   }, []);
 
   const bpmnContainerElt = window.document.getElementById('bpmn-container');
@@ -40,7 +40,7 @@ const Instanceview: React.FC<InstanceViewProps> = () => {
         bpmnVisualization.load(xml);
 
         //Change the color to green for completed elements
-        info.data.elements.forEach((element) => {
+        instancesData.data.elements.forEach((element) => {
             if (element.Intent === "ELEMENT_COMPLETED" || element.Intent === "SEQUENCE_FLOW_TAKEN") {
               bpmnVisualization.bpmnElementsRegistry.updateStyle(element.ElementId, 
                 { stroke: {
@@ -53,7 +53,7 @@ const Instanceview: React.FC<InstanceViewProps> = () => {
   }, [bpmnContainerElt, diagramData]);
   return (
     <div className='instanceview'>
-      <h2>{info.data.process.BpmnProcessId}</h2>
+      <h2>{instancesData.data.process.BpmnProcessId}</h2>
       <br/>
 
       <div id="bpmn-container"></div>
@@ -66,8 +66,7 @@ const Instanceview: React.FC<InstanceViewProps> = () => {
       <div className='variable-container'>    
         <div className='variable-item'>
           <span>Name</span>
-          {instanceData &&
-          instanceData.map((instanceData, index) => (
+          {instancesData.map((instanceData, index) => (
           <div className="variable-info" key={index}>
             <span>{instanceData.Name}</span>
           </div>

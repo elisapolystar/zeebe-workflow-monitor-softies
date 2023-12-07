@@ -100,17 +100,22 @@ type TimerValue struct {
 }
 
 // Message from frontend
+type FrontCommunication struct {
+	Process string `json:"process"`
+}
+
+type WebsocketMessage struct {
+	Type string `json:"type"`
+	Data string `json:"data"`
+}
+
+// Message from frontend
 type ProcessRequest struct {
 	Process string `json:"process"`
 }
 
 type InstanceRequest struct {
 	Instance string `json:"instance"`
-}
-
-type WebsocketMessage struct {
-	Type string `json:"type"`
-	Data string `json:"data"`
 }
 
 type Zeebe struct {
