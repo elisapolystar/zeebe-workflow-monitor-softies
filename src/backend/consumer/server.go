@@ -168,7 +168,7 @@ func reader(conn *websocket.Conn) {
 					fmt.Println(err.Error())
 				}
 
-				fmt.Println("Instances json we are sending to front: ", instancesDataJson)
+				fmt.Println("Instances json we are sending to front: ", string(instancesDataJson))
 				err2 := conn.WriteMessage(messageType, instancesDataJson)
 				if err2 != nil {
 					fmt.Println("Error sending instances to frontend", err2)
