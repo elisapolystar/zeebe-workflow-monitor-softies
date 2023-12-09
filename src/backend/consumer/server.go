@@ -489,7 +489,8 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the variable JSON: ", err)
 			}
-
+			SaveData(db, *variableItem)
+			
 			fmt.Println()
 			fmt.Println("******************************************************")
 			fmt.Println()
@@ -511,6 +512,7 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the job JSON: ", err)
 			}
+			SaveData(db, *jobItem)
 
 			fmt.Println()
 			fmt.Println("-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-")
@@ -534,6 +536,7 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the incident JSON: ", err)
 			}
+			SaveData(db, *incidentItem)
 
 			fmt.Println()
 			fmt.Println("INCIDENT - INCIDENT - INCIDENT - INCIDENT - INCIDENT - ")
@@ -558,6 +561,7 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the message JSON: ", err)
 			}
+			SaveData(db, *messageItem)
 
 			fmt.Println()
 			fmt.Println("MESSAGE - MESSAGE - MESSAGE - MESSAGE - MESSAGE - MESSAGE")
@@ -578,6 +582,7 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the timer JSON: ", err)
 			}
+			SaveData(db, *timerItem)
 
 			fmt.Println("TIMER TIMER TIMER TIMER TIMER TIMER TIMER TIMER ")
 			fmt.Println("Timer key: ", timerItem.Key)
