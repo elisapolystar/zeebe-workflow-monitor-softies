@@ -295,9 +295,6 @@ func RetrieveProcessByID(db *sql.DB, key int64) string {
 func RetrieveInstanceByID(db *sql.DB, column string, key int64) (string, error) {
 	if (column == "ProcessDefinitionKey") || (column == "ProcessInstanceKey") {
 		fmt.Println("retrieving an instance")
-		if err != nil {
-			fmt.Println("Error opening database connection")
-		}
 		// perform the query
 		var strkey string = strconv.FormatInt(key, 10)
 		db_query := fmt.Sprintf(InstanceByIDQuery, column, strkey)
