@@ -289,38 +289,6 @@ Get Instance With Id
     [Return]    ${found_instance_data}
 
 
-Get Amount Of Elements In Instance
-    [Documentation]   Return the amount of elements in an instance.
-    [Arguments]    ${instance_id}
-    ${instance_data} =    Get Instance With Id    ${instance_id}
-    ${amount_of_elements} =    Collections.Get From Dictionary    ${instance_data}    elements
-    [Return]    ${amount_of_elements}
-
-
-Get Amount Of Variables In Instance
-    [Documentation]   Return the amount of variables in an instance.
-    [Arguments]    ${instance_id}
-    ${instance_data} =    Get Instance With Id    ${instance_id}
-    ${amount_of_variables} =    Collections.Get From Dictionary    ${instance_data}    message-variables
-    [Return]    ${amount_of_variables}
-
-
-Get Amount Of Timers In Instance
-    [Documentation]   Return the amount of timers in an instance.
-    [Arguments]    ${instance_id}
-    ${instance_data} =    Get Instance With Id    ${instance_id}
-    ${amount_of_timers} =    Collections.Get From Dictionary    ${instance_data}    timers
-    [Return]    ${amount_of_timers}
-
-
-Get Amount Of Incidents In Instance
-    [Documentation]   Return the amount of incidents in an instance.
-    [Arguments]    ${instance_id}
-    ${instance_data} =    Get Instance With Id    ${instance_id}
-    ${amount_of_incidents} =    Collections.Get From Dictionary    ${instance_data}    incidents
-    [Return]    ${amount_of_incidents}
-
-
 Get Single Instance Id Of Deployed Instance
     [Documentation]   Return a random instance id from the list of deployed instances.
     ${instance_ids} =    Get Deployed Instance Ids
