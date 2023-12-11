@@ -304,9 +304,28 @@ func reader(conn *websocket.Conn) {
 					fmt.Println("Error sending instances to frontend", err6)
 				}
 			}
-
+		// frontend requests incidents	
+		} else if incidentValue, ok := messageData["incident"]; ok {
+			// retrieve all incidents from the database and create a WS message with the data
+			allIncidents := RetrieveIncidents(db)
+			incidentsData := WebsocketMessage{
+				Type: "all-incidents",
+				Data: string(allIncidents),
+			}
+			// parse the message to a json format
+			incidentsDataJson, err := json.Marshal(incidentsData)
+			if err != nil {
+				fmt.Println("Error marshalling the incidentsData item to json")
+				fmt.Println(err.Error())
+			}
+			// send the json data to the frontend
+			fmt.Println("Incidents json we are sending to front: ", string(incidentsDataJson))
+			err2 := conn.WriteMessage(messageType, incidentsDataJson)
+			if err2 != nil {
+				fmt.Println("Error sending instances to frontend", err2)
+			}
 		} else {
-			log.Println("hmm maybe some other json")
+			fmt.Println("Unrecognized message")
 		}
 	}
 }
@@ -471,7 +490,8 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the variable JSON: ", err)
 			}
-
+			SaveData(db, *variableItem)
+			
 			fmt.Println()
 			fmt.Println("******************************************************")
 			fmt.Println()
@@ -493,6 +513,7 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the job JSON: ", err)
 			}
+			SaveData(db, *jobItem)
 
 			fmt.Println()
 			fmt.Println("-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-")
@@ -516,6 +537,7 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the incident JSON: ", err)
 			}
+			SaveData(db, *incidentItem)
 
 			fmt.Println()
 			fmt.Println("INCIDENT - INCIDENT - INCIDENT - INCIDENT - INCIDENT - ")
@@ -540,6 +562,7 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the message JSON: ", err)
 			}
+			SaveData(db, *messageItem)
 
 			fmt.Println()
 			fmt.Println("MESSAGE - MESSAGE - MESSAGE - MESSAGE - MESSAGE - MESSAGE")
@@ -560,6 +583,7 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the timer JSON: ", err)
 			}
+			SaveData(db, *timerItem)
 
 			fmt.Println("TIMER TIMER TIMER TIMER TIMER TIMER TIMER TIMER ")
 			fmt.Println("Timer key: ", timerItem.Key)
