@@ -1,0 +1,51 @@
+/* Processes.css */
+
+/* Style the container for the horizontal layout */
+.process-container {
+    display: flex; /* Display items horizontally */
+    align-items: center; /* Vertically center items */
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Style each item within the container */
+  .process-item {
+    background-color: white; /* Background color for each item */
+    color: #333; /* Text color */
+    padding: 10px; /* Add padding to each item */
+    padding-left: 35px;
+    margin-right: 5%; /* Add space between items */
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+/*process-info goes under each process-item*/
+.process-info {
+    background-color: white; /* Background color for each item */
+    color: #333; /* Text color */
+    padding: 10px; /* Add padding to each item */
+    padding-left: 25px;
+    margin-right: 5%; /* Add space between items */
+    font-size: 16px;
+  }
+
+  .process-key {
+    background-color: white; /* Background color for each item */
+    color: #0000FF; /* Text color */
+    padding: 10px; /* Add padding to each item */
+    padding-left: 35px;
+    margin-right: 5%; /* Add space between items */
+    font-size: 16px;
+  }
+
+  .not-found{
+    padding: 20px;
+    padding-left: 5%;
+  }
+
+  /* Responsive layout - makes the menu and the content (inside the section) sit on top of each other instead of next to each other */
+  @media (max-width: 600px) {
+    .process-container {
+      flex-direction: column;
+    }
+}
+  

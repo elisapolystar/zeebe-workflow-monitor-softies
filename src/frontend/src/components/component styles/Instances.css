@@ -1,0 +1,48 @@
+/* Style the container for the horizontal layout */
+.instance-container {
+    display: flex; 
+    align-items: center; 
+    font-family: 'Arial', sans-serif;
+  }
+
+/* Style each item within the container */
+.instance-item {
+  background-color: white;
+  color: #333;
+  padding: 10px;
+  padding-left: 35px;
+  margin-right: 5%;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+/*process-info goes under each process-item*/
+.instance-info {
+  background-color: white;
+  color: #333;
+  padding: 10px;
+  font-size: 16px;
+}
+
+/*Style links to be blue*/
+.definition-key {
+  background-color: white;
+  color: #0000FF;
+  padding: 10px;
+  font-size: 16px;
+}
+
+/*Not found text comes under the process-items*/
+.not-found{
+  padding: 20px;
+  padding-left: 5%;
+}
+
+/* Responsive layout - makes the menu and the content (inside the section) sit on top of each other instead of next to each other */
+@media (max-width: 600px) {
+  .instance-container {
+    flex-direction: column;
+  }
+}
+
+  
