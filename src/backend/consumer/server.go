@@ -76,7 +76,6 @@ func reader(conn *websocket.Conn) {
 
 				// Retrieve the processes from the database
 				allProcesses := RetrieveProcesses(db)
-				fmt.Println("(J)The processes retrieved: ", string(allProcesses))
 				// Transfrom the retrieved processes to the correct json format that can be sent to the front
 				processesData := WebsocketMessage{
 					Type: all_processes,
@@ -88,6 +87,7 @@ func reader(conn *websocket.Conn) {
 					fmt.Println(err.Error())
 				}
 
+				log.Println("The processes json we are sending to frontend: ", string(processesDataJson))
 				// Send all processes to the frontend in the correct format
 				err2 := conn.WriteMessage(messageType, processesDataJson)
 				if err2 != nil {
@@ -115,6 +115,7 @@ func reader(conn *websocket.Conn) {
 					log.Println("Error marshalling websocketmessage struct: ", err2)
 				}
 
+				log.Println("The process we are sending to frontend: ", string(processDataJson))
 				err3 := conn.WriteMessage(messageType, processDataJson)
 				if err3 != nil {
 					log.Println("Error sending single process message to frontend: ", err2)
@@ -150,6 +151,7 @@ func reader(conn *websocket.Conn) {
 					fmt.Println(err.Error())
 				}
 
+				log.Println("The instances we are sending to frontend: ", string(instancesDataJson))
 				err2 := conn.WriteMessage(messageType, instancesDataJson)
 				if err2 != nil {
 					fmt.Println("Error sending instances to frontend", err2)
@@ -205,6 +207,7 @@ func reader(conn *websocket.Conn) {
 					fmt.Println(err5.Error())
 				}
 
+				log.Println("The instance we are sending to frontend: ", string(instanceDataJson))
 				// Send the instance json to frontend
 				err6 := conn.WriteMessage(messageType, instanceDataJson)
 				if err6 != nil {
@@ -274,7 +277,7 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the process instance json: ", err)
 			}
-
+			log.Println("Saving a zeebe item")
 			SaveData(db, *zeebeItem)
 		}
 
@@ -286,9 +289,8 @@ func listenTmChannel() {
 				fmt.Println("Error parsing the json: ", err)
 			}
 
+			log.Println("Saving a zeebe process item")
 			SaveData(db, *process)
-			processes := RetrieveProcessByID(db, process.Key)
-			fmt.Println("The process we just saved: ", string(processes))
 		}
 
 		// Make a struct of a process instance JSON
@@ -301,6 +303,7 @@ func listenTmChannel() {
 					fmt.Println("Error parsing the process instance json: ", err)
 				}
 
+				log.Println("Saving an element item")
 				SaveData(db, *elementItem)
 			} else {
 
@@ -320,6 +323,8 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the variable JSON: ", err)
 			}
+
+			log.Println("Saving a zeebe variable item")
 			SaveData(db, *variableItem)
 		}
 
@@ -330,6 +335,8 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the job JSON: ", err)
 			}
+
+			log.Println("Saving a zeebe job item")
 			SaveData(db, *jobItem)
 		}
 
@@ -340,6 +347,8 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the incident JSON: ", err)
 			}
+
+			log.Println("Saving a zeebe incident item")
 			SaveData(db, *incidentItem)
 		}
 
@@ -350,6 +359,8 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the message JSON: ", err)
 			}
+
+			log.Println("Saving a zeebe message item")
 			SaveData(db, *messageItem)
 		}
 
@@ -360,6 +371,8 @@ func listenTmChannel() {
 			if err != nil {
 				fmt.Println("Error parsing the timer JSON: ", err)
 			}
+
+			log.Println("Saving a zeebe timer item")
 			SaveData(db, *timerItem)
 		}
 	}
@@ -389,7 +402,6 @@ func main() {
 	messageChannel = make(chan topicMessagePair)
 	go Consume(messageChannel)
 	go listenTmChannel()
-	fmt.Println("We are here")
 	setupRoutes()
 	//Start server and listen port 8000
 	http.ListenAndServe(":8001", nil)
