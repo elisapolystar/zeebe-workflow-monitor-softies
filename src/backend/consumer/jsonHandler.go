@@ -161,8 +161,8 @@ func parseInstanceRequest(msg []byte) (*InstanceRequest, error) {
 	return &instanceMessage, nil
 }
 
-// Add two JSONs together
-func concatenateJSON(json1, json2, json3, json4, json5 []byte) (*[]byte, error) {
+// Add JSONs together to form one json that represents an instance
+func concatenateInstanceJSON(json1, json2, json3, json4, json5 []byte) (*[]byte, error) {
 	var process ProcessForFrontend
 	var elements []interface{}
 	var variables []interface{}
@@ -217,19 +217,10 @@ func concatenateJSON(json1, json2, json3, json4, json5 []byte) (*[]byte, error) 
 		Incidents:        incidents,
 	}
 
-	fmt.Println()
-	fmt.Println("combined item process field: ", combinedItem.ProcessContainer.Process.Key)
-	//fmt.Println("combined item fields: ", combinedItem.Elements)
-
 	combinedJSON, err := json.Marshal(combinedItem)
 	if err != nil {
 		fmt.Println("Failed to marshal json: ", err)
 		return nil, err
 	}
-
-	fmt.Println()
-	fmt.Println("1 combinded json ", string(combinedJSON))
-	fmt.Println()
-
 	return &combinedJSON, nil
 }
