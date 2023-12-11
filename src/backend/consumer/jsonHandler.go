@@ -122,19 +122,6 @@ func parseElementJson(msg []byte) (*Element, error) {
 	return &elementItem, nil
 }
 
-// Turn a process struct into JSON data
-func structToJson(data interface{}) (string, error) {
-
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		fmt.Println("Error: ", err)
-		fmt.Println(err.Error())
-	}
-
-	jsonString := string(jsonData)
-	return jsonString, err
-}
-
 // Turn a process request message from the frontend into a struct
 func parseProcessRequest(msg []byte) (*ProcessRequest, error) {
 
