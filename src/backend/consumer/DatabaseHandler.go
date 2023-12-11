@@ -1,99 +1,99 @@
 package main
 
-
 import (
-	"fmt"
-	"strconv"
-	"errors"
 	"database/sql"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"strconv"
+
 	_ "github.com/lib/pq"
 )
 
 const (
-	host = "postgres"
-	port = 5432
-	user = "postgres"
-	password = "password"
-	DBname = "workflow"
-	ProcessesQuery = "SELECT p.Key, p.BpmnProcessId, p.Version, p.Timestamp, COUNT(i.ProcessDefinitionKey) FROM process p LEFT JOIN process_instance i ON p.Key = i.ProcessDefinitionKey GROUP BY p.Key ORDER BY Timestamp DESC"
-	ProcessByIDQuery = "SELECT * FROM process WHERE key = %s"
+	host              = "postgres"
+	port              = 5432
+	user              = "postgres"
+	password          = "password"
+	DBname            = "workflow"
+	ProcessesQuery    = "SELECT p.Key, p.BpmnProcessId, p.Version, p.Timestamp, COUNT(i.ProcessDefinitionKey) FROM process p LEFT JOIN process_instance i ON p.Key = i.ProcessDefinitionKey GROUP BY p.Key ORDER BY Timestamp DESC"
+	ProcessByIDQuery  = "SELECT * FROM process WHERE key = %s"
 	InstanceByIDQuery = "SELECT * FROM process_instance WHERE %s = %s ORDER BY Timestamp DESC"
-	InstancesQuery = "SELECT * FROM process_instance ORDER BY Timestamp DESC"
+	InstancesQuery    = "SELECT * FROM process_instance ORDER BY Timestamp DESC"
 	VariableByIDQuery = "SELECT * FROM variable WHERE ProcessInstanceKey = %s"
 	IncidentByIDQuery = "SELECT * FROM incident WHERE ProcessInstanceKey = %s"
-	IncidentsQuery = "SELECT * FROM incident ORDER BY Timestamp DESC"
-	MessageByIDQuery = "SELECT * FROM message WHERE key = %s"
-	TimerByIDQuery = "SELECT * FROM timer WHERE ProcessInstanceKey = %s"
-	ElementByIDQuery = "SELECT * FROM element WHERE ProcessInstanceKey = %s"
+	IncidentsQuery    = "SELECT * FROM incident ORDER BY Timestamp DESC"
+	MessageByIDQuery  = "SELECT * FROM message WHERE key = %s"
+	TimerByIDQuery    = "SELECT * FROM timer WHERE ProcessInstanceKey = %s"
+	ElementByIDQuery  = "SELECT * FROM element WHERE ProcessInstanceKey = %s"
 )
 
 type SimpleProcess struct {
-	Key				int64	`json:"key"`
-	BpmnProcessId 	string 	`json:"bpmnProcessId"`
-	Version       	int64  	`json:"version"`
-	Timestamp 		int64	`json:"timestamp"`
-	Instances		int64	`json:"instances"`
+	Key           int64  `json:"key"`
+	BpmnProcessId string `json:"bpmnProcessId"`
+	Version       int64  `json:"version"`
+	Timestamp     int64  `json:"timestamp"`
+	Instances     int64  `json:"instances"`
 }
 type FullProcess struct {
-	Key				int64	`json:"key"`
-	BpmnProcessId 	string 	`json:"bpmnProcessId"`
-	Version       	int64  	`json:"version"`
-	Resource 		string 	`json:"resource"`
-	Timestamp 		int64	`json:"timestamp"`
+	Key           int64  `json:"key"`
+	BpmnProcessId string `json:"bpmnProcessId"`
+	Version       int64  `json:"version"`
+	Resource      string `json:"resource"`
+	Timestamp     int64  `json:"timestamp"`
 }
 type ProcessInst struct {
-	ProcessInstanceKey	int64	`json:"ProcessInstanceKey"`
-	PartitionID		int64	`json:"PartitionID"`
-	ProcessDefinitionKey	int64	`json:"ProcessDefinitionKey"`
-	BpmnProcessId	string	`json:"BpmnProcessId"`
-	Version		int64	`json:"Version"`
-	Timestamp	int64	`json:"Timestamp"`
-	Active		bool	`json:"Active"`
+	ProcessInstanceKey   int64  `json:"ProcessInstanceKey"`
+	PartitionID          int64  `json:"PartitionID"`
+	ProcessDefinitionKey int64  `json:"ProcessDefinitionKey"`
+	BpmnProcessId        string `json:"BpmnProcessId"`
+	Version              int64  `json:"Version"`
+	Timestamp            int64  `json:"Timestamp"`
+	Active               bool   `json:"Active"`
 }
 type variable struct {
-	PartitionId		int64	`json:"PartitionID"`
-	Position		int64	`json:"Position"`
-	Name			string	`json:"Name"`
-	Value			string	`json:"Value"`
-	ProcessInstanceKey	int64	`json:"ProcessInstanceKey"`
-	ScopeKey	int64	`json:"ScopeKey"`
+	PartitionId        int64  `json:"PartitionID"`
+	Position           int64  `json:"Position"`
+	Name               string `json:"Name"`
+	Value              string `json:"Value"`
+	ProcessInstanceKey int64  `json:"ProcessInstanceKey"`
+	ScopeKey           int64  `json:"ScopeKey"`
 }
 type incident struct {
-	Key				int64	`json:"Key"`
-	BpmnProcessId	string	`json:"BpmnProcessId"`
-	ProcessInstanceKey	int64	`json:"ProcessInstanceKey"`
-	ElementInstanceKey	int64	`json:"ElementInstanceKey"`
-	JobKey			int64	`json:"JobKey"`
-	ErrorType		string	`json:"ErrorType"`
-	ErrorMessage	string	`json:"ErrorMessage"`
-	Timestamp		int64	`json:"Timestamp"`
+	Key                int64  `json:"Key"`
+	BpmnProcessId      string `json:"BpmnProcessId"`
+	ProcessInstanceKey int64  `json:"ProcessInstanceKey"`
+	ElementInstanceKey int64  `json:"ElementInstanceKey"`
+	JobKey             int64  `json:"JobKey"`
+	ErrorType          string `json:"ErrorType"`
+	ErrorMessage       string `json:"ErrorMessage"`
+	Timestamp          int64  `json:"Timestamp"`
 }
 type message struct {
-	Key				int64	`json:"Key"`
-	Name			string	`json:"Name"`
-	CorrelationKey				string	`json:"Key"`
-	MessageId		string	`json:"MessageId"`
-	Timestamp		int64	`json:"Timestamp"`
+	Key            int64  `json:"Key"`
+	Name           string `json:"Name"`
+	CorrelationKey string `json:"Key"`
+	MessageId      string `json:"MessageId"`
+	Timestamp      int64  `json:"Timestamp"`
 }
 type timer struct {
-	Key				int64	`json:"Key"`
-	Timestamp		int64	`json:"Timestamp"`
-	ProcessDefinitionKey	int64	`json:"ProcessDefinitonKey"`
-	ProcessInstanceKey	int64	`json:"ProcessInstanceKey"`
-	ElementInstanceKey	int64	`json:"ElementInstanceKey"`
-	TargetElementId		string	`json:"TargetElementId"`
-	Duedate				int64	`json:"Duedate"`
-	Repetitions			int64	`json:"Repetitions"`
+	Key                  int64  `json:"Key"`
+	Timestamp            int64  `json:"Timestamp"`
+	ProcessDefinitionKey int64  `json:"ProcessDefinitonKey"`
+	ProcessInstanceKey   int64  `json:"ProcessInstanceKey"`
+	ElementInstanceKey   int64  `json:"ElementInstanceKey"`
+	TargetElementId      string `json:"TargetElementId"`
+	Duedate              int64  `json:"Duedate"`
+	Repetitions          int64  `json:"Repetitions"`
 }
 type element struct {
-	Key				int64	`json:"Key"`
-	ProcessInstanceKey	int64	`json:"ProcessInstanceKey"`
-	ProcessDefinitionKey	int64	`json:"ProcessDefinitionKey"`
-	BpmnProcessId	string	`json:"BpmnProcessId"`
-	ElementId		string	`json:"ElementId"`
-	BpmnElementType	string	`json:"BpmnElementType"`
-	Intent			string	`json:"Intent"`
+	Key                  int64  `json:"Key"`
+	ProcessInstanceKey   int64  `json:"ProcessInstanceKey"`
+	ProcessDefinitionKey int64  `json:"ProcessDefinitionKey"`
+	BpmnProcessId        string `json:"BpmnProcessId"`
+	ElementId            string `json:"ElementId"`
+	BpmnElementType      string `json:"BpmnElementType"`
+	Intent               string `json:"Intent"`
 }
 
 func SaveData(db *sql.DB, entity interface{}) {
@@ -101,7 +101,7 @@ func SaveData(db *sql.DB, entity interface{}) {
 	switch d := entity.(type) {
 	//save a process entity
 	case Process:
-		process := d;
+		process := d
 		fmt.Println("saving process")
 		insertProcess := `INSERT INTO process (Key, BpmnProcessId, Version, Resource, Timestamp) VALUES ($1, $2, $3, $4, $5)`
 		//execute the insertion command with entity as parameters
@@ -115,7 +115,7 @@ func SaveData(db *sql.DB, entity interface{}) {
 	//save a zeebe entity
 	case Zeebe:
 		fmt.Println("saving zeebe")
-		zeebe := d;
+		zeebe := d
 		insertZeebe := `INSERT INTO process_instance (ProcessInstanceKey, PartitionID, ProcessDefinitionKey, BpmnProcessId, Version, Timestamp, Active) VALUES ($1, $2, $3, $4, $5, $6, $7)`
 		_, err := db.Exec(insertZeebe, zeebe.Value.ProcessInstanceKey, zeebe.PartitionId, zeebe.Value.ProcessDefinitionKey, zeebe.Value.BpmnProcessId, zeebe.Value.Version, zeebe.Timestamp, zeebe.Active)
 		if err != nil {
@@ -123,11 +123,11 @@ func SaveData(db *sql.DB, entity interface{}) {
 			fmt.Println(err)
 		} else {
 			fmt.Println("saved instance to database!")
-		}	
+		}
 	// save a timer entity
 	case Timer:
 		fmt.Println("saving timer")
-		timer := d;
+		timer := d
 		insertTimer := `INSERT INTO timer (Key, Timestamp, ProcessDefinitionKey, ProcessInstanceKey, ElementInstanceKey, TargetElementId, Duedate, Repetitions) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 		_, err := db.Exec(insertTimer, timer.Key, timer.Timestamp, timer.Value.ProcessDefinitionKey, timer.Value.ProcessInstanceKey, timer.Value.ElementInstanceKey, timer.Value.TargetElementId, timer.Value.Duedate, timer.Value.Repetitions)
 		if err != nil {
@@ -139,7 +139,7 @@ func SaveData(db *sql.DB, entity interface{}) {
 	// save a job entity
 	case Job:
 		fmt.Println("saving job")
-		job := d;
+		job := d
 		insertJob := `INSERT INTO job (Key, Timestamp, ProcessInstanceKey, ElementInstanceKey, JobType, Worker, Retries) VALUES ($1, $2, $3, $4, $5, $6, $7)`
 		_, err := db.Exec(insertJob, job.Key, job.Timestamp, job.Value.ProcessInstanceKey, job.Value.ElementInstanceKey, job.Value.JobType, job.Value.Worker, job.Value.Retries)
 		if err != nil {
@@ -151,7 +151,7 @@ func SaveData(db *sql.DB, entity interface{}) {
 	// save a message entity
 	case Message:
 		fmt.Println("saving message")
-		msg := d;
+		msg := d
 		insertMsg := `INSERT INTO message (Key, Name, CorrelationKey, MessageId, Timestamp) VALUES ($1, $2, $3, $4, $5)`
 		_, err := db.Exec(insertMsg, msg.Key, msg.Value.Name, msg.Value.CorrelationKey, msg.Value.MessageId, msg.Timestamp)
 		if err != nil {
@@ -163,7 +163,7 @@ func SaveData(db *sql.DB, entity interface{}) {
 	// save an incident entity
 	case Incident:
 		fmt.Println("saving incident")
-		incident := d;
+		incident := d
 		insertIncident := `INSERT INTO incident (Key, BpmnProcessId, ProcessInstanceKey, ElementInstanceKey, JobKey, ErrorType, ErrorMessage, Timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 		_, err := db.Exec(insertIncident, incident.Key, incident.Value.BpmnProcessId, incident.Value.ProcessInstanceKey, incident.Value.ElementInstanceKey, incident.Value.JobKey, incident.Value.ErrorType, incident.Value.ErrorMessage, incident.Timestamp)
 		if err != nil {
@@ -175,26 +175,26 @@ func SaveData(db *sql.DB, entity interface{}) {
 	// save a variable entity to the database
 	case Variable:
 		fmt.Println("saving variable")
-		variable := d;
+		variable := d
 		insertVariable := `INSERT INTO variable (PartitionID, Position, Name, Value, ProcessInstanceKey, ScopeKey) VALUES ($1, $2, $3, $4, $5, $6)`
-		_, err := db.Exec(insertVariable, variable.PartitionId, variable.Position, variable.Value.Name, variable.Value.Value, variable.Value.ProcessInstanceKey, variable.Value.ScopeKey)	
+		_, err := db.Exec(insertVariable, variable.PartitionId, variable.Position, variable.Value.Name, variable.Value.Value, variable.Value.ProcessInstanceKey, variable.Value.ScopeKey)
 		if err != nil {
 			fmt.Println("Failed to save variable to the database")
 			fmt.Println(err)
 		} else {
 			fmt.Println("saved variable to the database!")
 		}
-	
+
 	// save an element entity to the database
 	case Element:
 		fmt.Println("saving element")
-		element := d;
+		element := d
 		// check if the element already exists. If yes, only update then intent value
 		CheckIfExists := `SELECT * FROM element WHERE Key = $1`
 		var storeIntent string = element.Intent
 		err := db.QueryRow(CheckIfExists, element.Key).Scan(&element.Key, &element.Value.ProcessInstanceKey, &element.Value.ProcessDefinitionKey, &element.Value.BpmnProcessId, &element.Value.ElementId, &element.Value.BpmnElementType, &element.Intent)
-		if err == sql.ErrNoRows{
-			insertElement := `INSERT INTO ELEMENT (Key, ProcessInstanceKey, ProcessDefinitionKey, BpmnProcessId, ElementId, BpmnElementType, Intent) VALUES ($1, $2, $3, $4, $5, $6, $7)`	
+		if err == sql.ErrNoRows {
+			insertElement := `INSERT INTO ELEMENT (Key, ProcessInstanceKey, ProcessDefinitionKey, BpmnProcessId, ElementId, BpmnElementType, Intent) VALUES ($1, $2, $3, $4, $5, $6, $7)`
 			_, err = db.Exec(insertElement, element.Key, element.Value.ProcessInstanceKey, element.Value.ProcessDefinitionKey, element.Value.BpmnProcessId, element.Value.ElementId, element.Value.BpmnElementType, element.Intent)
 			if err != nil {
 				fmt.Println("Failed to save element to the database")
@@ -207,14 +207,14 @@ func SaveData(db *sql.DB, entity interface{}) {
 		} else {
 			UpdateIntent := `UPDATE element SET Intent = $1 WHERE Key = $2`
 			_, err = db.Exec(UpdateIntent, storeIntent, element.Key)
-			if (err != nil){
+			if err != nil {
 				fmt.Println("Failed to update element: ", err)
 			}
 			fmt.Println("Successfully updated element")
 		}
 
 	default:
-        fmt.Println("Unsupported entity")
+		fmt.Println("Unsupported entity")
 	}
 
 }
@@ -232,7 +232,7 @@ func RetrieveProcesses(db *sql.DB) string {
 	//array for the processes
 	var processes []SimpleProcess
 
-	for rows.Next(){
+	for rows.Next() {
 		var p SimpleProcess
 		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Timestamp, &p.Instances)
 		if err != nil {
@@ -246,6 +246,7 @@ func RetrieveProcesses(db *sql.DB) string {
 	}
 	return string(jsonData)
 }
+
 // retrieves a process with the given Key (Process definition key)
 func RetrieveProcessByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the Process...")
@@ -263,7 +264,7 @@ func RetrieveProcessByID(db *sql.DB, key int64) string {
 	fmt.Println("Converting data to JSON...")
 	// Try to convert data to a JSON format
 	var p FullProcess
-	for rows.Next(){
+	for rows.Next() {
 		counter++
 		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Resource, &p.Timestamp)
 		if err != nil {
@@ -274,23 +275,24 @@ func RetrieveProcessByID(db *sql.DB, key int64) string {
 	fmt.Println("Checking if query return rows")
 	if counter == 0 {
 		fmt.Println("results empty. Returning error.")
-		message := GenerateErrorMessage("Process not found")	
+		message := GenerateErrorMessage("Process not found")
 		return message
-	//convert to string otherwise
+		//convert to string otherwise
 	} else {
 		json, err := json.Marshal(p)
 		if err != nil {
 			fmt.Println("Failed to convert data to JSON")
 		}
-		return string(json)	
+		return string(json)
 	}
-  
+
 }
-// Retrieves an instance from the database. 
+
+// Retrieves an instance from the database.
 // column = The name of a specific column, key = the value we want to find from the column
 // accepts "ProcessDefinitionKey" or "ProcessInstanceKey" as the column parameter
 func RetrieveInstanceByID(db *sql.DB, column string, key int64) (string, error) {
-	if (column == "ProcessDefinitionKey") || (column == "ProcessInstanceKey"){
+	if (column == "ProcessDefinitionKey") || (column == "ProcessInstanceKey") {
 		fmt.Println("retrieving an instance")
 		db, err := connectToDatabase()
 		if err != nil {
@@ -309,7 +311,7 @@ func RetrieveInstanceByID(db *sql.DB, column string, key int64) (string, error) 
 
 		// create the JSON and return it
 		var p ProcessInst
-		for rows.Next(){
+		for rows.Next() {
 			counter++
 			err := rows.Scan(&p.ProcessInstanceKey, &p.PartitionID, &p.ProcessDefinitionKey, &p.BpmnProcessId, &p.Version, &p.Timestamp, &p.Active)
 			if err != nil {
@@ -318,9 +320,9 @@ func RetrieveInstanceByID(db *sql.DB, column string, key int64) (string, error) 
 		}
 		if counter == 0 {
 			fmt.Println("results empty. Returning error.")
-			message := GenerateErrorMessage("Instance not found")	
+			message := GenerateErrorMessage("Instance not found")
 			return message, nil
-		//convert to string otherwise
+			//convert to string otherwise
 		} else {
 			json, err := json.Marshal(p)
 			if err != nil {
@@ -333,6 +335,7 @@ func RetrieveInstanceByID(db *sql.DB, column string, key int64) (string, error) 
 		return "", errors.New("invalid column")
 	}
 }
+
 // retrieves all process instances from the database, and returns them ordered from newest to oldest.
 func RetrieveInstances(db *sql.DB) string {
 	fmt.Println("retrieving all instances from the database")
@@ -346,7 +349,7 @@ func RetrieveInstances(db *sql.DB) string {
 	//array for the process instances
 	var instances []ProcessInst
 
-	for rows.Next(){
+	for rows.Next() {
 		var i ProcessInst
 		err := rows.Scan(&i.ProcessInstanceKey, &i.PartitionID, &i.ProcessDefinitionKey, &i.BpmnProcessId, &i.Version, &i.Timestamp, &i.Active)
 		if err != nil {
@@ -363,7 +366,7 @@ func RetrieveInstances(db *sql.DB) string {
 }
 
 // retrieves all variables with the ProcessInstanceKey specified in the parameter
-func RetrieveVariableByID(db *sql.DB, key int64) (string){
+func RetrieveVariableByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the variable...")
 	// Perform the query
 	var strkey string = strconv.FormatInt(key, 10)
@@ -377,7 +380,7 @@ func RetrieveVariableByID(db *sql.DB, key int64) (string){
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
 	var variables []variable
-	for rows.Next(){
+	for rows.Next() {
 		var v variable
 		err := rows.Scan(&v.PartitionId, &v.Position, &v.Name, &v.Value, &v.ProcessInstanceKey, &v.ScopeKey)
 		if err != nil {
@@ -389,24 +392,25 @@ func RetrieveVariableByID(db *sql.DB, key int64) (string){
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
-	return string(json)	
+	return string(json)
 }
+
 // Retrieves all incidents with the given ProcessInstanceKey
-func RetrieveIncidentByID(db *sql.DB, key int64) string{
+func RetrieveIncidentByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the incident...")
 	// Perform the query
 	var strkey string = strconv.FormatInt(key, 10)
 	db_query := fmt.Sprintf(IncidentByIDQuery, strkey)
 	rows, err := db.Query(db_query)
 	if err != nil {
-        fmt.Println("Query failed")
-    }
+		fmt.Println("Query failed")
+	}
 	defer rows.Close()
 	fmt.Println("incident retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
 	var incidents []incident
-	for rows.Next(){
+	for rows.Next() {
 		var i incident
 		err := rows.Scan(&i.Key, &i.BpmnProcessId, &i.ProcessInstanceKey, &i.ElementInstanceKey, &i.JobKey, &i.ErrorType, &i.ErrorMessage, &i.Timestamp)
 		if err != nil {
@@ -418,22 +422,23 @@ func RetrieveIncidentByID(db *sql.DB, key int64) string{
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
-	return string(json)		
+	return string(json)
 }
+
 // Returns all incidents in the database, sorted from newest to oldest.
 func RetrieveIncidents(db *sql.DB) string {
 	fmt.Println("retrieving all incidents from the database")
 	fmt.Println("incidents retrieved succesfully")
 	rows, err := db.Query(IncidentsQuery)
 	if err != nil {
-        fmt.Println("Query failed")
-    }
+		fmt.Println("Query failed")
+	}
 	defer rows.Close()
 
 	//array for the incidents
 	var incidents []incident
 
-	for rows.Next(){
+	for rows.Next() {
 		var i incident
 		err := rows.Scan(&i.Key, &i.BpmnProcessId, &i.ProcessInstanceKey, &i.ElementInstanceKey, &i.JobKey, &i.ErrorType, &i.ErrorMessage, &i.Timestamp)
 		if err != nil {
@@ -445,8 +450,9 @@ func RetrieveIncidents(db *sql.DB) string {
 	if err != nil {
 		fmt.Println("Failed to transform to json")
 	}
-	return string(jsonData)	
+	return string(jsonData)
 }
+
 // retrieves all messages with a given key
 func RetrieveMessageByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the Message...")
@@ -455,14 +461,14 @@ func RetrieveMessageByID(db *sql.DB, key int64) string {
 	db_query := fmt.Sprintf(MessageByIDQuery, strkey)
 	rows, err := db.Query(db_query)
 	if err != nil {
-        fmt.Println("Query failed")
-    }
+		fmt.Println("Query failed")
+	}
 	defer rows.Close()
 	fmt.Println("Message retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
 	var messages []message
-	for rows.Next(){
+	for rows.Next() {
 		var m message
 		err := rows.Scan(&m.Key, &m.Name, &m.CorrelationKey, &m.MessageId, &m.Timestamp)
 		if err != nil {
@@ -474,8 +480,9 @@ func RetrieveMessageByID(db *sql.DB, key int64) string {
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
-	return string(json)		
+	return string(json)
 }
+
 // retrieves all timers with the specified ProcessInstanceKey from the db
 func RetrieveTimerByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the timer...")
@@ -484,14 +491,14 @@ func RetrieveTimerByID(db *sql.DB, key int64) string {
 	db_query := fmt.Sprintf(TimerByIDQuery, strkey)
 	rows, err := db.Query(db_query)
 	if err != nil {
-        fmt.Println("Query failed")
-    }
+		fmt.Println("Query failed")
+	}
 	defer rows.Close()
 	fmt.Println("Message retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
 	var timers []timer
-	for rows.Next(){
+	for rows.Next() {
 		var t timer
 		err := rows.Scan(&t.Key, &t.Timestamp, &t.ProcessDefinitionKey, &t.ProcessInstanceKey, &t.ElementInstanceKey, &t.TargetElementId, &t.Duedate, &t.Repetitions)
 		if err != nil {
@@ -503,8 +510,9 @@ func RetrieveTimerByID(db *sql.DB, key int64) string {
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
-	return string(json)		
+	return string(json)
 }
+
 // retrieves all elements with the given ProcessInstanceKey
 func RetrieveElementByID(db *sql.DB, key int64) string {
 	fmt.Println("Retrieving the element...")
@@ -513,15 +521,15 @@ func RetrieveElementByID(db *sql.DB, key int64) string {
 	db_query := fmt.Sprintf(ElementByIDQuery, strkey)
 	rows, err := db.Query(db_query)
 	if err != nil {
-        fmt.Println("Query failed")
-    }
+		fmt.Println("Query failed")
+	}
 	defer rows.Close()
 	fmt.Println("Element retrieved successfully!")
 	fmt.Println("Converting data to JSON...")
 	// Convert data to a JSON format
 	var elements []element
 
-	for rows.Next(){
+	for rows.Next() {
 		var e element
 		err := rows.Scan(&e.Key, &e.ProcessInstanceKey, &e.ProcessDefinitionKey, &e.BpmnProcessId, &e.ElementId, &e.BpmnElementType, &e.Intent)
 		if err != nil {
@@ -533,13 +541,13 @@ func RetrieveElementByID(db *sql.DB, key int64) string {
 	if err != nil {
 		fmt.Println("Failed to convert data to JSON")
 	}
-	return string(json)		
+	return string(json)
 }
 
-//generates message for error
+// generates message for error
 func GenerateErrorMessage(message string) string {
 	fmt.Println("results empty. Returning error.")
-	errorMessageValue := ErrorMessageValue {
+	errorMessageValue := ErrorMessageValue{
 		Error: message,
 	}
 	errorJSON, err := json.MarshalIndent(errorMessageValue, "", "  ")
