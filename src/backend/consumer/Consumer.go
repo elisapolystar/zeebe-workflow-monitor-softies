@@ -12,24 +12,24 @@ import (
 func Consume(messageChannel chan<- topicMessagePair) {
 
 	// Define the Kafka broker address and topic we want to subscribe to
-	brokers := []string{"kafka:9093"}
-	topics := []string{"zeebe",
-		"zeebe-deployment",
-		"zeebe-deploy-distribution",
-		"zeebe-error",
-		"zeebe-incident",
-		"zeebe-job-batch",
-		"zeebe-job",
-		"zeebe-message",
-		"zeebe-message-subscription",
-		"zeebe-message-subscription-start-event",
-		"zeebe-process",
-		"zeebe-process-event",
-		"zeebe-process-instance",
-		"zeebe-process-instance-result",
-		"zeebe-process-message-subscription",
-		"zeebe-timer",
-		"zeebe-variable"}
+	brokers := []string{broker}
+	topics := []string{zeebe,
+		zeebe_deployment,
+		zeebe_deploy_distribution,
+		zeebe_error,
+		zeebe_incident,
+		zeebe_job_batch,
+		zeebe_job,
+		zeebe_message,
+		zeebe_message_subscription,
+		zeebe_message_subscription_start_event,
+		zeebe_process,
+		zeebe_process_event,
+		zeebe_process_instance,
+		zeebe_process_instance_result,
+		zeebe_process_message_subscription,
+		zeebe_timer,
+		zeebe_variable}
 
 	// Configure the Kafka consumer
 	config := sarama.NewConfig()

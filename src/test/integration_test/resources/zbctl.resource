@@ -5,6 +5,10 @@ Library      JSONLibrary
 Variables    ../variables/bpmn.yml
 
 
+*** Variables ***
+${DEPLOYED_DATA} =    DATA DEPLOYED BY KEYWORD 'Deploy All'
+
+
 *** Keywords ***
 Deploy All
     [Documentation]    Deploys all BPMN processes, subprocesses, instances and workers.
@@ -21,14 +25,16 @@ Deploy All
     FOR    ${sub_process}    IN    @{sub_processes}
         Deploy BPMN SubProcess    ${sub_process}
     END
-    FOR    ${process}    ${variable_type}    IN    &{instances}
-        Create Instance    ${process}    ${variable_type}
-        Sleep    1s
+    FOR    ${process}    ${variable_type_list}    IN    &{instances}
+        FOR    ${variable_type}    IN    @{variable_type_list}
+            Create Instance    ${process}    ${variable_type}
+            Sleep    1s
+        END
     END
     FOR    ${worker}    IN    @{workers}
         Create Worker    ${worker}    create
     END
-    [Return]    ${to-deploy}
+    BuiltIn.Set Suite Variable    ${DEPLOYED_DATA}    ${to-deploy}
 
 
 Deploy BPMN Process
@@ -112,3 +118,91 @@ Set Process Id
     ${process_id} =    Convert To Integer    ${process_id}
     Collections.Set To Dictionary    ${bpmn_instance}    process-id    ${process_id}
     Log    ${bpmn}
+
+
+Get Name Of Deployed Process
+    [Documentation]   Return the name of a deployed process by id.
+    [Arguments]    ${process_id}
+    FOR    ${process_name}    IN    @{DEPLOYED_DATA}[process]
+        ${process_instance} =    Collections.Get From Dictionary    ${bpmn}    ${process_name}
+        ${process_id_from_instance} =    Collections.Get From Dictionary    ${process_instance}    process-id
+        IF    ${process_id_from_instance} == ${process_id}
+            ${found_process_name} =    BuiltIn.Set Variable    ${process_name}
+        END
+    END
+    BuiltIn.Variable Should Exist    ${found_process_name}    msg=No deployed process with id ${process_id} found.
+    [Return]    ${found_process_name}
+
+
+Get Count Of Any Deployed Element
+    [Documentation]   Return the amount of deployed instances of a given type.
+    ...
+    ...               Type here is the name of the type of instance, e.g. process, instance, etc.
+    [Arguments]    ${type}
+    ${deployed_instances} =    Collections.Get From Dictionary    ${DEPLOYED_DATA}    ${type}
+    ${no_duplicates} =     Collections.Remove Duplicates    ${deployed_instances}
+    ${instance_count} =    Get Length    ${no_duplicates}
+    [Return]    ${instance_count}
+
+
+Get Count Of Deployed Instances
+    [Documentation]   Return the amount of deployed instances of a given process.
+    [Arguments]    ${process_name}
+    ${deployed_instances} =    Collections.Get From Dictionary    ${DEPLOYED_DATA}    instance
+    ${no_duplicates} =     Collections.Remove Duplicates    ${deployed_instances}
+    ${instance_count} =    Get Length    ${no_duplicates}
+    [Return]    ${instance_count}
+
+
+Get Deployed Process Ids
+    [Documentation]   Return the ids of all processes deployed during Suite Setup.
+    ${ids} =    Create List
+    ${deployed_processes} =    Collections.Get From Dictionary    ${DEPLOYED_DATA}    process
+    FOR    ${process_name}    IN    @{deployed_processes}
+        ${process_instance} =    Collections.Get From Dictionary    ${bpmn}    ${process_name}
+        ${process_id} =    Collections.Get From Dictionary    ${process_instance}    process-id
+        Append To List    ${ids}    ${process_id}
+    END
+    ${clean_list} =    Collections.Remove Duplicates    ${ids}
+    [Return]    ${clean_list}
+
+
+Get Single Process Id Of Deployed Process
+    [Documentation]   Return a random process id from the list of deployed processes.
+    ${process_ids} =    Get Deployed Process Ids
+    ${random_process_id} =    Get From List    ${process_ids}    0
+    [Return]    ${random_process_id}
+
+
+Get Deployed Instance Ids
+    [Documentation]   Return the ids of all instances deployed during Suite Setup.
+    ${ids} =    Create List
+    ${deployed_instances} =    Collections.Get From Dictionary    ${DEPLOYED_DATA}    instance
+    FOR    ${instance_name}    IN    @{deployed_instances}
+        ${instance_instance} =    Collections.Get From Dictionary    ${bpmn}    ${instance_name}
+        ${instance_id} =    Collections.Get From Dictionary    ${instance_instance}    process-id
+        Append To List    ${ids}    ${instance_id}
+    END
+    ${clean_list} =    Collections.Remove Duplicates    ${ids}
+    [Return]    ${clean_list}
+
+
+Get Name Of Deployed Instance
+    [Documentation]   Return the name of a deployed instance by id.
+    [Arguments]    ${instance_id}
+    FOR    ${instance_name}    IN    @{DEPLOYED_DATA}[instance]
+        ${instance_instance} =    Collections.Get From Dictionary    ${bpmn}    ${instance_name}
+        ${instance_id_from_instance} =    Collections.Get From Dictionary    ${instance_instance}    process-id
+        IF    ${instance_id_from_instance} == ${instance_id}
+            ${found_instance_name} =    BuiltIn.Set Variable    ${instance_name}
+        END
+    END
+    BuiltIn.Variable Should Exist    ${found_instance_name}    msg=No deployed instance with id ${instance_id} found.
+    [Return]    ${found_instance_name}
+
+
+Get Single Instance Id Of Deployed Instance
+    [Documentation]   Return a random instance id from the list of deployed instances.
+    ${instance_ids} =    Get Deployed Instance Ids
+    ${random_instance_id} =    Get From List    ${instance_ids}    0
+    [Return]    ${random_instance_id}

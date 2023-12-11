@@ -7,11 +7,13 @@ to-deploy:
   sub-process:
     - order-subprocess
   instance:
-    money-loan: ok-debt
-    money-loan: too-much-debt
-    multi-instance-process: all-in-stock
-    multi-instance-process: none-in-stock
-    multi-instance-process: some-in-stock
+    money-loan:
+      - ok-debt
+      - too-much-debt
+    multi-instance-process:
+      - all-in-stock
+      - none-in-stock
+      - some-in-stock
   worker:
     - send-acceptance-letter
     - send-rejection-letter
@@ -28,6 +30,7 @@ bpmn:
     variables:
       ok-debt: '{"debt": "100"}'
       too-much-debt: '{"debt": "2000"}'
+      incident: '{"not a real variable": "should cause an incident"}"}'
   multi-instance-process:
     filepath: resources/bpmn/multi-instance-process.bpmn
     process-id: SET-DYNAMICALLY

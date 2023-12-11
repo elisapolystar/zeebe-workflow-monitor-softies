@@ -12,7 +12,7 @@ services:
     ports:
       - 8001:8001
     networks:
-      - testenv
+      - devenv
 
   frontend:
     build:
@@ -24,7 +24,19 @@ services:
     ports:
       - 3000:3000
     networks:
-      - testenv
+      - devenv
+
+  dbclean:
+    build:
+      dockerfile: Dockerfile
+      context: src/backend/dbclean
+    container_name: dbclean
+    depends_on:
+      - postgres
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - devenv
 
   zookeeper:
     image: bitnami/zookeeper:3.8.0
@@ -35,7 +47,7 @@ services:
       - ZOO_TICK_TIME=2000
       - ALLOW_ANONYMOUS_LOGIN=yes
     networks:
-      - testenv
+      - devenv
 
   kafka:
     image: bitnami/kafka:3.1.0
@@ -57,7 +69,7 @@ services:
     depends_on:
       - zookeeper
     networks:
-      - testenv
+      - devenv
 
   kafka-setup:
     image: bitnami/kafka:2.8.1
@@ -73,7 +85,7 @@ services:
       KAFKA_CFG_BROKER_ID: ignored
       KAFKA_CFG_ZOOKEEPER_CONNECT: ignored
     networks:
-      - testenv
+      - devenv
 
   get-kafka-exporter:
     image: busybox:1.35.0
@@ -96,15 +108,15 @@ services:
       - kafka
       - get-kafka-exporter
     networks:
-      - testenv
+      - devenv
 
   postgres:
     image: bitnami/postgresql:15.4.0
     restart: always
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     logging:
       options:
         max-size: 10m
@@ -114,22 +126,13 @@ services:
     volumes:
       - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - testenv
-
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: root
-    ports:
-      - '5050:80'
+      - devenv
 
 volumes:
   exporters:
   postgres:
 
 networks:
-  testenv:
+  devenv:
     driver: bridge
-    name: testenv
+    name: devenv

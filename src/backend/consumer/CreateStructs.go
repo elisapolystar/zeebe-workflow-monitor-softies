@@ -2,7 +2,7 @@ package main
 
 func CreateProcess() Process {
 	//parameters for a process
-	var key int64 = 2251799813685249
+	var key int64 = 2345678912345678
 	bpmnProcessId := "money-loan"
 	var version int64 = 1
 	//version := 1
@@ -55,11 +55,11 @@ func CreateProcessInstance() Zeebe {
 }
 func CreateVariable() Variable {
 	//variable parameters
-	name := "test-variable"
-	value := "test"
-	var processInstanceKey int64 = 2251799813685250
+	name := "test-variable2"
+	value := "test2"
+	var processInstanceKey int64 = 2593275030505839
 	var scopeKey int64 = 2251799813685251
-	var partitionId int64 = 1
+	var partitionId int64 = 2
 	var position int64 = 6
 
 	//Create a variableValue instance
@@ -81,7 +81,7 @@ func CreateVariable() Variable {
 func CreateJob() Job {
 	var key int64 = 2251799813685251
 	var timestamp int64 = 1699893451665
-	var processInstanceKey int64 = 2251799813685250
+	var processInstanceKey int64 = 2593275030505839
 	var elementInstanceKey int64 = 2251799813685252
 	jobType := "test-job"
 	worker := "test-worker"
@@ -106,7 +106,7 @@ func CreateIncident() Incident {
 
 	bpmnProcessId := "money-loan"
 	var processDefinitionKey int64 = 2251799813685249
-	var processInstanceKey int64 = 2251799813685250
+	var processInstanceKey int64 = 2593275030505839
 	var elementInstanceKey int64 = 2251799813685252
 	var jobKey int64 = 2251799813685251
 	errorType := "test-error"
@@ -151,7 +151,7 @@ func CreateMessage() Message {
 }
 func CreateTimer() Timer {
 	var processDefinitionKey int64 = 2251799813685249
-	var processInstanceKey int64 = 2251799813685250
+	var processInstanceKey int64 = 2593275030505839
 	var elementInstanceKey int64 = 2251799813685252
 	targetElementId := "id"
 	var dueDate int64 = 1699893451665
@@ -173,4 +173,51 @@ func CreateTimer() Timer {
 		Value:timerValue,
 	}
 	return timer
+}
+
+func CreateElement() Element {
+	var key int64 = 1
+	var intent string = "first"
+	var processinstancekey int64 = 2593275030505839
+	var processdefinitionkey int64 = 2251799813685249
+	var bpmnprocessid string = "placeholder"
+	var elementid string = "placeholder id"
+	var bpmnelementtype string = "placeholder elementtype"
+
+	elementvalue := ElementValue{
+		ProcessInstanceKey:processinstancekey,
+		ProcessDefinitionKey:processdefinitionkey,
+		BpmnProcessId:bpmnprocessid,
+		ElementId:elementid,
+		BpmnElementType:bpmnelementtype,
+	}
+	element := Element{
+		Key:key,
+		Value:elementvalue,
+		Intent:intent,
+	}
+	return element
+}
+func UpdateElement() Element {
+	var key int64 = 1
+	var intent string = "second"
+	var processinstancekey int64 = 2593275030505839
+	var processdefinitionkey int64 = 2251799813685249
+	var bpmnprocessid string = "placeholder"
+	var elementid string = "placeholder id"
+	var bpmnelementtype string = "placeholder elementtype"
+
+	elementvalue := ElementValue{
+		ProcessInstanceKey:processinstancekey,
+		ProcessDefinitionKey:processdefinitionkey,
+		BpmnProcessId:bpmnprocessid,
+		ElementId:elementid,
+		BpmnElementType:bpmnelementtype,
+	}
+	element := Element{
+		Key:key,
+		Value:elementvalue,
+		Intent:intent,
+	}
+	return element	
 }
