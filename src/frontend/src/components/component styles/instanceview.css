@@ -1,0 +1,35 @@
+/* Style the container for the horizontal layout */
+.variable-container {
+  display: flex; 
+  align-items: center; 
+  font-family: 'Arial', sans-serif;
+}
+
+.variables{
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  padding-left: 15px;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+}
+
+/* Style each item within the container */
+.variable-item {
+color: #333; /* Text color */
+padding: 10px; /* Add padding to each item */
+padding-left: 15px;
+margin-right: 5%; /* Add space between items */
+font-size: 16px;
+}
+
+/*process-info goes under each process-item*/
+.variable-info {
+color: #333; /* Text color */
+padding: 10px; /* Add padding to each item */
+font-size: 16px;
+}
+
+.instanceview{
+  color: #333;
+}

@@ -1,0 +1,22 @@
+/* Style the container for the horizontal layout */
+.process-container {
+    display: flex; 
+    align-items: center; 
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Style each item within the container */
+  .process-item {
+  color: #333; /* Text color */
+  font-size: 16px;
+  }
+  
+  /*process-info goes under each process-item*/
+  .process-info {
+  color: #333; /* Text color */
+  font-size: 16px;
+  }
+  
+  .bpmnview{
+    color: #333;
+  }
