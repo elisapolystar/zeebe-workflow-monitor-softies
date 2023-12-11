@@ -53,6 +53,24 @@ Request Raw Process By Id
     [Return]    ${reply}
 
 
+Request Raw All Instances
+    [Documentation]   Request and return all instances from backend as unparsed message.
+    ${message} =      Collections.Get From Dictionary    ${query}    all-instances
+    ${reply} =        websocket.Request From Websocket    ${WEBSOCKET}    ${message}
+    Log    ${reply}
+    [Return]    ${reply}
+
+
+Request Raw Instance By Id
+    [Documentation]   Request and return an instance from backend by id as unparsed message.
+    [Arguments]    ${instance_id}
+    ${message} =         Collections.Get From Dictionary    ${query}    instance-by-id
+    ${full_message} =    BuiltIn.Replace Variables    ${message}
+    ${reply} =           websocket.Request From Websocket    ${WEBSOCKET}    ${full_message}
+    Log    ${reply}
+    [Return]    ${reply}
+
+
 Request All Instances
     [Documentation]   Request and return all instances from backend.
     ${message} =      Collections.Get From Dictionary    ${query}    all-instances

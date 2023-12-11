@@ -85,7 +85,7 @@ Return the correct process bpmn when requested by id
 
 Return an error when requesting a non-existing process by id
     ${process} =    data_requests.Request Raw Process By Id    123456789123456789
-    Message Type Should Be    ${process}    process
+    data_validation.Message Type Should Be    ${process}    process
     ${correct_error_message} =    Collections.Get From Dictionary    ${response}    process-not-found
     ${received_error_message} =   message_utils.Get Message Data As Dictionary    ${process}
     BuiltIn.Should Be Equal As Strings    ${received_error_message}    ${correct_error_message}
