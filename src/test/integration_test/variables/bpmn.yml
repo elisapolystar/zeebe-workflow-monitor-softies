@@ -29,10 +29,10 @@ bpmn:
       - transfer-money
     instances:
       ok-debt:
-        variables: '{"debt": "100"}'
+        variables: '{"debt": 100}'
         instance-id: SET-DYNAMICALLY
       too-much-debt:
-        variables: '{"debt": "2000"}'
+        variables: '{"debt": 2000}'
         instance-id: SET-DYNAMICALLY
     incidents:
       wrong-variable-type:
