@@ -1,5 +1,5 @@
 name: "Robot Framework integration tests"
-on: workflow_dispatch
+on: push
 
 jobs:
   test:
