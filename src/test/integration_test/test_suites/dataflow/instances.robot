@@ -111,11 +111,6 @@ Return an error when requesting an instance that does not exist
     BuiltIn.Should Be Equal As Strings    ${received_error_message}    ${correct_error_message}
 
 
-DEBUG REMOVE THIS
-    Request All Instances
-    Request Instance By Id    2251799813685324
-
-
 *** Keywords ***
 Suite Setup
     zbctl.Deploy All
