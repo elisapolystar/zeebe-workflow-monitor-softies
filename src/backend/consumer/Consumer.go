@@ -1,99 +1,90 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"os/signal"
-	"time"
+  "context"
+  "fmt"
+  "reflect"
+  "os"
+  "os/signal"
+  "time"
 
-	"github.com/IBM/sarama"
+  kafka "github.com/segmentio/kafka-go"
 )
 
+// Helper function for printing the reader configuration for debugging
+func printConfig(config kafka.ReaderConfig) {
+  configType := reflect.TypeOf(config)
+  configValue := reflect.ValueOf(config)
+
+  for i := 0; i < configType.NumField(); i++ {
+    field := configType.Field(i)
+    value := configValue.Field(i).Interface()
+    fmt.Printf("%s: %v\n", field.Name, value)
+  }
+}
+
 func Consume(messageChannel chan<- topicMessagePair) {
+  // Define the Kafka broker address and topics we want to subscribe to
+  brokers := []string{broker}
+  topics := []string{zeebe,
+    zeebe_deployment,
+    zeebe_deploy_distribution,
+    zeebe_error,
+    zeebe_incident,
+    zeebe_job_batch,
+    zeebe_job,
+    zeebe_message,
+    zeebe_message_subscription,
+    zeebe_message_subscription_start_event,
+    zeebe_process,
+    zeebe_process_event,
+    zeebe_process_instance,
+    zeebe_process_instance_result,
+    zeebe_process_message_subscription,
+    zeebe_timer,
+    zeebe_variable}
 
-	// Define the Kafka broker address and topic we want to subscribe to
-	brokers := []string{broker}
-	topics := []string{zeebe,
-		zeebe_deployment,
-		zeebe_deploy_distribution,
-		zeebe_error,
-		zeebe_incident,
-		zeebe_job_batch,
-		zeebe_job,
-		zeebe_message,
-		zeebe_message_subscription,
-		zeebe_message_subscription_start_event,
-		zeebe_process,
-		zeebe_process_event,
-		zeebe_process_instance,
-		zeebe_process_instance_result,
-		zeebe_process_message_subscription,
-		zeebe_timer,
-		zeebe_variable}
+  // Set up a signal channel to handle termination
+  signals := make(chan os.Signal, 1)
+  signal.Notify(signals, os.Interrupt)
 
-	// Configure the Kafka consumer
-	config := sarama.NewConfig()
-	config.Consumer.Return.Errors = true
+  // Subscribe to each topic concurrently
+  for _, topic := range topics {
+    go func(t string) {
+      // Create a Kafka reader
+      r := kafka.NewReader(kafka.ReaderConfig{
+        Brokers:   brokers,
+        Topic:     t,
+        MinBytes:  10e3, // 10KB
+        MaxBytes:  10e6, // 10MB
+        MaxWait:   250 * time.Millisecond,
+        Partition: 0,
+        StartOffset: kafka.LastOffset,
+        IsolationLevel: 1,
+      })
 
-	// Create a Kafka consumer
-	consumer, err := sarama.NewConsumer(brokers, config)
-	if err != nil {
-		fmt.Printf("Error creating Kafka consumer: %v\n", err)
-		return
-	}
+      defer r.Close()
 
-	defer func() {
-		if err := consumer.Close(); err != nil {
-			fmt.Printf("Error closing Kafka consumer: %v\n", err)
-		}
-	}()
+      // Consume messages from the Kafka topics
+      for {
+        m, err := r.FetchMessage(context.Background())
+        if err != nil {
+          fmt.Printf("Error fetching message from topic %s: %v\n", t, err)
+          break
+        }
 
-	// Set up a signal channel to handle termination
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt)
+        //config := r.Config()
+        //fmt.Printf("Received tunturi from topic %s: %s\n", m.Topic, string(m.Value))
+        //fmt.Printf("message at %s offset %d partition %d: %s = %s\n", m.Topic, m.Offset, m.Partition, string(m.Key), string(m.Value))
+        //fmt.Printf("Received message: %+v\n", m)
+        //printConfig(config)
+        //fmt.Printf("Config: %v\n", config)
+        fmt.Printf("len key: %d && len value: %d from topic %s with offset %d\n", len(m.Key), len(m.Value), m.Topic, m.Offset)
+        //messageChannel <- topicMessagePair{m.Topic, m.Value}
+      }
+    }(topic)
+  }
 
-	// Create a map to store partition consumers for each topic
-	partitionConsumers := make(map[string]sarama.PartitionConsumer)
-
-	// Subscribe to each topic
-	for _, topic := range topics {
-		partitionConsumer, err := consumer.ConsumePartition(topic, 0, sarama.OffsetOldest)
-		if err != nil {
-			fmt.Printf("Error subscribing to topic %s: %v\n", topic, err)
-			return
-		}
-		defer func(topic string) {
-			if err := partitionConsumers[topic].Close(); err != nil {
-				fmt.Printf("Error closing partition consumer for topic %s: %v\n", topic, err)
-			}
-		}(topic)
-
-		partitionConsumers[topic] = partitionConsumer
-		fmt.Printf("Subscribed to topic: %s\n", topic)
-	}
-
-	// Consume messages from the Kafka topics
-	for {
-		select {
-		case <-signals:
-			fmt.Println("Received termination signal. Closing consumer.")
-			return
-		default:
-			for topic, partitionConsumer := range partitionConsumers {
-				select {
-				case msg := <-partitionConsumer.Messages():
-
-					messageChannel <- topicMessagePair{topic, msg.Value}
-
-				case err := <-partitionConsumer.Errors():
-					fmt.Printf("Error consuming message from topic %s: %v\n", topic, err)
-				default:
-					continue
-				}
-			}
-		}
-
-		// Pause for 0.1 seconds to save cpu usage
-		time.Sleep(100 * time.Millisecond)
-	}
+  // Block until a signal is received
+  <-signals
 }
