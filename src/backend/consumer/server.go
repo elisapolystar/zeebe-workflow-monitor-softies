@@ -180,28 +180,9 @@ func reader(conn *websocket.Conn) {
 				// Fetch everything thats needed to build the instance response json
 				processJson := RetrieveProcessByID(db, instanceItem.ProcessDefinitionKey)
 				elements := RetrieveElementByID(db, key)
-
-				fmt.Println()
-				fmt.Println("elements: ", elements)
-				fmt.Println()
-
 				variables := RetrieveVariableByID(db, key)
-
-				fmt.Println()
-				fmt.Println("variables: ", variables)
-				fmt.Println()
-
 				timers := RetrieveTimerByID(db, key)
-
-				fmt.Println()
-				fmt.Println("timers: ", timers)
-				fmt.Println()
-
 				incidents := RetrieveIncidentByID(db, key)
-
-				fmt.Println()
-				fmt.Println("incidents: ", incidents)
-				fmt.Println()
 
 				// Combine the jsons
 				combinedJSON, err4 := concatenateInstanceJSON(
