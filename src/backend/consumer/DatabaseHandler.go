@@ -17,7 +17,7 @@ const (
 	password          = "password"
 	DBname            = "workflow"
 	ProcessesQuery    = "SELECT p.Key, p.BpmnProcessId, p.Version, p.Timestamp, COUNT(i.ProcessDefinitionKey) FROM process p LEFT JOIN process_instance i ON p.Key = i.ProcessDefinitionKey GROUP BY p.Key ORDER BY Timestamp DESC"
-	ProcessByIDQuery  = "SELECT * FROM process WHERE key = %s"
+	ProcessByIDQuery  = "SELECT p.Key, p.BpmnProcessId, p.Version, p.Resource, p.Timestamp, COUNT(i.ProcessDefinitionKey) FROM process p LEFT JOIN process_instance i ON p.Key = i.ProcessDefinitionKey WHERE p.key = %s GROUP BY p.key ORDER BY Timestamp DESC"
 	InstanceByIDQuery = "SELECT * FROM process_instance WHERE %s = %s ORDER BY Timestamp DESC"
 	InstancesQuery    = "SELECT * FROM process_instance ORDER BY Timestamp DESC"
 	VariableByIDQuery = "SELECT * FROM variable WHERE ProcessInstanceKey = %s"
@@ -41,6 +41,7 @@ type FullProcess struct {
 	Version       int64  `json:"version"`
 	Resource      string `json:"resource"`
 	Timestamp     int64  `json:"timestamp"`
+	Instances	  int64	 `json:"timestamp"`
 }
 type ProcessInst struct {
 	ProcessInstanceKey   int64  `json:"ProcessInstanceKey"`
@@ -266,7 +267,7 @@ func RetrieveProcessByID(db *sql.DB, key int64) string {
 	var p FullProcess
 	for rows.Next() {
 		counter++
-		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Resource, &p.Timestamp)
+		err := rows.Scan(&p.Key, &p.BpmnProcessId, &p.Version, &p.Resource, &p.Timestamp, &p.Instances)
 		if err != nil {
 			fmt.Println("Failed to scan row")
 		}
@@ -294,10 +295,6 @@ func RetrieveProcessByID(db *sql.DB, key int64) string {
 func RetrieveInstanceByID(db *sql.DB, column string, key int64) (string, error) {
 	if (column == "ProcessDefinitionKey") || (column == "ProcessInstanceKey") {
 		fmt.Println("retrieving an instance")
-		db, err := connectToDatabase()
-		if err != nil {
-			fmt.Println("Error opening database connection")
-		}
 		// perform the query
 		var strkey string = strconv.FormatInt(key, 10)
 		db_query := fmt.Sprintf(InstanceByIDQuery, column, strkey)
