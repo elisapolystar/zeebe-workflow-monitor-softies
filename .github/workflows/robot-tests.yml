@@ -9,6 +9,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
+      - name: Install zbctl
+        run: |
+          npm i -g zbctl
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
