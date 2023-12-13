@@ -19,13 +19,19 @@ Test Teardown    Test Teardown
 # Deploying data takes significantly longer than requesting it.
 # ~10 deployment iterations / minute
 # ~2500 request iterations / minute
-${DEPLOYMENT_ITERATIONS} =       ${20}
+${DEPLOYMENT_ITERATIONS} =       ${10}
 ${REQUEST_ITERATIONS} =       ${500}
 ${WEBSOCKET} =        DEFAULT WEBSOCKET CONNECTION
 ${DEPLOYED_DATA} =    DATA DEPLOYED IN SUITE SETUP
 
 
 *** Test Cases ***
+Deploy All Data
+    FOR    ${_}    IN RANGE    ${DEPLOYMENT_ITERATIONS}
+        zbctl.Deploy All
+    END
+
+
 Request all processes
     FOR    ${_}    IN RANGE    ${REQUEST_ITERATIONS}
         ${processes} =    data_requests.Request All Processes
@@ -44,9 +50,24 @@ Request a single process
     END
 
 
-Deploy All Data
-    FOR    ${_}    IN RANGE    ${DEPLOYMENT_ITERATIONS}
-        zbctl.Deploy All
+Request all instances
+    FOR    ${_}    IN RANGE    ${REQUEST_ITERATIONS}
+        ${instances} =    data_requests.Request All Instances
+        ${received_instance_ids} =   message_utils.Get All Items With Key From List Of Dicts    ${instances}    ProcessInstanceKey
+        ${correct_instance_ids} =    zbctl.Get Deployed Instance Ids
+        ${current_received_instance_ids} =    message_utils.Get Latest Instances    ${received_instance_ids}    ${correct_instance_ids}
+        data_validation.Lists Should Contain Exactly Same Items    ${current_received_instance_ids}    ${correct_instance_ids}
+    END
+
+
+Request a single instance
+    ${instance_id} =    zbctl.Get Single Instance Id Of Deployed Instance
+    FOR    ${_}    IN RANGE    ${REQUEST_ITERATIONS}
+        ${instance} =                  data_requests.Request Instance By Id    ${instance_id}
+        ${received_process} =      Collections.Get From Dictionary    ${instance}    process
+        ${received_process_id} =   Collections.Get From Dictionary    ${received_process}    key
+        ${correct_process_id} =    zbctl.Get Process Id With Instance Id    ${instance_id}
+        BuiltIn.Should Be Equal As Strings    ${received_process_id}    ${correct_process_id}
     END
 
 

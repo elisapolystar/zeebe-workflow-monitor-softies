@@ -27,22 +27,38 @@ bpmn:
       - send-acceptance-letter
       - send-rejection-letter
       - transfer-money
-    variables:
-      ok-debt: '{"debt": "100"}'
-      too-much-debt: '{"debt": "2000"}'
-      incident: '{"not a real variable": "should cause an incident"}"}'
+    instances:
+      ok-debt:
+        variables: '{"debt": 100}'
+        instance-id: SET-DYNAMICALLY
+      too-much-debt:
+        variables: '{"debt": 2000}'
+        instance-id: SET-DYNAMICALLY
+    incidents:
+      wrong-variable-type:
+        variables: '{"not a real variable": "should cause an incident"}"}'
+        instance-id: SET-DYNAMICALLY
   multi-instance-process:
     filepath: resources/bpmn/multi-instance-process.bpmn
     process-id: SET-DYNAMICALLY
-    variables:
-      all-in-stock: '{"items": [{"id": 1, "value": 10, "inCart": 10, "inStock": 20}, {"id": 2, "value": 20, "inCart": 2, "inStock": 5}], "orderId": "1"}'
-      none-in-stock: '{"items": [{"id": 1, "value": 10, "inCart": 10, "inStock": 0}, {"id": 2, "value": 20, "inCart": 2, "inStock": 0}], "orderId": "2"}'
-      some-in-stock: '{"items": [{"id": 1, "value": 10, "inCart": 10, "inStock": 5}, {"id": 2, "value": 20, "inCart": 2, "inStock": 1}], "orderId": "3"}'
+    instances:
+      all-in-stock:
+        variables: '{"items": [{"id": 1, "value": 10, "inCart": 10, "inStock": 20}, {"id": 2, "value": 20, "inCart": 2, "inStock": 5}], "orderId": "1"}'
+        instance-id: SET-DYNAMICALLY
+      none-in-stock:
+        variables: '{"items": [{"id": 1, "value": 10, "inCart": 10, "inStock": 0}, {"id": 2, "value": 20, "inCart": 2, "inStock": 0}], "orderId": "2"}'
+        instance-id: SET-DYNAMICALLY
+      some-in-stock:
+        variables: '{"items": [{"id": 1, "value": 10, "inCart": 10, "inStock": 5}, {"id": 2, "value": 20, "inCart": 2, "inStock": 1}], "orderId": "3"}'
+        instance-id: SET-DYNAMICALLY
   order-main:
     filepath: resources/bpmn/order-main.bpmn
     process-id: SET-DYNAMICALLY
     sub-process:
       - order-subprocess
+    instances: {}
+
   order-subprocess:
     filepath: resources/bpmn/order-subprocess.bpmn
     process-id: SET-DYNAMICALLY
+    instances: {}

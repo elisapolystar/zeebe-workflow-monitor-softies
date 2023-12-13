@@ -6,3 +6,12 @@ query:
 
 response:
   process-not-found: "{'Error': 'Process not found'}"
+  instance-not-found: "{'Error': 'Instance not found'}"
+
+expected_fields:
+  instance:
+    - process
+    - Elements
+    - Variables
+    - Timers
+    - Incidents

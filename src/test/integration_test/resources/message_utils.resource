@@ -70,3 +70,10 @@ Get BPMN From Message
     ${bpmn} =            Decode Base64 To String    ${bpmn_encoded}
     [Return]    ${bpmn}
 
+
+Get Latest Instances
+    [Documentation]    Get x latest instaces from ${received_instances}, where x is the length of ${deployed_instances}.
+    [Arguments]    ${received_instances}    ${deployed_instances}
+    ${length} =    Get Length    ${deployed_instances}
+    ${latest_instances} =    Collections.Get Slice From List    ${received_instances}    end=${length}
+    [Return]    ${latest_instances}
