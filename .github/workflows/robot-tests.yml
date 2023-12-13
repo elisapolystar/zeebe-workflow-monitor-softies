@@ -40,5 +40,5 @@ jobs:
         if: always()
         with:
           gh_access_token: ${{ secrets.GITHUB_TOKEN }}
-          report_path: src/test/integration_test/output/output.xml
+          report_path: src/test/integration_test/output/
     
