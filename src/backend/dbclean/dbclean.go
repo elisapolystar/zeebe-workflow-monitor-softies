@@ -26,7 +26,7 @@ const (
 var dbpassword = os.Getenv("POSTGRES_PASSWORD")
 
 var delQueries = [2]string{
-  `DELETE FROM process WHERE timestamp < $1`,
+  `DELETE FROM process_instance WHERE timestamp < $1`,
   `DELETE FROM message WHERE timestamp < $1`,
 }
 
