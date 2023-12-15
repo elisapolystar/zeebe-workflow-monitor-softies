@@ -1,3 +1,21 @@
+// Licensed to the Apache Software Foundation (ASF) under one or more
+// contributor license agreements.  See the NOTICE file distributed with
+// this work for additional information regarding copyright ownership.
+// The ASF licenses this file to You under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance with
+// the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// The content of this file has been modified by Iiro Inkinen in 2023
+// upon requirement of the software.
+
 import React, { useState, useEffect } from 'react';
 import { BpmnVisualization, ShapeBpmnElementKind } from 'bpmn-visualization';
 import tippy from 'tippy.js';
@@ -11,7 +29,7 @@ const BPMNView: React.FC<BpmnProps> = ({process}) => {
   const [diagramData, setDiagramData] = useState<string | null>(null);
   const bpmnContainerElt = window.document.getElementById('bpmn-container');
   const processesData = process ? JSON.parse(process) : {};
-  
+
   //change the base64 encoded string to xml
   const encodedBpmn = processesData.resource;
   const xml = encodedBpmn ? atob(encodedBpmn) : null;
@@ -73,7 +91,7 @@ const BPMNView: React.FC<BpmnProps> = ({process}) => {
               }
           });
       }
-      
+
       function addTimerPopup(bpmnElements) {
         bpmnElements.forEach(bpmnElement => {
             console.log(bpmnElement);
@@ -103,14 +121,14 @@ const BPMNView: React.FC<BpmnProps> = ({process}) => {
     <br/>
     <div id="bpmn-container"></div>
     <br/>
-    <div className='process-container'>    
+    <div className='process-container'>
       <div className='process-item'>
         <span>Key</span>
         <div className="process-info">
           <span>{processesData.key}</span>
         </div>
       </div>
-      
+
       <div className='process-item'>
         <span>Version</span>
         <div className="process-info">
@@ -125,7 +143,7 @@ const BPMNView: React.FC<BpmnProps> = ({process}) => {
         </div>
     </div>
   </div>
-</div>  
+</div>
 
   );
 }
