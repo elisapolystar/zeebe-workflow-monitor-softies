@@ -1,0 +1,7 @@
+Link to Figma with all the designed features listed that didn't get implemented can be found
+from wiki from page "Further Development". From this design folder you can find pdf pictures 
+of the Figma pages and local copy of the Figma. Here is how you can open the copy in Figma:
+
+1. Go to Figma home page and press "import" from top right.
+2. Drag the "zeebe workflow monitor -Figma" file there.
+3. Open. If you want to use the prototype, click the play button from to right.
